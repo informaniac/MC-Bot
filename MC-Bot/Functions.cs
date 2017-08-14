@@ -242,6 +242,13 @@ namespace Bot.Classes
         public string Ip;
         public ushort Port;
     }
+    public class _Item
+    {
+        public string ID;
+        public string Meta;
+        public string Name;
+        public string Text;
+    }
     public class _Guild
     {
         public ulong ID;

@@ -26,6 +26,7 @@ namespace Bot
         public static bool DevMode = true;
         public static Class Tokens = new Class();
         public static List<_Guild> MCGuilds = new List<_Guild>();
+        public static List<_Item> MCItems = new List<_Item>();
         public class Class
         {
             public string Discord = "";

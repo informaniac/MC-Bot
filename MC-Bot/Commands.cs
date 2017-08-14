@@ -14,6 +14,10 @@ using static MojangSharp.Responses.NameHistoryResponse;
 using System.Net.NetworkInformation;
 using Bot.Functions;
 using Bot.Utils;
+using System.Net;
+using System.IO;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace Bot.Commands
 {
@@ -35,10 +39,102 @@ namespace Bot.Commands
             var embed = new EmbedBuilder()
             {
                 Title = "Commands",
-                Description = "mc/ping (IP) | `Ping a minecraft server`" + Environment.NewLine + "mc/skin (Arg) (Name) | `Get a players skin`" + Environment.NewLine + "mc/list | `List of this guilds minecraft servers`" + Environment.NewLine + "mc/info | `Info about minecraft`" + Environment.NewLine + $"mc/names (Name) | `Account name history`" + Environment.NewLine + $"mc/status | `Mojang service status`" + Environment.NewLine + "mc/uuid (Name) | `Uuid of a player`"
+                Description = "mc/ping (IP) | `Ping a minecraft server`" + Environment.NewLine + "mc/skin (Arg) (Name) | `Get a players skin`" + Environment.NewLine + "mc/list | `List of this guilds minecraft servers`" + Environment.NewLine + "mc/info | `Info about minecraft`" + Environment.NewLine + $"mc/names (Name) | `Account name history`" + Environment.NewLine + $"mc/status | `Mojang service status`" + Environment.NewLine + "mc/uuid (Name) | `Uuid of a player`" + Environment.NewLine + "mc/item (Name) | `Lookup a minecraft item/block`" + Environment.NewLine + "mc/colors | `Minecraft color codes`" + Environment.NewLine + "mc/invite | `Invite this bot to your guild`"
             };
             await ReplyAsync("", false, embed);
         }
+        [Command("colors")]
+        public async Task Colors()
+        {
+            var embed = new EmbedBuilder()
+            {
+                Title = "Minecraft Color Codes",
+                ImageUrl = "https://lolis.ml/img-1o4ubn88Z474.png"
+            };
+            await ReplyAsync("", false, embed);
+        }
+
+        [Command("item")]
+        public async Task Items(string ID = "0", string Meta = "0")
+        {
+            if (_Config.MCItems.Count == 0)
+            {
+                using (StreamReader reader = new StreamReader(_Config.BotPath + "Items.json"))
+                {
+                    string json = reader.ReadToEnd();
+                    JArray a = JArray.Parse(json);
+                    foreach (JObject o in a.Children<JObject>())
+                    {
+                        string GetID = "";
+                        string GetMeta = "";
+                        string GetName = "";
+                        string GetText = "";
+                        foreach (JProperty p in o.Properties())
+                        {
+                            if (p.Name == "type")
+                            {
+                                GetID = (string)p.Value;
+                            }
+                            if (p.Name == "meta")
+                            {
+                                GetMeta = (string)p.Value;
+                            }
+                            if (p.Name == "name")
+                            {
+                                GetName = (string)p.Value;
+                            }
+                            if (p.Name == "text_type")
+                            {
+                                GetText = (string)p.Value;
+                            }
+                        }
+                        _Item ThisItem = new _Item()
+                        {
+                            ID = GetID,
+                            Meta = GetMeta,
+                            Name = GetName,
+                            Text = GetText
+                        };
+                        _Config.MCItems.Add(ThisItem);
+                    }
+                }
+            }
+            if (ID.Contains(":"))
+            {
+                string[] Split = ID.Split(':');
+                ID = Split.First();
+                Meta = Split.Last();
+            }
+            _Item Item = _Config.MCItems.Find(x => x.ID == ID & x.Meta == Meta);
+            if (Item == null)
+            {
+                Item = _Config.MCItems.Find(x => x.Name.ToLower() == ID.ToLower());
+            }
+            if (Item == null)
+            {
+                await ReplyAsync("Cannot find item ID");
+                return;
+            }
+            var embed = new EmbedBuilder()
+            {
+                Description = $"{Item.ID}:{Item.Meta} | {Item.Name}",
+                ThumbnailUrl = "http://lolis.ml/mcitems/" + ID + "-" + Meta + ".png",
+                Footer = new EmbedFooterBuilder()
+                { Text = $"/give {Context.User.Username} {Item.Text}" }
+            };
+            await ReplyAsync("", false, embed);
+        }
+
+        [Command("invite")]
+        public async Task Invite()
+        {
+            var embed = new EmbedBuilder()
+            {
+                Description = "Invite this bot [https://discordapp.com/oauth2/authorize?&client_id=346346285953056770&scope=bot&permissions=0](Invite Link)"
+            };
+            await ReplyAsync("", false, embed);
+        }
+
         [Command("uuid")]
         public async Task Uuid([Remainder]string Name)
         {
@@ -65,6 +161,7 @@ namespace Bot.Commands
             if (IP.Contains(":"))
             {
                 string[] GetPort = IP.Split(':');
+                IP = GetPort.First();
                 Port = Convert.ToUInt16(GetPort.Last());
 
             }
@@ -327,6 +424,7 @@ namespace Bot.Commands
                 if (IP.Contains(":"))
                 {
                     string[] GetPort = IP.Split(':');
+                    IP = GetPort.First();
                     Port = Convert.ToUInt16(GetPort.Last());
 
                 }
