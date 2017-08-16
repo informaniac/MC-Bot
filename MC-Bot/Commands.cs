@@ -392,7 +392,7 @@ namespace Bot.Commands
                 await ReplyAsync("This command can only be used in a guild");
                 return;
             }
-            if (Context.User.Id == Context.Guild.OwnerId)
+            if (Context.User.Id != Context.Guild.OwnerId)
             {
                 await ReplyAsync("Guild owner only command");
                 return;
