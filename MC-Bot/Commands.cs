@@ -23,6 +23,11 @@ namespace Bot.Commands
 {
     public class Main : ModuleBase
     {
+        [Command("test")]
+        public async Task Test([Remainder]string Message = "")
+        {
+            await ReplyAsync(Message);
+        }
         [Command("help")]
         public async Task Help()
         {

@@ -22,6 +22,21 @@ namespace Bot.Services
             _Client = Client;
             _Task.LoadGuilds();
             _Client.GuildAvailable += _Client_GuildAvailable;
+            _Client.JoinedGuild += _Client_JoinedGuild;
+        }
+
+        private Task _Client_JoinedGuild(SocketGuild g)
+        {
+            var Blacklist = _Bot.Blacklist.List.Find(x => x.GuildID == g.Id);
+            if (Blacklist == null)
+            {
+                var Guild = _Config.MCGuilds.Find(x => x.ID == g.Id);
+                if (Guild == null)
+                {
+                    _Task.NewGuild(g.Id);
+                }
+            }
+            return Task.CompletedTask;
         }
 
         private Task _Client_GuildAvailable(SocketGuild g)
