@@ -19,7 +19,7 @@ namespace Bot
         public static string BotName = "Minecraft";
         public static string Prefix = "mc/";
         public static string DevPrefix = "tmc/";
-        public static string ClientID = "";
+        public static string Github = "";
         public static string BotPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "/MC-Bot/";
         public static string BlacklistPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "/Blacklist/";
         public static bool Ready = false;

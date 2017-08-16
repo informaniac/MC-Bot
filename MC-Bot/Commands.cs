@@ -125,15 +125,6 @@ namespace Bot.Commands
             await ReplyAsync("", false, embed);
         }
 
-        [Command("invite")]
-        public async Task Invite()
-        {
-            var embed = new EmbedBuilder()
-            {
-                Description = "Invite this bot [https://discordapp.com/oauth2/authorize?&client_id=346346285953056770&scope=bot&permissions=0](Invite Link)"
-            };
-            await ReplyAsync("", false, embed);
-        }
 
         [Command("uuid")]
         public async Task Uuid([Remainder]string Name)
@@ -150,7 +141,7 @@ namespace Bot.Commands
 
         }
 
-        [Command("ping")]
+        [Command("ping"), Priority(0)]
         public async Task Ping(string IP = "", ushort Port = 25565)
         {
             if (IP == "" || IP.Contains("("))

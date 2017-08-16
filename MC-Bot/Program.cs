@@ -1,10 +1,12 @@
-﻿using Discord;
+﻿using Bot.Utils;
+using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -65,13 +67,67 @@ namespace Bot
 
     public class _Bot
     {
+        #region ConsoleFix
+        private class DisableConsoleQuickEdit
+        {
+            const uint ENABLE_QUICK_EDIT = 0x0040;
+            const int STD_INPUT_HANDLE = -10;
+            [DllImport("kernel32.dll", SetLastError = true)]
+            static extern IntPtr GetStdHandle(int nStdHandle);
+            [DllImport("kernel32.dll")]
+            static extern bool GetConsoleMode(IntPtr hConsoleHandle, out uint lpMode);
+            [DllImport("kernel32.dll")]
+            static extern bool SetConsoleMode(IntPtr hConsoleHandle, uint dwMode);
+            internal static bool Go()
+            {
+                IntPtr consoleHandle = GetStdHandle(STD_INPUT_HANDLE);
+                uint consoleMode;
+                if (!GetConsoleMode(consoleHandle, out consoleMode))
+                {
+                    return false;
+                }
+                consoleMode &= ~ENABLE_QUICK_EDIT;
+                if (!SetConsoleMode(consoleHandle, consoleMode))
+                {
+                    return false;
+                }
+                return true;
+            }
+        }
+        #endregion
+
         public static DiscordSocketClient _Client;
         public static IServiceProvider _Services;
         public static CommandService _Commands;
-        public static Dictionary<IGuild, IGuildUser> GuildCache = new Dictionary<IGuild, IGuildUser>();
+        public static Dictionary<ulong, IGuildUser> BotCache = new Dictionary<ulong, IGuildUser>();
+        private static string Status = "";
+        public static string GetStatus()
+        {
+            if (Status == "")
+            {
+                return $"{_Config.Prefix}help [{_Client.Guilds.Count}] www.blaze.ml";
+            }
+            else
+            {
+                return Status;
+            }
+        }
+        public static void SetStatus(string Message = "")
+        {
+            if (Message == "")
+            {
+                Status = "";
+                _Client.SetGameAsync($"{_Config.Prefix}help [{_Client.Guilds.Count}] www.blaze.ml").GetAwaiter();
+            }
+            else
+            {
+                Status = Message;
+                _Client.SetGameAsync(Message).GetAwaiter();
+            }
+        }
         public static void Main()
         {
-            Misc.DisableConsoleQuickEdit.Go();
+            DisableConsoleQuickEdit.Go();
             Console.Title = _Config.BotName;
             Console.ForegroundColor = ConsoleColor.White;
             if (File.Exists($"{_Config.BotPath}LIVE.txt"))
@@ -188,7 +244,7 @@ namespace Bot
             }
             #endregion
         }
-        
+
 
         public async Task RunBot()
         {
@@ -205,6 +261,7 @@ namespace Bot
                 }
                 return Task.CompletedTask;
             };
+
             _Client.Disconnected += (e) =>
             {
                 _Log.Bot("DISCONNECTED!");
@@ -218,20 +275,17 @@ namespace Bot
                 }
                 return Task.CompletedTask;
             };
+
             _Client.Ready += () =>
             {
-                Console.ForegroundColor = ConsoleColor.Green;
-                _Log.Bot($"Ready in {_Client.Guilds.Count} guilds");
-                if (!_Client.CurrentUser.Game.ToString().Contains("[!!!]"))
-                {
-                    _Client.SetGameAsync($"{_Config.Prefix}help [{_Client.Guilds.Count}] www.blaze.ml").GetAwaiter();
-                }
+                _Log.Custom($"Ready in {_Client.Guilds.Count} guilds", ConsoleColor.Green);
                 _Config.Ready = true;
                 return Task.CompletedTask;
             };
+
             _Client.JoinedGuild += (g) =>
             {
-                GuildCache.Add(g, g.CurrentUser);
+                BotCache.Add(g.Id, g.CurrentUser);
                 if (_Config.DevMode == false)
                 {
                     if (g.Id == 110373943822540800 || g.Id == 264445053596991498)
@@ -270,31 +324,22 @@ namespace Bot
                             }
                         }
                     }
-                    if (!_Client.CurrentUser.Game.ToString().Contains("[!!!]"))
-                    {
-                        _Client.SetGameAsync($"{_Config.Prefix}help [{_Client.Guilds.Count}] www.blaze.ml").GetAwaiter();
-                    }
                 }
-                
-                _Log.GuildJoined($"[{GuildCache.Count()}] {g.Name} - {g.Owner.Username}#{g.Owner.Discriminator} - {g.Users.Where(x => !x.IsBot).Count()}/{g.Users.Where(x => x.IsBot).Count()} Users/Bots");
+
+                _Log.GuildJoined($"[{BotCache.Count()}] {g.Name} - {g.Owner.Username}#{g.Owner.Discriminator} - {g.Users.Where(x => !x.IsBot).Count()}/{g.Users.Where(x => x.IsBot).Count()} Users/Bots");
                 return Task.CompletedTask;
             };
+
             _Client.LeftGuild += (g) =>
             {
                 _Log.GuildLeft($"{g.Name}");
-                if (GuildCache.Keys.Contains(g))
+                if (BotCache.Keys.Contains(g.Id))
                 {
-                    GuildCache.Remove(g);
-                }
-                if (_Config.DevMode == false)
-                {
-                    if (!_Client.CurrentUser.Game.ToString().Contains("[!!!]"))
-                    {
-                        _Client.SetGameAsync($"{_Config.Prefix}help [{_Client.Guilds.Count}] www.blaze.ml").GetAwaiter();
-                    }
+                    BotCache.Remove(g.Id);
                 }
                 return Task.CompletedTask;
             };
+
             _Client.GuildAvailable += (g) =>
             {
                 if (_Config.DevMode == false)
@@ -333,35 +378,61 @@ namespace Bot
                         }
                     }
                 }
-                if (!GuildCache.Keys.Contains(g))
+                if (!BotCache.Keys.Contains(g.Id))
                 {
-                    GuildCache.Add(g, g.CurrentUser);
-                }
-                return Task.CompletedTask;
-            };
-            _Client.GuildUnavailable += (g) =>
-            {
-                if (GuildCache.Keys.Contains(g))
-                {
-                    GuildCache.Remove(g);
-                }
-                if (_Client.ConnectionState != ConnectionState.Disconnecting & _Client.ConnectionState != ConnectionState.Disconnected)
-                {
-                    _Log.Warning($"Guild {g.Name} - {g.Owner.Username}#{g.Owner.Discriminator} is DOWN!");
+                    BotCache.Add(g.Id, g.CurrentUser);
                 }
                 return Task.CompletedTask;
             };
 
-            
+            _Client.GuildUnavailable += (g) =>
+            {
+                if (BotCache.Keys.Contains(g.Id))
+                {
+                    BotCache.Remove(g.Id);
+                }
+                return Task.CompletedTask;
+            };
+
+            _Client.JoinedGuild += async (g) =>
+            {
+                if (!_Config.DevMode)
+                {
+                    if (!_Bot.Blacklist.List.Exists(x => x.GuildID == g.Id))
+                    {
+                        await _Client.SetGameAsync(GetStatus());
+                    }
+                }
+            };
+
+            _Client.LeftGuild += async (g) =>
+            {
+                if (!_Config.DevMode)
+                {
+                    if (!_Bot.Blacklist.List.Exists(x => x.GuildID == g.Id))
+                    {
+                        await _Client.SetGameAsync(GetStatus());
+                    }
+                }
+            };
+
+            _Client.Ready += async () =>
+            {
+                if (!_Config.DevMode)
+                {
+                    await _Client.SetGameAsync(GetStatus());
+                }
+            };
+
             await _Config.ConfigureServices(_Services, _Client, _Commands);
             await _Client.LoginAsync(TokenType.Bot, _Config.Tokens.Discord);
             await _Client.StartAsync();
-            
+
             await Task.Delay(-1);
         }
     }
 
-#region CommandService
+    #region CommandService
     public class CommandHandler
     {
         private readonly DiscordSocketClient _Client;
@@ -379,7 +450,7 @@ namespace Bot
         }
         public Task StartHandle()
         {
-            
+
             _Client.MessageReceived += (msg) => { var _ = Task.Run(() => RunCommand(msg)); return Task.CompletedTask; };
             return Task.CompletedTask;
         }
@@ -434,315 +505,635 @@ namespace Bot
             }
         }
     }
-#endregion
+    #endregion
 }
 namespace Bot.Commands
 {
-    #region OwnerCommands
-    public class OwnerCMDS : ModuleBase
+    public class _Utils
     {
+        public static int BotPercentage(int AllUsers, int BotUsers)
+        {
+            if (BotUsers == 0)
+            {
+                return 0;
+            }
+            else
+            {
+                return BotUsers * 100 / AllUsers;
+            }
+        }
+        public static IGuild GetGuild(DiscordSocketClient Client, ulong ID)
+        {
+            IGuild Guild = null;
+            try
+            {
+                Guild = Client.Guilds.ElementAt((int)ID - 1);
+            }
+            catch
+            {
+                Guild = Client.GetGuild(ID);
+            }
+
+            return Guild;
+        }
+
+        public static ITextChannel GetChannel(DiscordSocketClient Client, List<ITextChannel> Channels, ulong ID)
+        {
+            ITextChannel Chan = null;
+            try
+            {
+                Chan = Channels.ElementAt((int)ID - 1);
+            }
+            catch
+            {
+                Chan = Channels.Where(x => x.Id == ID).First();
+            }
+            return Chan;
+        }
+    }
+}
+namespace Bot.Commands
+{
+    #region CoreCommands
+    public class Core : ModuleBase
+    {
+        private DiscordSocketClient _Client;
+        public Core(DiscordSocketClient Client)
+        {
+            _Client = Client;
+        }
+
+        [Command("ping")]
+        public async Task Ping()
+        {
+            System.Net.NetworkInformation.PingReply PingDiscord = new System.Net.NetworkInformation.Ping().Send("discordapp.com");
+            System.Net.NetworkInformation.PingReply PingGoogle = new System.Net.NetworkInformation.Ping().Send("google.com");
+            await ReplyAsync($"`PONG > Discord: {PingDiscord.RoundtripTime} ms Google: {PingGoogle.RoundtripTime} ms Gateway: {_Client.Latency} ms`");
+        }
+
         [Command("prefix")]
         public async Task Prefix()
         {
-            await ReplyAsync($"My prefix is {_Config.Prefix}");
-        }
-
-        [Command("o")]
-        [Alias("owner")]
-        public async Task O()
-        {
-            if (Context.User.Id != 190590364871032834)
-            {
-                await ReplyAsync("The owner is xXBuilderBXx#9113 - 190590364871032834" + Environment.NewLine + $"For more info about the bot do {_Config.Prefix}help");
-                return;
-            }
-            await ReplyAsync("`invite (ID) | info (ID) | leavehere | leave (ID) | botcol | clear | blacklist`").ConfigureAwait(false);
+            await ReplyAsync($"My prefix is `{_Config.Prefix}` custom prefix option coming soon");
         }
 
         [Command("invite")]
-        [RequireOwner]
-        public async Task Invite(ulong ID)
+        public async Task Invite()
         {
-            IGuild Guild = await Context.Client.GetGuildAsync(ID).ConfigureAwait(false) ?? null;
-            if (Guild == null)
+            var embed = new EmbedBuilder()
             {
-                await ReplyAsync($"`Cannot find guild {ID}`").ConfigureAwait(false);
-                return;
-            }
-            var Invites = await Guild.GetInvitesAsync().ConfigureAwait(false);
-            if (Invites.Count != 0)
+                Description = $"[Add {_Config.BotName} to your server/guild](https://discordapp.com/oauth2/authorize?&client_id=" + Context.Client.CurrentUser.Id + "&scope=bot&permissions=0)"
+            };
+            if (Context.Guild == null)
             {
-                await ReplyAsync(Invites.First().Code).ConfigureAwait(false);
-                return;
-            }
-            IGuildChannel Chan = await Guild.GetDefaultChannelAsync().ConfigureAwait(false);
-            var Invite = await Chan.CreateInviteAsync().ConfigureAwait(false) ?? null;
-            if (Invite != null)
-            {
-                await ReplyAsync(Invite.Code).ConfigureAwait(false);
+                await Context.Channel.SendMessageAsync("", false, embed);
             }
             else
             {
-                await ReplyAsync($"`Could not create invite for guild {ID}`").ConfigureAwait(false);
-                return;
+                _Bot.BotCache.TryGetValue(Context.Guild.Id, out IGuildUser GU);
+                if (!GU.GuildPermissions.EmbedLinks)
+                {
+                    await Context.Channel.SendMessageAsync($"Add {_Config.BotName} to your server/guild" + Environment.NewLine + "https://discordapp.com/oauth2/authorize?&client_id=" + Context.Client.CurrentUser.Id + "&scope=bot&permissions=0");
+                }
+                else
+                {
+
+                    await Context.Channel.SendMessageAsync("", false, embed);
+                }
             }
         }
 
-        [Command("info")]
-        [RequireOwner]
-        public async Task Oinfo(ulong ID)
+        [Command("website")]
+        public async Task Website()
         {
-            IGuild Guild = await Context.Client.GetGuildAsync(ID).ConfigureAwait(false) ?? null;
-            if (Guild == null)
+            await ReplyAsync("https://blaze.ml");
+        }
+
+        [Command("github")]
+        public async Task Github()
+        {
+            if (_Config.Github == "")
             {
-                await ReplyAsync($"`Cannot find guild {ID}`").ConfigureAwait(false);
+                await ReplyAsync("This bot does not have a github");
                 return;
-            }
-            string Owner = "NO OWNER";
-            var Users = await Guild.GetUsersAsync();
-            IGuildUser ThisOwner = await Guild.GetOwnerAsync().ConfigureAwait(false) ?? null;
-            if (ThisOwner != null)
-            {
-                Owner = $"{ThisOwner.Username}#{ThisOwner.Discriminator} - {ThisOwner.Id}";
             }
             var embed = new EmbedBuilder()
             {
-                Author = new EmbedAuthorBuilder()
-                {
-                    Name = $"{Guild.Name}",
-                    IconUrl = Guild.IconUrl
-                },
-                Description = $"Owner: {Owner}" + Environment.NewLine + $"Users {Users.Where(x => !x.IsBot).Count()}/{Users.Where(x => x.IsBot).Count()} Bots",
-                Footer = new EmbedFooterBuilder()
-                {
-                    Text = $"Created {Guild.CreatedAt.Day}/{Guild.CreatedAt.Month}/{Guild.CreatedAt.Year}"
-                }
+                Description = $"Please report issues/suggestions to [Github]({_Config.Github})"
             };
-            await ReplyAsync("", false, embed).ConfigureAwait(false);
-        }
-
-        [Command("leavehere")]
-        [RequireOwner]
-        public async Task Leavehere()
-        {
-            await Context.Guild.LeaveAsync().ConfigureAwait(false);
-        }
-
-        [Command("clear")]
-        [RequireOwner]
-        public async Task Clear()
-        {
-            await Context.Message.DeleteAsync().ConfigureAwait(false);
-            Console.Clear();
-            _Log.Custom("Console cleared");
-            await Context.Channel.SendMessageAsync("`Console cleared`").ConfigureAwait(false);
-        }
-
-        [Command("botcol")]
-        [RequireOwner]
-        public async Task Botcol(int Number = 100)
-        {
-            var Guilds = await Context.Client.GetGuildsAsync().ConfigureAwait(false);
-            List<string> GuildList = new List<string>();
-            foreach (var Guild in Guilds)
+            if (Context.Guild == null)
             {
-                if (Guild.Id != 110373943822540800 & Guild.Id != 264445053596991498)
-                {
-                    var Users = await Guild.GetUsersAsync();
-                    IGuildUser Owner = await Guild.GetOwnerAsync() ?? null;
-                    if (Owner != null)
-                    {
-
-                        if (Users.Where(x => x.IsBot).Count() * 100 / Users.Count() > 85)
-                        {
-                            GuildList.Add($"{Guild.Name} ({Guild.Id}) - Owner: {Owner.Username} ({Owner.Id}) - {Users.Where(x => !x.IsBot).Count()}/{Users.Where(x => x.IsBot).Count()}");
-                        }
-                    }
-                    else
-                    {
-                        GuildList.Add($"{Guild.Name} ({Guild.Id}) - NO OWNER! - {Users.Where(x => !x.IsBot).Count()}/{Users.Where(x => x.IsBot).Count()}");
-                    }
-                }
-
-            }
-            string AllGuilds = string.Join(Environment.NewLine, GuildList.ToArray());
-            IDMChannel DM = await Context.User.GetOrCreateDMChannelAsync().ConfigureAwait(false);
-            await DM.SendMessageAsync("```" + Environment.NewLine + AllGuilds + "```");
-        }
-
-        [Command("leave")]
-        [RequireOwner]
-        public async Task Leave(ulong ID)
-        {
-            await Context.Message.DeleteAsync();
-            IGuild Guild = await Context.Client.GetGuildAsync(ID).ConfigureAwait(false) ?? null;
-            if (Guild == null)
-            {
-                await ReplyAsync($"`Could not find guild by id {ID}`").ConfigureAwait(false);
+                await Context.Channel.SendMessageAsync("", false, embed);
             }
             else
             {
+                _Bot.BotCache.TryGetValue(Context.Guild.Id, out IGuildUser GU);
+                if (!GU.GuildPermissions.EmbedLinks)
+                {
+                    await Context.Channel.SendMessageAsync($"Please report issues/suggestions to {_Config.Github}");
+                }
+                else
+                {
+
+                    await Context.Channel.SendMessageAsync("", false, embed);
+                }
+            }
+        }
+
+        [Group("o")]
+        [Alias("owner")]
+        public class Owner : ModuleBase
+        {
+            private CommandService _Commands;
+            private DiscordSocketClient _Client;
+            public Owner(CommandService Commands, DiscordSocketClient CLient)
+            {
+                _Client = CLient;
+                _Commands = Commands;
+            }
+            [Command]
+            public async Task O()
+            {
+                if (Context.User.Id != 190590364871032834)
+                {
+                    await ReplyAsync("The owner is xXBuilderBXx#9113 - 190590364871032834" + Environment.NewLine + $"For more info about the bot do {_Config.Prefix}help");
+                }
+                else
+                {
+                    List<string> OwnerCommands = new List<string>();
+                    foreach (var CMD in _Commands.Commands.Where(x => x.Module.Name == "o"))
+                    {
+                        if (CMD.Remarks != null)
+                        {
+                            try
+                            {
+                                CMD.Remarks.Trim();
+                                OwnerCommands.Add(CMD.Remarks);
+                            }
+                            catch { }
+                        }
+                    }
+                    await ReplyAsync($"`{string.Join(" | ", OwnerCommands)} | blacklist`").ConfigureAwait(false);
+                }
+            }
+
+            [Command("invite"), Remarks("invite (GID/NUM)")]
+            [RequireOwner]
+            public async Task Invite(ulong ID)
+            {
+                if (ID == 0)
+                {
+                    ID = Context.Guild.Id;
+                }
+                IGuild Guild = _Utils.GetGuild(_Client, ID);
+                if (Guild == null)
+                {
+                    await ReplyAsync($"`Cannot find guild {ID}`");
+                    return;
+                }
+                var Invites = await Guild.GetInvitesAsync();
+                if (Invites.Count != 0)
+                {
+                    await ReplyAsync(Invites.First().Code);
+                    return;
+                }
+                IGuildChannel Chan = await Guild.GetDefaultChannelAsync();
+                var Invite = await Chan.CreateInviteAsync();
+                if (Invite != null)
+                {
+                    await ReplyAsync(Invite.Code);
+                }
+                else
+                {
+                    await ReplyAsync($"`Could not create invite for guild {ID}`");
+                    return;
+                }
+            }
+
+            [Command("info"), Remarks("info (GID/NUM)")]
+            [RequireOwner]
+            public async Task Oinfo(ulong ID = 0)
+            {
+                if (ID == 0)
+                {
+                    ID = Context.Guild.Id;
+                }
+                IGuild Guild = _Utils.GetGuild(_Client, ID);
+                if (Guild == null)
+                {
+                    await ReplyAsync($"`Cannot find guild {ID}`");
+                    return;
+                }
+                string Owner = "NO OWNER";
+                var Users = await Guild.GetUsersAsync();
+                IGuildUser ThisOwner = await Guild.GetOwnerAsync().ConfigureAwait(false);
+                if (ThisOwner != null)
+                {
+                    Owner = $"{ThisOwner.Username}#{ThisOwner.Discriminator} - {ThisOwner.Id}";
+                }
+                var embed = new EmbedBuilder()
+                {
+                    Author = new EmbedAuthorBuilder()
+                    {
+                        Name = $"{Guild.Name}",
+                        IconUrl = Guild.IconUrl
+                    },
+                    Description = "```md" + Environment.NewLine + $"<ID {Guild.Id}>" + Environment.NewLine + $"<Owner {Owner}>" + Environment.NewLine + $"<Users {Users.Where(x => !x.IsBot).Count()}> <Bots {Users.Where(x => x.IsBot).Count()}> <BotPercentage {_Utils.BotPercentage(Users.Count(), Users.Where(x => x.IsBot).Count())}>```",
+                    Footer = new EmbedFooterBuilder()
+                    {
+                        Text = $"Created {Guild.CreatedAt.Day}/{Guild.CreatedAt.Month}/{Guild.CreatedAt.Year}"
+                    },
+                    Color = DiscordUtils.GetRoleColor(Context.Channel as ITextChannel)
+                };
+                await ReplyAsync("", false, embed);
+            }
+
+            [Command("leavehere"), Remarks("leavehere")]
+            [RequireOwner]
+            public async Task Leavehere()
+            {
+                await Context.Guild.LeaveAsync();
+            }
+
+            [Command("clearcon"), Remarks("clearcon")]
+            [RequireOwner]
+            public async Task Clear()
+            {
+                await Context.Message.DeleteAsync().ConfigureAwait(false);
+                Console.Clear();
+                _Log.Custom("Console cleared", ConsoleColor.Cyan);
+                await Context.Channel.SendMessageAsync("`Console cleared`").ConfigureAwait(false);
+            }
+
+            [Command("botcol"), Remarks("botcol (*int)")]
+            [RequireOwner]
+            public async Task Botcol(int Number = 100)
+            {
+                var Guilds = await Context.Client.GetGuildsAsync().ConfigureAwait(false);
+                List<string> GuildList = new List<string>();
+                foreach (var Guild in Guilds)
+                {
+                    if (Guild.Id != 110373943822540800 & Guild.Id != 264445053596991498)
+                    {
+                        var Users = await Guild.GetUsersAsync();
+                        IGuildUser Owner = await Guild.GetOwnerAsync() ?? null;
+                        if (Owner != null)
+                        {
+
+                            if (Users.Where(x => x.IsBot).Count() * 100 / Users.Count() > 85)
+                            {
+                                GuildList.Add($"{Guild.Name} ({Guild.Id}) - Owner: {Owner.Username} ({Owner.Id}) - {Users.Where(x => !x.IsBot).Count()}/{Users.Where(x => x.IsBot).Count()}");
+                            }
+                        }
+                        else
+                        {
+                            GuildList.Add($"{Guild.Name} ({Guild.Id}) - NO OWNER! - {Users.Where(x => !x.IsBot).Count()}/{Users.Where(x => x.IsBot).Count()}");
+                        }
+                    }
+
+                }
+                string AllGuilds = string.Join(Environment.NewLine, GuildList.ToArray());
+                IDMChannel DM = await Context.User.GetOrCreateDMChannelAsync().ConfigureAwait(false);
+                await DM.SendMessageAsync("```" + Environment.NewLine + AllGuilds + "```");
+            }
+
+            [Command("leave"), Remarks("leave (GID/NUM)")]
+            [RequireOwner]
+            public async Task Leave(ulong ID)
+            {
                 try
                 {
-                    IGuildUser Owner = await Guild.GetOwnerAsync().ConfigureAwait(false);
-                    await Guild.LeaveAsync().ConfigureAwait(false);
-                    await ReplyAsync($"`Left guild {Guild.Name} - {Guild.Id} | Owned by {Owner.Username}#{Owner.Discriminator}`").ConfigureAwait(false);
+                    await Context.Message.DeleteAsync();
+                }
+                catch { }
+                IGuild Guild = _Utils.GetGuild(_Client, ID);
+                if (Guild == null)
+                {
+                    await ReplyAsync($"`Could not find guild by id {ID}`");
+                    return;
+                }
+                try
+                {
+                    IGuildUser Owner = await Guild.GetOwnerAsync();
+                    await Guild.LeaveAsync();
+                    await ReplyAsync($"`Left guild {Guild.Name} - {Guild.Id} | Owned by {Owner.Username}#{Owner.Discriminator}`");
                 }
                 catch
                 {
-                    await Guild.LeaveAsync().ConfigureAwait(false);
-                    await ReplyAsync($"`Left guild {Guild.Name} - {Guild.Id}`").ConfigureAwait(false);
+                    await Guild.LeaveAsync();
+                    await ReplyAsync($"`Left guild {Guild.Name} - {Guild.Id}`");
                 }
             }
-        }
 
-        [Group("blacklist")]
-        public class BlacklistGroup : ModuleBase
-        {
-            [Command]
-            [RequireOwner]
-            public async Task Blacklist()
+            [Group("blacklist")]
+            public class BlacklistGroup : ModuleBase
             {
-                await ReplyAsync("`Blacklist > add | reload | remove | list | info`").ConfigureAwait(false);
+                private DiscordSocketClient _Client;
+                public BlacklistGroup(CommandService Commands, DiscordSocketClient CLient)
+                {
+                    _Client = CLient;
+                }
+                [Command]
+                [RequireOwner]
+                public async Task Blacklist()
+                {
+
+                    await ReplyAsync("`Blacklist > add (ID) | reload | remove (ID) | list | info (ID)`");
+                }
+
+                [Command("add")]
+                [RequireOwner]
+                public async Task BlacklistAdd(ulong ID, [Remainder] string Reason = "")
+                {
+                    if (_Bot.Blacklist.List.Exists(x => x.GuildID == ID))
+                    {
+                        await Context.Channel.SendMessageAsync($"`{ID} is already in the blacklist`").ConfigureAwait(false);
+                    }
+                    else
+                    {
+                        try
+                        {
+                            IGuild Guild = _Client.GetGuild(ID);
+                            var Users = await Guild.GetUsersAsync();
+                            _Bot.Blacklist.Add(Guild.Name, ID, Reason, $"{Users.Where(x => !x.IsBot).Count()}/{Users.Where(x => x.IsBot).Count()}");
+                            await ReplyAsync($"`Adding {Guild.Name} - {ID} to blacklist`");
+                            await Guild.LeaveAsync();
+                        }
+                        catch
+                        {
+                            _Bot.Blacklist.Add("", ID, Reason);
+                            await ReplyAsync($"`Adding {ID} to blacklist`");
+                        }
+
+                    }
+                }
+
+                [Command("reload")]
+                [RequireOwner]
+                public async Task BlacklistReload()
+                {
+                    List<_Bot.Blacklist.Class> BlacklistCache = new List<_Bot.Blacklist.Class>();
+                    foreach (var File in Directory.GetFiles(_Config.BlacklistPath))
+                    {
+                        using (StreamReader reader = new StreamReader(File))
+                        {
+                            JsonSerializer serializer = new JsonSerializer();
+                            BlacklistCache.Add((_Bot.Blacklist.Class)serializer.Deserialize(reader, typeof(_Bot.Blacklist.Class)));
+                        }
+
+                    }
+                    _Bot.Blacklist.List.Clear();
+                    _Bot.Blacklist.List = BlacklistCache;
+                    await ReplyAsync("`Blacklist reloaded`").ConfigureAwait(false);
+                }
+
+                [Command("remove")]
+                [RequireOwner]
+                public async Task BlacklistRemove(ulong ID)
+                {
+                    _Bot.Blacklist.Class Item = _Bot.Blacklist.List.Find(x => x.GuildID == ID);
+                    if (Item == null)
+                    {
+                        await ReplyAsync("`Could not find guild ID`").ConfigureAwait(false);
+                    }
+                    else
+                    {
+                        _Bot.Blacklist.List.Remove(Item);
+                        if (File.Exists(_Config.BlacklistPath + $"{Item.GuildID.ToString()}.json"))
+                        {
+                            File.Delete(_Config.BlacklistPath + $"{Item.GuildID.ToString()}.json");
+                        }
+                        await ReplyAsync($"`Remove {Item.GuildName} - {Item.GuildID} from blacklist`").ConfigureAwait(false);
+                    }
+                }
+
+                [Command("list")]
+                [RequireOwner]
+                public async Task BlacklistList()
+                {
+                    if (_Bot.Blacklist.List.Count == 0)
+                    {
+                        await ReplyAsync("`Blacklist is empty`").ConfigureAwait(false);
+                    }
+                    else
+                    {
+                        List<string> BlacklistItems = new List<string>();
+                        foreach (var i in _Bot.Blacklist.List)
+                        {
+                            BlacklistItems.Add($"{i.GuildName} - {i.GuildID} ({i.UsersToBots})");
+                        }
+                        await ReplyAsync("```" + Environment.NewLine + string.Join(Environment.NewLine, BlacklistItems) + "```").ConfigureAwait(false);
+                    }
+                }
+
+                [Command("info")]
+                [RequireOwner]
+                public async Task BlacklistInfo(ulong ID)
+                {
+                    _Bot.Blacklist.Class Item = _Bot.Blacklist.List.Find(x => x.GuildID == ID);
+                    if (Item == null)
+                    {
+                        await ReplyAsync("`Could not find guild ID`").ConfigureAwait(false);
+                    }
+                    else
+                    {
+                        await ReplyAsync($"{Item.GuildName} - {Item.GuildID} ({Item.UsersToBots})" + Environment.NewLine + Item.Reason).ConfigureAwait(false);
+                    }
+                }
             }
 
-            [Command("add")]
+            [Command("say"), Remarks("say (Text)")]
             [RequireOwner]
-            public async Task BlacklistAdd(ulong ID, [Remainder] string Reason = "")
+            public async Task Say([Remainder]string Message)
             {
-                if (_Bot.Blacklist.List.Exists(x => x.GuildID == ID))
+                _Bot.BotCache.TryGetValue(Context.Guild.Id, out IGuildUser GU);
+                if (GU.GuildPermissions.ManageMessages)
                 {
-                    await Context.Channel.SendMessageAsync($"`{ID} is already in the blacklist`").ConfigureAwait(false);
+                    await Context.Message.DeleteAsync();
+                }
+                if (GU.GuildPermissions.EmbedLinks)
+                {
+                    var embed = new EmbedBuilder()
+                    {
+                        Description = Message,
+                        Color = DiscordUtils.GetRoleColor(Context.Channel as ITextChannel)
+                    };
+                    await ReplyAsync("", false, embed);
                 }
                 else
                 {
-                    try
-                    {
-                        IGuild Guild = await Context.Client.GetGuildAsync(ID).ConfigureAwait(false);
-                        var Users = await Guild.GetUsersAsync().ConfigureAwait(false);
-                        _Bot.Blacklist.Add(Guild.Name, ID, Reason, $"{Users.Where(x => !x.IsBot).Count()}/{Users.Where(x => x.IsBot).Count()}");
-                        await ReplyAsync($"`Adding {Guild.Name} - {ID} to blacklist`").ConfigureAwait(false);
-                        await Guild.LeaveAsync().ConfigureAwait(false);
-                    }
-                    catch
-                    {
-                        _Bot.Blacklist.Add("", ID, Reason);
-                        await ReplyAsync($"`Adding {ID} to blacklist`").ConfigureAwait(false);
-                    }
-
+                    await ReplyAsync(Message);
                 }
             }
 
-            [Command("reload")]
+            [Command("csay"), Remarks("csay (CID) (Text)")]
             [RequireOwner]
-            public async Task BlacklistReload()
+            public async Task SayChannel(ulong CID, [Remainder]string Message)
             {
-                List<_Bot.Blacklist.Class> BlacklistCache = new List<_Bot.Blacklist.Class>();
-                foreach (var File in Directory.GetFiles(_Config.BlacklistPath))
+                _Bot.BotCache.TryGetValue(Context.Guild.Id, out IGuildUser GU);
+                if (GU.GuildPermissions.ManageMessages)
                 {
-                    using (StreamReader reader = new StreamReader(File))
-                    {
-                        JsonSerializer serializer = new JsonSerializer();
-                        BlacklistCache.Add((_Bot.Blacklist.Class)serializer.Deserialize(reader, typeof(_Bot.Blacklist.Class)));
-                    }
-
+                    await Context.Message.DeleteAsync();
                 }
-                _Bot.Blacklist.List.Clear();
-                _Bot.Blacklist.List = BlacklistCache;
-                await ReplyAsync("`Blacklist reloaded`").ConfigureAwait(false);
+                try
+                {
+                    ITextChannel Chan = (ITextChannel)_Utils.GetChannel(_Client, (await Context.Guild.GetTextChannelsAsync()).ToList(), CID);
+                    if (Chan == null)
+                    {
+                        await ReplyAsync($"Could not find channel `{CID}`");
+                        return;
+                    }
+                    if (GU.GuildPermissions.EmbedLinks)
+                    {
+                        var embed = new EmbedBuilder()
+                        {
+                            Description = Message,
+                            Color = DiscordUtils.GetRoleColor(Chan as ITextChannel)
+                        };
+                        await Chan.SendMessageAsync("", false, embed);
+                    }
+                    else
+                    {
+                        await Chan.SendMessageAsync(Message);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    await ReplyAsync(ex.Message);
+                }
             }
 
-            [Command("remove")]
+            [Command("gsay"), Remarks("gsay (GID/NUM) (CID) (Text)")]
             [RequireOwner]
-            public async Task BlacklistRemove(ulong ID)
+            public async Task SayGuild(ulong GID, ulong CID, [Remainder]string Message)
             {
-                _Bot.Blacklist.Class Item = _Bot.Blacklist.List.Find(x => x.GuildID == ID);
-                if (Item == null)
+                IGuild Guild = _Utils.GetGuild(_Client, GID);
+
+                if (Guild == null)
                 {
-                    await ReplyAsync("`Could not find guild ID`").ConfigureAwait(false);
+                    await ReplyAsync($"Could not find guild `{GID}`");
+                    return;
+                }
+                ITextChannel Chan = (ITextChannel)_Utils.GetChannel(_Client, (await Guild.GetTextChannelsAsync()).ToList(), CID);
+                if (Chan == null)
+                {
+                    await ReplyAsync($"Could not find channel `{CID}`");
+                    return;
+                }
+                _Bot.BotCache.TryGetValue(Guild.Id, out IGuildUser GU);
+                if (GU.GuildPermissions.ManageMessages)
+                {
+                    await Context.Message.DeleteAsync();
+                }
+                try
+                {
+                    if (GU.GuildPermissions.EmbedLinks)
+                    {
+                        var embed = new EmbedBuilder()
+                        {
+                            Description = Message,
+                            Color = DiscordUtils.GetRoleColor(Chan as ITextChannel)
+                        };
+                        await Chan.SendMessageAsync("", false, embed);
+                    }
+                    else
+                    {
+                        await Chan.SendMessageAsync(Message);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    await ReplyAsync(ex.Message);
+                }
+            }
+
+            [Command("findguild"), Remarks("findguild (Name)")]
+            [RequireOwner]
+            public async Task FindGuild([Remainder]string Name)
+            {
+                IGuild Guild = null;
+                try
+                {
+                    Guild = _Client.Guilds.Where(x => x.Name.ToLower().Contains(Name.ToLower())).First();
+                }
+                catch
+                {
+                    await ReplyAsync($"Could not find guild with name `{Name}`");
+                    return;
+                }
+
+                string Owner = "NO OWNER";
+                var Users = await Guild.GetUsersAsync();
+                IGuildUser ThisOwner = await Guild.GetOwnerAsync().ConfigureAwait(false) ?? null;
+                if (ThisOwner != null)
+                {
+                    Owner = $"{ThisOwner.Username}#{ThisOwner.Discriminator} - {ThisOwner.Id}";
+                }
+                var embed = new EmbedBuilder()
+                {
+                    Author = new EmbedAuthorBuilder()
+                    {
+                        Name = $"{Guild.Name}",
+                        IconUrl = Guild.IconUrl
+                    },
+                    Description = "```md" + Environment.NewLine + $"<ID {Guild.Id}>" + Environment.NewLine + $"<Owner {Owner}>" + Environment.NewLine + $"<Users {Users.Where(x => !x.IsBot).Count()}> <Bots {Users.Where(x => x.IsBot).Count()}> <BotPercentage {_Utils.BotPercentage(Users.Count(), Users.Where(x => x.IsBot).Count())}>```",
+                    Footer = new EmbedFooterBuilder()
+                    {
+                        Text = $"Created {Guild.CreatedAt.Day}/{Guild.CreatedAt.Month}/{Guild.CreatedAt.Year}"
+                    },
+                    Color = DiscordUtils.GetRoleColor(Context.Channel as ITextChannel)
+                };
+                await ReplyAsync("", false, embed).ConfigureAwait(false);
+
+            }
+
+            [Command("channels"), Remarks("channels (GID)")]
+            [RequireOwner]
+            public async Task Channels(ulong ID = 0)
+            {
+                if (ID == 0)
+                {
+                    ID = Context.Guild.Id;
+                }
+                List<string> Channels = new List<string>();
+                IGuild Guild = _Utils.GetGuild(_Client, ID);
+
+                if (Guild == null)
+                {
+                    await ReplyAsync($"`Could not find guild by id {ID}`");
+                    return;
+                }
+                int Count = 1;
+                foreach (var Chan in await Guild.GetTextChannelsAsync())
+                {
+                    Channels.Add($"<[{Count}]{Chan.Name} {Chan.Id}>");
+                    Count++;
+                }
+                var embed = new EmbedBuilder()
+                {
+                    Description = "```md" + Environment.NewLine + string.Join(Environment.NewLine, Channels) + Environment.NewLine + "```",
+                    Color = DiscordUtils.GetRoleColor(Context.Channel as ITextChannel)
+                };
+                _Bot.BotCache.TryGetValue(Guild.Id, out IGuildUser GU);
+                if (!GU.GuildPermissions.EmbedLinks)
+                {
+                    await Context.Channel.SendMessageAsync("```md" + Environment.NewLine + string.Join(Environment.NewLine, Channels) + Environment.NewLine + "```");
                 }
                 else
                 {
-                    _Bot.Blacklist.List.Remove(Item);
-                    if (File.Exists(_Config.BlacklistPath + $"{Item.GuildID.ToString()}.json"))
-                    {
-                        File.Delete(_Config.BlacklistPath + $"{Item.GuildID.ToString()}.json");
-                    }
-                    await ReplyAsync($"`Remove {Item.GuildName} - {Item.GuildID} from blacklist`").ConfigureAwait(false);
-                }
-            }
 
-            [Command("list")]
-            [RequireOwner]
-            public async Task BlacklistList()
-            {
-                if (_Bot.Blacklist.List.Count == 0)
-                {
-                    await ReplyAsync("`Blacklist is empty`").ConfigureAwait(false);
+                    await Context.Channel.SendMessageAsync("", false, embed);
                 }
-                else
-                {
-                    List<string> BlacklistItems = new List<string>();
-                    foreach (var i in _Bot.Blacklist.List)
-                    {
-                        BlacklistItems.Add($"{i.GuildName} - {i.GuildID} ({i.UsersToBots})");
-                    }
-                    await ReplyAsync("```" + Environment.NewLine + string.Join(Environment.NewLine, BlacklistItems) + "```").ConfigureAwait(false);
-                }
-            }
 
-            [Command("info")]
-            [RequireOwner]
-            public async Task BlacklistInfo(ulong ID)
-            {
-                _Bot.Blacklist.Class Item = _Bot.Blacklist.List.Find(x => x.GuildID == ID);
-                if (Item == null)
-                {
-                    await ReplyAsync("`Could not find guild ID`").ConfigureAwait(false);
-                }
-                else
-                {
-                    await ReplyAsync($"{Item.GuildName} - {Item.GuildID} ({Item.UsersToBots})" + Environment.NewLine + Item.Reason).ConfigureAwait(false);
-                }
             }
         }
     }
     #endregion
 }
-namespace Bot.Misc
-{
-    #region ConsoleFix
-    static class DisableConsoleQuickEdit
-    {
-        const uint ENABLE_QUICK_EDIT = 0x0040;
-        const int STD_INPUT_HANDLE = -10;
-        [DllImport("kernel32.dll", SetLastError = true)]
-        static extern IntPtr GetStdHandle(int nStdHandle);
-        [DllImport("kernel32.dll")]
-        static extern bool GetConsoleMode(IntPtr hConsoleHandle, out uint lpMode);
-        [DllImport("kernel32.dll")]
-        static extern bool SetConsoleMode(IntPtr hConsoleHandle, uint dwMode);
-        internal static bool Go()
-        {
-            IntPtr consoleHandle = GetStdHandle(STD_INPUT_HANDLE);
-            uint consoleMode;
-            if (!GetConsoleMode(consoleHandle, out consoleMode))
-            {
-                return false;
-            }
-            consoleMode &= ~ENABLE_QUICK_EDIT;
-            if (!SetConsoleMode(consoleHandle, consoleMode))
-            {
-                return false;
-            }
-            return true;
-        }
-    }
-    #endregion
-}
+
 namespace Bot.Utils
 {
-#region HttpRequest
+    #region HttpRequest
     public class HttpRequest
     {
         public static string GetString(string Url)
@@ -838,7 +1229,7 @@ namespace Bot.Utils
     }
     #endregion
 
-#region DiscordUtils
+    #region DiscordUtils
     public class DiscordUtils
     {
         public static async Task<IGuildUser> StringToUser(IGuild Guild, string Username)
@@ -860,6 +1251,7 @@ namespace Bot.Utils
             }
             return GuildUser;
         }
+
         public static string StringToUserID(string User)
         {
             if (User.StartsWith("("))
@@ -887,7 +1279,7 @@ namespace Bot.Utils
             IGuildUser BotUser = null;
             if (Channel != null)
             {
-                _Bot.GuildCache.TryGetValue(Channel.Guild, out BotUser);
+                _Bot.BotCache.TryGetValue(Channel.Guild.Id, out BotUser);
                 if (BotUser.GetPermissions(Channel).EmbedLinks)
                 {
                     if (BotUser != null)
@@ -910,7 +1302,7 @@ namespace Bot.Utils
     }
     #endregion
 
-#region OtherUtils
+    #region OtherUtils
     public class OtherUtils
     {
         public static DateTime UnixToDateTime(long Unix)
@@ -920,5 +1312,5 @@ namespace Bot.Utils
             return dtDateTime;
         }
     }
-#endregion
+    #endregion
 }
