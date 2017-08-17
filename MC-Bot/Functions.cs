@@ -27,8 +27,7 @@ namespace Bot.Services
 
         private Task _Client_JoinedGuild(SocketGuild g)
         {
-            var Blacklist = _Bot.Blacklist.List.Find(x => x.GuildID == g.Id);
-            if (Blacklist == null)
+            if (_Bot._Blacklist.Check(g.Id))
             {
                 var Guild = _Config.MCGuilds.Find(x => x.ID == g.Id);
                 if (Guild == null)
@@ -41,8 +40,7 @@ namespace Bot.Services
 
         private Task _Client_GuildAvailable(SocketGuild g)
         {
-            var Blacklist = _Bot.Blacklist.List.Find(x => x.GuildID == g.Id);
-            if (Blacklist == null)
+            if (_Bot._Blacklist.Check(g.Id))
             {
                 var Guild = _Config.MCGuilds.Find(x => x.ID == g.Id);
                 if (Guild == null)

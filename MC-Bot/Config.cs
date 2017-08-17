@@ -21,7 +21,6 @@ namespace Bot
         public static string DevPrefix = "tmc/";
         public static string Github = "https://github.com/xXBuilderBXx/MC-Bot";
         public static string BotPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "/MC-Bot/";
-        public static string BlacklistPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "/Blacklist/";
         public static bool Ready = false;
         public static bool DevMode = true;
         public static Class Tokens = new Class();
@@ -43,27 +42,7 @@ namespace Bot
             var commandHandler = Services.GetService<CommandHandler>();
             commandHandler.Setup(Services);
         }
-
-        #region Functions
-        public static void CreateTemplate()
-        {
-            Class NewConfig = new Class();
-            using (StreamWriter file = File.CreateText(BotPath + "Config-Example" + ".json"))
-            {
-                JsonSerializer serializer = new JsonSerializer();
-                serializer.Serialize(file, NewConfig);
-
-            }
-        }
-        public static void LoadFile()
-        {
-            using (StreamReader reader = new StreamReader(BotPath + "Config.json"))
-            {
-                JsonSerializer serializer = new JsonSerializer();
-                Tokens = (Class)serializer.Deserialize(reader, typeof(Class));
-            }
-        }
-        #endregion
+        
     }
 }
 
