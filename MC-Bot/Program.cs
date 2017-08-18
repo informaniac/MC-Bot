@@ -284,7 +284,7 @@ namespace Bot
         public class _Whitelist
         {
             public static string Path = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "/Whitelist/";
-            private static HashSet<ulong> List = new HashSet<ulong>();
+            private static List<ulong> List = new List<ulong>();
             /// <summary>
             /// Check if whitelist has a guild ID
             /// </summary>
@@ -309,7 +309,7 @@ namespace Bot
             /// <summary>
             /// Get all whitelist items
             /// </summary>
-            public static HashSet<ulong> GetAll()
+            public static List<ulong> GetAll()
             {
                 return List;
             }
@@ -351,7 +351,7 @@ namespace Bot
             /// </summary>
             public static void Reload()
             {
-                HashSet<ulong> NewList = new HashSet<ulong>();
+                List<ulong> NewList = new List<ulong>();
                 foreach (var Item in Directory.GetFiles(Path))
                 {
                     NewList.Add(Convert.ToUInt64(Item.Replace(Path, "")));
@@ -369,7 +369,7 @@ namespace Bot
         public class _Blacklist
         {
             public static string Path = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "/Blacklist/";
-            private static HashSet<Item> List = new HashSet<Item>();
+            private static List<Item> List = new List<Item>();
             /// <summary>
             /// Blacklist Item | Name, ID, Reason, UsersToBots
             /// </summary>
@@ -392,7 +392,7 @@ namespace Bot
             /// </summary>
             public static Item Get(ulong ID)
             {
-                var GetItem = List.Where(x => x.GuildID == ID).First();
+                var GetItem = List.Find(x => x.GuildID == ID);
                 if (GetItem != null)
                 {
                     return GetItem;
@@ -405,7 +405,7 @@ namespace Bot
             /// <summary>
             /// Get all whitelist items
             /// </summary>
-            public static HashSet<Item> GetAll()
+            public static List<Item> GetAll()
             {
                 return List;
             }
@@ -414,7 +414,7 @@ namespace Bot
             /// </summary>
             public static bool Check(ulong ID)
             {
-                if (List.Where(x => x.GuildID == ID).First() != null)
+                if (List.Exists(x => x.GuildID == ID))
                 {
                     return true;
                 }
@@ -472,7 +472,7 @@ namespace Bot
             /// <param name="ID"></param>
             public static void Remove(ulong ID)
             {
-                List.RemoveWhere(x => x.GuildID == ID);
+                List.RemoveAll(x => x.GuildID == ID);
                 if (File.Exists(Path + $"{ID.ToString()}.json"))
                 {
                     File.Delete(Path + $"{ID.ToString()}.json");
@@ -480,7 +480,7 @@ namespace Bot
             }
             public static void UpdateBlacklist(object sender, ElapsedEventArgs e)
             {
-                HashSet<Item> BlacklistCache = new HashSet<Item>();
+                List<Item> BlacklistCache = new List<Item>();
                 foreach (var File in Directory.GetFiles(_Blacklist.Path))
                 {
                     using (StreamReader reader = new StreamReader(File.Replace(_Blacklist.Path, "").Replace(".json", "")))
@@ -1092,7 +1092,7 @@ namespace Bot.Commands
             public class WhitelistGroup : ModuleBase
             {
                 private DiscordSocketClient _Client;
-                public WhitelistGroup(CommandService Commands, DiscordSocketClient Client)
+                public WhitelistGroup(DiscordSocketClient Client)
                 {
                     _Client = Client;
                 }
@@ -1170,15 +1170,14 @@ namespace Bot.Commands
             public class BlacklistGroup : ModuleBase
             {
                 private DiscordSocketClient _Client;
-                public BlacklistGroup(CommandService Commands, DiscordSocketClient CLient)
+                public BlacklistGroup(DiscordSocketClient Client)
                 {
-                    _Client = CLient;
+                    _Client = Client;
                 }
                 [Command]
                 [RequireOwner]
                 public async Task Blacklist()
                 {
-
                     await ReplyAsync("`Blacklist > add (ID) | reload | remove (ID) | list | info (ID)`");
                 }
 

@@ -154,6 +154,18 @@ namespace Bot.Commands
                 await ReplyAsync("Enter an IP | `mc/ping my.server.net` | `mc/ping other.server.net:25566` | `mc/ping this.server.net 25567`");
                 return;
             }
+            switch(IP)
+            {
+                case "127.0.0.1":
+                    await ReplyAsync("You really think that would work?");
+                    return;
+                case "192.168.0.1":
+                    await ReplyAsync("Minecraft servers dont run on routers DUH");
+                    return;
+                case "0.0.0.0":
+                    await ReplyAsync("Not enough zeros?");
+                    return;
+            }
             if (IP.Contains(":"))
             {
                 string[] GetPort = IP.Split(':');
