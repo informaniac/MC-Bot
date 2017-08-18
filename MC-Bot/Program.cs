@@ -34,17 +34,18 @@ namespace Bot
             });
         }
         /// <summary>
-        /// [Command] /test + Color Grey
+        /// [Command] /test + Color Cyan
         /// </summary>
         public static void Command(string Message)
         {
             Task.Run(() =>
             {
-                if (Console.ForegroundColor != ConsoleColor.Gray)
+                if (Console.ForegroundColor != ConsoleColor.Cyan)
                 {
-                    Console.ForegroundColor = ConsoleColor.Gray;
+                    Console.ForegroundColor = ConsoleColor.Cyan;
                 }
                 Console.WriteLine($"[Command] {Message}");
+                Console.ForegroundColor = ConsoleColor.White;
             });
         }
         /// <summary>
@@ -73,25 +74,25 @@ namespace Bot
         }
 
         /// <summary>
-        /// [Joined] Guild + Color Cyan
+        /// [Joined] Guild + Color Green
         /// </summary>
         public static void GuildJoined(string Message)
         {
             Task.Run(() =>
             {
-                Console.ForegroundColor = ConsoleColor.Cyan;
+                Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine($"[Joined] {Message}");
                 Console.ForegroundColor = ConsoleColor.White;
             });
         }
         /// <summary>
-        /// [Left] Guild + Color Cyan
+        /// [Left] Guild + Color Green
         /// </summary>
         public static void GuildLeft(string Message)
         {
             Task.Run(() =>
             {
-                Console.ForegroundColor = ConsoleColor.Cyan;
+                Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine($"[Left] {Message}");
                 Console.ForegroundColor = ConsoleColor.White;
             });
@@ -284,7 +285,7 @@ namespace Bot
         public class _Whitelist
         {
             public static string Path = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "/Whitelist/";
-            private static List<ulong> List = new List<ulong>();
+            private static HashSet<ulong> List = new HashSet<ulong>();
             /// <summary>
             /// Check if whitelist has a guild ID
             /// </summary>
@@ -309,7 +310,7 @@ namespace Bot
             /// <summary>
             /// Get all whitelist items
             /// </summary>
-            public static List<ulong> GetAll()
+            public static HashSet<ulong> GetAll()
             {
                 return List;
             }
@@ -351,7 +352,7 @@ namespace Bot
             /// </summary>
             public static void Reload()
             {
-                List<ulong> NewList = new List<ulong>();
+                HashSet<ulong> NewList = new HashSet<ulong>();
                 foreach (var Item in Directory.GetFiles(Path))
                 {
                     NewList.Add(Convert.ToUInt64(Item.Replace(Path, "")));
@@ -392,7 +393,7 @@ namespace Bot
             /// </summary>
             public static Item Get(ulong ID)
             {
-                var GetItem = List.Find(x => x.GuildID == ID);
+                var GetItem = List.Where(x => x.GuildID == ID).First();
                 if (GetItem != null)
                 {
                     return GetItem;
@@ -518,6 +519,7 @@ namespace Bot
 
             await Task.Delay(-1);
         }
+        #region ClientEvents
         private async Task Client_JoinedGuildAsync(SocketGuild g)
         {
             if (!BotCache.Keys.Contains(g.Id))
@@ -690,6 +692,7 @@ namespace Bot
                 await _Client.SetGameAsync(GetStatus());
             }
         }
+        #endregion
     }
 
     #region CommandService
@@ -730,13 +733,11 @@ namespace Bot
                 {
                     if (context.Channel is IPrivateChannel)
                     {
-                        _Log.Command($"DM");
-                        _Log.Custom($"     {context.Message.Author}: {context.Message.Content}");
+                        _Log.Command($"DM" + Environment.NewLine + $"     {context.Message.Author}: {context.Message.Content}");
                     }
                     else
                     {
-                        _Log.Command($"{context.Guild.Name} #{context.Channel.Name}");
-                        _Log.Custom($"     {context.Message.Author}: {context.Message.Content}");
+                        _Log.Command($"{context.Guild.Name} #{context.Channel.Name}" + Environment.NewLine + $"     {context.Message.Author}: {context.Message.Content}");
                     }
                 }
                 else
@@ -759,8 +760,7 @@ namespace Bot
                 }
                 else
                 {
-                    _Log.Command($"Error > {context.Message.Content}");
-                    _Log.Custom($"     Error: {result.ErrorReason}");
+                    _Log.Custom($"[Command] Error > {context.Message.Content}" + Environment.NewLine + $"     Error: {result.ErrorReason}");
                 }
             }
         }
@@ -1092,7 +1092,7 @@ namespace Bot.Commands
             public class WhitelistGroup : ModuleBase
             {
                 private DiscordSocketClient _Client;
-                public WhitelistGroup(DiscordSocketClient Client)
+                public WhitelistGroup(CommandService Commands, DiscordSocketClient Client)
                 {
                     _Client = Client;
                 }
@@ -1170,14 +1170,15 @@ namespace Bot.Commands
             public class BlacklistGroup : ModuleBase
             {
                 private DiscordSocketClient _Client;
-                public BlacklistGroup(DiscordSocketClient Client)
+                public BlacklistGroup(CommandService Commands, DiscordSocketClient CLient)
                 {
-                    _Client = Client;
+                    _Client = CLient;
                 }
                 [Command]
                 [RequireOwner]
                 public async Task Blacklist()
                 {
+
                     await ReplyAsync("`Blacklist > add (ID) | reload | remove (ID) | list | info (ID)`");
                 }
 
