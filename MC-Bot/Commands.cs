@@ -18,6 +18,7 @@ using System.Net;
 using System.IO;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Discord.Addons.InteractiveCommands;
 
 namespace Bot.Commands
 {
@@ -66,13 +67,14 @@ namespace Bot.Commands
             await ReplyAsync("", false, embed);
         }
 
-        [Command("quiz"), Remarks("quiz"), Summary("Spoopy")]
-        public async Task Quiz()
+        [Command("quiztestblahlol"),Remarks("quiz"), Summary("Answer a minecraft quiz question")]
+        public async Task Quiztestblah()
         {
-            await ReplyAsync("Coming soon ;)");
+            
         }
-
+        
         [Command("colors"), Remarks("colors"), Summary("Minecraft color codes")]
+        [Alias("color")]
         public async Task Colors()
         {
             var embed = new EmbedBuilder()
@@ -84,6 +86,7 @@ namespace Bot.Commands
         }
 
         [Command("item"), Remarks("item (ID/Name)"), Summary("Item/Block info")]
+        [Alias("block")]
         public async Task Items(string ID = "0", string Meta = "0")
         {
             if (_Config.MCItems.Count == 0)
@@ -206,15 +209,25 @@ namespace Bot.Commands
                         ThumbnailUrl = Mob.PicUrl,
                         Color = DiscordUtils.GetRoleColor(Context.Channel as ITextChannel)
                     };
+                    string Height = Mob.Height + " blocks";
+                    string Width = Mob.Width + " blocks";
+                    if (Mob.Height == "Rip")
+                    {
+                        Height = "Unknown";
+                    }
+                    if (Mob.Width == "Rip")
+                    {
+                        Width = "Unknown";
+                    }
                     if (Mob.AttackEasy == "")
                     {
                         embed.AddInlineField("Stats", $"**Health:** {Mob.Health} :heart:" + Environment.NewLine + $"**Type:** {Mob.Type}");
-                        embed.AddInlineField("Info", $"**Height:** {Mob.Height} blocks" + Environment.NewLine + $"**Width:** {Mob.Width} blocks" + Environment.NewLine + $"**Version:** {Mob.Version}");
+                        embed.AddInlineField("Info", $"**Height:** {Height}" + Environment.NewLine + $"**Width:** {Width}" + Environment.NewLine + $"**Version:** {Mob.Version}");
                     }
                     else
                     {
                         embed.AddInlineField("Stats", $"**Health:** {Mob.Health} :heart:" + Environment.NewLine + "**Attack** :crossed_swords:" + Environment.NewLine + $"**Easy:** {Mob.AttackEasy}" + Environment.NewLine + $"**Normal:** {Mob.AttackNormal}" + Environment.NewLine + $"**Hard:** {Mob.AttackHard}");
-                        embed.AddInlineField("Info", $"**Height:** {Mob.Height} blocks" + Environment.NewLine + $"**Width:** {Mob.Width} blocks" + Environment.NewLine + $"**Version:** {Mob.Version}" + Environment.NewLine + $"**Type:** {Mob.Type}");
+                        embed.AddInlineField("Info", $"**Height:** {Height}" + Environment.NewLine + $"**Width:** {Width}" + Environment.NewLine + $"**Version:** {Mob.Version}" + Environment.NewLine + $"**Type:** {Mob.Type}");
                     }
                     await ReplyAsync("", false, embed);
                 }
@@ -434,7 +447,7 @@ namespace Bot.Commands
         {
             if (Arg == null)
             {
-                await Context.Channel.SendMessageAsync("mc/skin (Arg) (User) | head | cube | full | steal | `mc/skin full Notch`");
+                await Context.Channel.SendMessageAsync("mc/skin (Arg) (User) | head | cube | full | steal | `mc/skin Notch` or `mc/skin cube Notch`");
                 return;
             }
             if (User == null)
@@ -465,8 +478,8 @@ namespace Bot.Commands
                     await ReplyAsync($"{Context.User.Username} Stole a skin :o <https://minotar.net/download/" + User + ">");
                     break;
                 default:
-                    await Context.Channel.SendMessageAsync("Unknown argument do /skin");
-                    break;
+                    await Context.Channel.SendMessageAsync("Unknown argument do mc/skin");
+                    return;
             }
             if (Url == "steal")
             {
@@ -663,7 +676,7 @@ namespace Bot.Commands
             await ReplyAsync("", false, embed);
         }
 
-        [Command("misc"), Remarks("misc"), Summary("Misc links for minecraft")]
+        [Command("skinedit")]
         public async Task Misc()
         {
             var embed = new EmbedBuilder()
@@ -736,6 +749,78 @@ namespace Bot.Commands
                 }
             };
             await ReplyAsync("", false, embed);
+        }
+        
+        [Command("notch")]
+        public async Task Notch()
+        {
+            var embed = new EmbedBuilder()
+            {
+                Description = "Minecraft was created by Notch aka Markus Persson" + Environment.NewLine + "https://en.wikipedia.org/wiki/Markus_Persson",
+                Color = DiscordUtils.GetRoleColor(Context.Channel as ITextChannel),
+                Footer = new EmbedFooterBuilder()
+                {
+                    Text = "Hey you found a secret command :D"
+                }
+            };
+            await ReplyAsync("", false, embed);
+        }
+
+    }
+
+    public class Quiz : InteractiveModuleBase
+    {
+        [Command("quiz")]
+        public async Task QuizCom(string Accept = "")
+        {
+            if (Accept == "start")
+            {
+                Random Ran = new Random();
+                int Num = Ran.Next(1, _Config.MCQuiz.Count);
+                _Quiz Quiz = _Config.MCQuiz[Num - 1];
+
+                await ReplyAsync(Quiz.Question);
+                var response = await WaitForMessage(Context.Message.Author, Context.Channel, new TimeSpan(0, 0, 10));
+                if (response == null)
+                {
+                    var embed = new EmbedBuilder()
+                    {
+                        Title = "Minecraft Quiz",
+                        Description = "You ran out of time :(",
+                        Color = DiscordUtils.GetRoleColor(Context.Channel as ITextChannel)
+                    };
+                    await ReplyAsync("", false, embed);
+                }
+                else
+                {
+                    string YesNo = "<:error:350172479936921611> Incorrect";
+                    if (Quiz.Answer.Contains(response.Content.ToLower()))
+                    {
+                        YesNo = "<:success:350172481186955267> Correct!";
+                    }
+                    var embed = new EmbedBuilder()
+                    {
+                        Title = "Minecraft Quiz",
+                        Description = YesNo + Environment.NewLine + Quiz.Note,
+                        Color = DiscordUtils.GetRoleColor(Context.Channel as ITextChannel)
+                    };
+                    await ReplyAsync("", false, embed);
+                }
+            }
+            else
+            {
+                var embed = new EmbedBuilder()
+                {
+                    Title = "Minecraft Quiz",
+                    Description = "Think you know your minecraft knowledge?" + Environment.NewLine + "Type **mc/quiz start** to play you have 10 seconds to answer",
+                    Footer = new EmbedFooterBuilder()
+                    {
+                        Text = $"Questions Available {_Config.MCQuiz.Count()}"
+                    },
+                    Color = DiscordUtils.GetRoleColor(Context.Channel as ITextChannel)
+                };
+                await ReplyAsync("", false, embed);
+            }
         }
     }
 }

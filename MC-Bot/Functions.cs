@@ -27,7 +27,7 @@ namespace Bot.Services
 
         private Task _Client_JoinedGuild(SocketGuild g)
         {
-            if (_Bot._Blacklist.Check(g.Id))
+            if (!_Bot._Blacklist.Check(g.Id))
             {
                 var Guild = _Config.MCGuilds.Find(x => x.ID == g.Id);
                 if (Guild == null)
@@ -40,7 +40,7 @@ namespace Bot.Services
 
         private Task _Client_GuildAvailable(SocketGuild g)
         {
-            if (_Bot._Blacklist.Check(g.Id))
+            if (!_Bot._Blacklist.Check(g.Id))
             {
                 var Guild = _Config.MCGuilds.Find(x => x.ID == g.Id);
                 if (Guild == null)
@@ -276,6 +276,12 @@ namespace Bot.Classes
         public string AttackNormal;
         public string AttackHard;
         public _MobType Type;
+        public string Note;
+    }
+    public class _Quiz
+    {
+        public string Question;
+        public string Answer;
         public string Note;
     }
     public enum _MobType
