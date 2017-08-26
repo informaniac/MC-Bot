@@ -262,6 +262,26 @@ namespace Bot.Classes
         public string Name;
         public string Text;
     }
+    public class _Mob
+    {
+        public string ID;
+        public string EmojiID;
+        public string PicUrl;
+        public string Name;
+        public string Health;
+        public string Height;
+        public string Width;
+        public string Version;
+        public string AttackEasy;
+        public string AttackNormal;
+        public string AttackHard;
+        public _MobType Type;
+        public string Note;
+    }
+    public enum _MobType
+    {
+        Passive, Neutral, Hostile, Boss, Tameable, Secret
+    }
     public class _Guild
     {
         public ulong ID;

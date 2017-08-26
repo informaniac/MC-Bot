@@ -122,7 +122,7 @@ namespace Bot
             });
         }
         /// <summary>
-        /// [Custom Text] Test + ConsoleColor
+        /// CustomText + ConsoleColor
         /// </summary>
         public static void Custom(string Message, ConsoleColor Color = ConsoleColor.White)
         {
@@ -187,7 +187,7 @@ namespace Bot
         {
             if (Status == "")
             {
-                return $"{_Config.Prefix}help [{_Client.Guilds.Count}] www.blaze.ml";
+                return $"{_Config.Prefix}help [{_Client.Guilds.Count}] blazeweb.ml";
             }
             else
             {
@@ -199,7 +199,7 @@ namespace Bot
             if (Message == "")
             {
                 Status = "";
-                _Client.SetGameAsync($"{_Config.Prefix}help [{_Client.Guilds.Count}] www.blaze.ml").GetAwaiter();
+                _Client.SetGameAsync($"{_Config.Prefix}help [{_Client.Guilds.Count}] blazeweb.ml").GetAwaiter();
             }
             else
             {
@@ -207,6 +207,7 @@ namespace Bot
                 _Client.SetGameAsync(Message).GetAwaiter();
             }
         }
+
         public static void Main()
         {
             DisableConsoleQuickEdit.Go();
@@ -866,7 +867,7 @@ namespace Bot.Commands
         [Command("website")]
         public async Task Website()
         {
-            await ReplyAsync("https://blaze.ml");
+            await ReplyAsync("https://blazeweb.ml");
         }
 
         [Command("github")]

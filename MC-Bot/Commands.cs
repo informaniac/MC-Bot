@@ -66,6 +66,12 @@ namespace Bot.Commands
             await ReplyAsync("", false, embed);
         }
 
+        [Command("quiz"), Remarks("quiz"), Summary("Spoopy")]
+        public async Task Quiz()
+        {
+            await ReplyAsync("Coming soon ;)");
+        }
+
         [Command("colors"), Remarks("colors"), Summary("Minecraft color codes")]
         public async Task Colors()
         {
@@ -77,7 +83,7 @@ namespace Bot.Commands
             await ReplyAsync("", false, embed);
         }
 
-        [Command("item"), Remarks("item (ID/Name)"), Summary("Minecraft item/block info")]
+        [Command("item"), Remarks("item (ID/Name)"), Summary("Item/Block info")]
         public async Task Items(string ID = "0", string Meta = "0")
         {
             if (_Config.MCItems.Count == 0)
@@ -149,6 +155,114 @@ namespace Bot.Commands
             await ReplyAsync("", false, embed);
         }
 
+        [Command("mob"), Remarks("mob (Mob Name)"), Summary("Mob/Monster info")]
+        [Alias("mobs")]
+        public async Task Mob([Remainder]string Name = "")
+        {
+            if (Name != "")
+            {
+                if (Name.ToLower() == "herobrine")
+                {
+                    var embedh = new EmbedBuilder()
+                    {
+                        Title = "Herobrine",
+                        Description = "Always watching you...",
+                        ThumbnailUrl = "https://lh3.googleusercontent.com/AQ5S9Xj1z6LBbNis2BdUHM-mQbDrkvbrrlx5rTIxCPc-SwdITwjkJP370gZxNpjG92ND8wImuMuLyKnKi7te7w",
+                        Footer = new EmbedFooterBuilder()
+                        {
+                            Text = "Hey you found a secret command :D"
+                        },
+                        Color = DiscordUtils.GetRoleColor(Context.Channel as ITextChannel)
+                    };
+                    await ReplyAsync("", false, embedh);
+                    return;
+                }
+                if (Name.ToLower() == "giant")
+                {
+                    _Mob Giant = _Config.MCMobs.Find(x => x.Name == "Giant");
+                    var embed = new EmbedBuilder()
+                    {
+                        Title = $"{Giant.ID} | {Giant.Name}",
+                        ThumbnailUrl = Giant.PicUrl,
+                        Description = Giant.Note,
+                        Color = DiscordUtils.GetRoleColor(Context.Channel as ITextChannel),
+                        Footer = new EmbedFooterBuilder()
+                        {
+                            Text = "Hey you found a secret command :D"
+                        }
+                    };
+                    embed.AddInlineField("Stats", $"**Health:** {Giant.Health} :heart:" + Environment.NewLine + "**Attack** :crossed_swords:" + Environment.NewLine + $"**Easy:** {Giant.AttackEasy}" + Environment.NewLine + $"**Normal:** {Giant.AttackNormal}" + Environment.NewLine + $"**Hard:** {Giant.AttackHard}");
+                    embed.AddInlineField("Info", $"**Height:** {Giant.Height} blocks" + Environment.NewLine + $"**Width:** {Giant.Width} blocks" + Environment.NewLine + $"**Version:** {Giant.Version}" + Environment.NewLine + $"**Type:** {Giant.Type}");
+                    await ReplyAsync("", false, embed);
+                    return;
+                }
+                _Mob Mob = _Config.MCMobs.Find(x => x.Name.ToLower() == Name.ToLower().Replace(" ", ""));
+                if (Mob != null)
+                {
+                    var embed = new EmbedBuilder()
+                    {
+                        Title = $"{Mob.ID} | {Mob.Name}",
+                        Description = Mob.Note,
+                        ThumbnailUrl = Mob.PicUrl,
+                        Color = DiscordUtils.GetRoleColor(Context.Channel as ITextChannel)
+                    };
+                    if (Mob.AttackEasy == "")
+                    {
+                        embed.AddInlineField("Stats", $"**Health:** {Mob.Health} :heart:" + Environment.NewLine + $"**Type:** {Mob.Type}");
+                        embed.AddInlineField("Info", $"**Height:** {Mob.Height} blocks" + Environment.NewLine + $"**Width:** {Mob.Width} blocks" + Environment.NewLine + $"**Version:** {Mob.Version}");
+                    }
+                    else
+                    {
+                        embed.AddInlineField("Stats", $"**Health:** {Mob.Health} :heart:" + Environment.NewLine + "**Attack** :crossed_swords:" + Environment.NewLine + $"**Easy:** {Mob.AttackEasy}" + Environment.NewLine + $"**Normal:** {Mob.AttackNormal}" + Environment.NewLine + $"**Hard:** {Mob.AttackHard}");
+                        embed.AddInlineField("Info", $"**Height:** {Mob.Height} blocks" + Environment.NewLine + $"**Width:** {Mob.Width} blocks" + Environment.NewLine + $"**Version:** {Mob.Version}" + Environment.NewLine + $"**Type:** {Mob.Type}");
+                    }
+                    await ReplyAsync("", false, embed);
+                }
+                else
+                {
+                    await ReplyAsync("Could not find mob");
+                }
+            }
+            else
+            {
+                List<string> Passive = new List<string>();
+                List<string> Tameable = new List<string>();
+                List<string> Neutral = new List<string>();
+                List<string> Hostile = new List<string>();
+                List<string> Boss = new List<string>();
+                foreach (var i in _Config.MCMobs)
+                {
+                    if (i.Type == _MobType.Passive)
+                    {
+                        Passive.Add($"<:{i.Name}:{i.EmojiID}>");
+                    } else if (i.Type == _MobType.Tameable)
+                    {
+                        Tameable.Add($"<:{i.Name}:{i.EmojiID}>");
+                    } else if (i.Type == _MobType.Neutral)
+                    {
+                        Neutral.Add($"<:{i.Name}:{i.EmojiID}>");
+                    } else if (i.Type == _MobType.Hostile)
+                    {
+                        Hostile.Add($"<:{i.Name}:{i.EmojiID}>");
+                    } else if (i.Type == _MobType.Boss)
+                    {
+                        Boss.Add($"<:{i.Name}:{i.EmojiID}>");
+                    }
+                }
+
+                var embed = new EmbedBuilder()
+                {
+                    Description = "Get more info with mc/mob (Mob Name) | mc/mob Bat"
+                };
+                embed.AddInlineField("Passive", string.Join(" ", Passive));
+                embed.AddInlineField("Tameable", string.Join(" ", Tameable));
+                embed.AddInlineField("Neutral", string.Join(" ", Neutral));
+                embed.AddInlineField("Hostile", string.Join(" ", Hostile));
+                embed.AddInlineField("Boss", string.Join(" ", Boss));
+
+                await ReplyAsync("", false, embed);
+            }
+        }
 
         [Command("uuid"), Remarks("uuid (Player)"), Summary("Get a players UUID")]
         public async Task Uuid([Remainder]string Name)
