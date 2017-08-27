@@ -765,7 +765,6 @@ namespace Bot.Commands
             };
             await ReplyAsync("", false, embed);
         }
-
     }
 
     public class Quiz : InteractiveModuleBase
@@ -775,10 +774,10 @@ namespace Bot.Commands
         {
             if (Accept == "start")
             {
-                Random Ran = new Random();
+                var Ran = new Random((int)DateTime.Now.Ticks);
                 int Num = Ran.Next(1, _Config.MCQuiz.Count);
                 _Quiz Quiz = _Config.MCQuiz[Num - 1];
-
+                string User = $"{Context.User.Username}#{Context.User.Discriminator}";
                 await ReplyAsync(Quiz.Question);
                 var response = await WaitForMessage(Context.Message.Author, Context.Channel, new TimeSpan(0, 0, 10));
                 if (response == null)
@@ -786,17 +785,17 @@ namespace Bot.Commands
                     var embed = new EmbedBuilder()
                     {
                         Title = "Minecraft Quiz",
-                        Description = "You ran out of time :(",
+                        Description = $"{User} you ran out of time :(",
                         Color = DiscordUtils.GetRoleColor(Context.Channel as ITextChannel)
                     };
                     await ReplyAsync("", false, embed);
                 }
                 else
                 {
-                    string YesNo = "<:error:350172479936921611> Incorrect";
+                    string YesNo = "<:error:350172479936921611> Incorrect {User}";
                     if (Quiz.Answer.Contains(response.Content.ToLower()))
                     {
-                        YesNo = "<:success:350172481186955267> Correct!";
+                        YesNo = $"<:success:350172481186955267> Correct! {User}";
                     }
                     var embed = new EmbedBuilder()
                     {
