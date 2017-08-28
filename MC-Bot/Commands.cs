@@ -29,6 +29,7 @@ namespace Bot.Commands
         {
             _Commands = Commands;
         }
+        public string NewsText = "";
 
         [Command("help")]
         public async Task Help()
@@ -36,14 +37,21 @@ namespace Bot.Commands
             if (Context.Guild != null)
             {
                 IGuildUser GU = await Context.Guild.GetUserAsync(Context.Client.CurrentUser.Id);
-                if (!GU.GuildPermissions.EmbedLinks)
+                if (!GU.GuildPermissions.EmbedLinks || !GU.GetPermissions(Context.Channel as ITextChannel).EmbedLinks)
                 {
-                    await ReplyAsync("This bot requires permission `Embed Links`");
+                    await ReplyAsync("```python" + Environment.NewLine + "Bot requires permission \" Embed Links \"```");
                     return;
                 }
             }
+            if (NewsText == "" && File.Exists(_Config.BotPath + "News.txt"))
+            {
+                using (StreamReader reader = new StreamReader(_Config.BotPath + "News.txt"))
+                {
+                    NewsText = reader.ReadLine();
+                }
+            }
             List<string> Commands = new List<string>();
-            foreach(var I in _Commands.Commands)
+            foreach(var I in _Commands.Commands.Where(x => x.Module.Name == "Main"))
             {
                 if (I.Summary == null || I.Summary == "") continue;
                 try
@@ -53,27 +61,73 @@ namespace Bot.Commands
                 }
                 catch { }
             }
+            string CommunityName = "";
+            string CommunityDesc = "";
+            string CommunityLink = "";
+            int Servers = 0;
+            if (Context.Guild != null)
+            {
+                _Guild Guild = _Config.MCGuilds.Find(x => x.ID == Context.Guild.Id);
+                if (Guild != null)
+                {
+                    if (Guild.CommunityName != "")
+                    {
+                        CommunityName = Guild.CommunityName;
+                        CommunityDesc = Guild.CommunityDescription;
+                        CommunityLink = Guild.Website;
+                        Servers = Guild.Servers.Count();
+                    }
+                }
+            }
             var embed = new EmbedBuilder()
             {
-                Title = "Commands",
-                Description = "```md" + Environment.NewLine + string.Join(Environment.NewLine, Commands) + "```",
+                Title = $"Bot News > {NewsText}",
+                Description = "",
                 Color = Bot.Utils.DiscordUtils.GetRoleColor(Context.Channel as ITextChannel),
                 Footer = new EmbedFooterBuilder()
                 {
                     Text = "There are some hidden commands aswell ;)"
                 }
             };
-            embed.AddField("Launchers", "[MultiMC](https://multimc.org/) Manage and launch multiple versions/instances and easy forge/mods install" + Environment.NewLine + "[Ftb Legacy](http://ftb.cursecdn.com/FTB2/launcher/FTB_Launcher.exe) | [TechnicPack](https://www.technicpack.net/download) | [AT](https://www.atlauncher.com/downloads)");
+            if (CommunityName == "")
+            {
+                embed.AddField("This Community", "This guild is not registered as a community contact the guild owner to set it up");
+            }
+            else
+            {
+                if (CommunityLink == "")
+                {
+                    embed.AddField("This Community", CommunityName + Environment.NewLine + CommunityDesc);
+                }
+                else
+                {
+                    embed.AddField($"This Community - {CommunityName}", $"Servers {Servers} [Website]({CommunityLink})" + Environment.NewLine + CommunityDesc);
+                }
+            }
+            embed.AddInlineField("Commands", "```md" + Environment.NewLine + string.Join(Environment.NewLine, Commands) + "```");
+            embed.AddField("Links", "[MultiMC](https://multimc.org/) MultiMC allows you to manage and launch multiple versions with easy forge/mods installation" + Environment.NewLine + "[Ftb Legacy](http://ftb.cursecdn.com/FTB2/launcher/FTB_Launcher.exe) | [Technic Launcher](https://www.technicpack.net/download) | [AT Launcher](https://www.atlauncher.com/downloads)");
+            
+            
             await ReplyAsync("", false, embed);
         }
 
-        [Command("quiztestblahlol"),Remarks("quiz"), Summary("Answer a minecraft quiz question")]
+        [Command("quiztestblahlol"),Remarks("quiz"), Summary("Minecraft quiz :D")]
         public async Task Quiztestblah()
         {
             
         }
-        
-        [Command("colors"), Remarks("colors"), Summary("Minecraft color codes")]
+
+        [Command("setnews"), RequireOwner]
+        public async Task News([Remainder]string Text)
+        {
+            NewsText = Text;
+            using (StreamWriter file = File.CreateText(_Config.BotPath + $"News" + ".txt"))
+            {
+                file.WriteLine(Text);
+            }
+        }
+
+        [Command("colors"), Remarks("colors"), Summary("MC color codes")]
         [Alias("color")]
         public async Task Colors()
         {
@@ -277,7 +331,7 @@ namespace Bot.Commands
             }
         }
 
-        [Command("uuid"), Remarks("uuid (Player)"), Summary("Get a players UUID")]
+        [Command("uuid"), Remarks("uuid (Player)"), Summary("Player UUID")]
         public async Task Uuid([Remainder]string Name)
         {
             UuidAtTimeResponse uuid = new UuidAtTime(Name, DateTime.Now).PerformRequest().Result;
@@ -292,7 +346,7 @@ namespace Bot.Commands
 
         }
 
-        [Command("ping"), Priority(0), Remarks("ping (IP)"), Summary("Ping a minecraft server")]
+        [Command("ping"), Priority(0), Remarks("ping (IP)"), Summary("Ping a server")]
         public async Task Ping(string IP = "", ushort Port = 25565)
         {
             if (IP == "" || IP.Contains("("))
@@ -376,7 +430,7 @@ namespace Bot.Commands
             
         }
 
-        [Command("list"), Remarks("list"), Summary("List this guilds minecraft servers")]
+        [Command("list"), Remarks("list"), Summary("List guild MC servers")]
         [Alias("servers")]
         public async Task List()
         {
@@ -414,7 +468,7 @@ namespace Bot.Commands
             await ReplyAsync("", false, embed);
         }
 
-        [Command("info"), Remarks("info"), Summary("Minecraft sales info")]
+        [Command("info"), Remarks("info"), Summary("MC sales info")]
         public async Task Info()
         {
             StatisticsResponse stats = await new Statistics(Item.MinecraftAccountsSold).PerformRequest();
@@ -442,7 +496,7 @@ namespace Bot.Commands
             }
         }
 
-        [Command("skin"), Remarks("skin (Player)"), Summary("Show a players minecraft skin")]
+        [Command("skin"), Remarks("skin (Player)"), Summary("Player skin")]
         public async Task SkinArg(string Arg = null, [Remainder] string User = null)
         {
             if (Arg == null)
@@ -498,7 +552,7 @@ namespace Bot.Commands
             await ReplyAsync("", false, embed);
         }
 
-        [Command("names"), Remarks("names (Player)"), Summary("Minecraft account name history")]
+        [Command("names"), Remarks("names (Player)"), Summary("MC account name history")]
         public async Task Names([Remainder]string Name)
         {
             UuidAtTimeResponse uuid = new UuidAtTime(Name, DateTime.Now).PerformRequest().Result;
@@ -538,7 +592,7 @@ namespace Bot.Commands
             }
         }
 
-        [Command("status"), Remarks("status"), Summary("Mojang status e.g. auth server")]
+        [Command("status"), Remarks("status"), Summary("Mojang status")]
         public async Task Status()
         {
             ApiStatusResponse status = new ApiStatus().PerformRequest().Result;
@@ -563,87 +617,6 @@ namespace Bot.Commands
             else
             {
                 await ReplyAsync("API error");
-            }
-        }
-
-        [Command("addserver"), Remarks("addserver"), Summary("Add a minecraft server to this guild list")]
-        public async Task Addserver(string Tag = "", string IP = "", [Remainder]string Name = "")
-        {
-            if (Context.Guild == null)
-            {
-                await ReplyAsync("This command can only be used in a guild");
-                return;
-            }
-            if (Context.User.Id != Context.Guild.OwnerId)
-            {
-                await ReplyAsync("Guild owner only command");
-                return;
-            }
-            if (Tag == "" || IP == "" || Name == "")
-            {
-                await ReplyAsync("Enter a tag, ip and name | `mc/addserver (Tag) (IP) (Name)` | `mc/addserver sf sky.minecraft.net Skyfactory 2`");
-                return;
-            }
-            _Guild Guild = _Config.MCGuilds.Find(x => x.ID == Context.Guild.Id);
-            if (Guild != null)
-            {
-                _Server Server = Guild.Servers.Find(x => x.Tag.ToLower() == Tag.ToLower());
-                if (Server != null)
-                {
-                    await ReplyAsync("This server already exists on the list");
-                    return;
-                }
-                ushort Port = 25565;
-                if (IP.Contains(":"))
-                {
-                    string[] GetPort = IP.Split(':');
-                    IP = GetPort.First();
-                    Port = Convert.ToUInt16(GetPort.Last());
-
-                }
-                _Server NewServer = new _Server()
-                {
-                    Tag = Tag,
-                    Ip = IP,
-                    Name = Name,
-                    Port = Port
-                };
-                Guild.Servers.Add(NewServer);
-                _Task.SaveGuild(Context.Guild.Id);
-                await ReplyAsync($"Added server {Name} to the guild list | `mc/list`");
-            }
-        }
-
-        [Command("delserver"), Remarks("delserver"), Summary("Remove a minecraft server from the guild list")]
-        public async Task Delserver(string Tag = "")
-        {
-            if (Context.Guild == null)
-            {
-                await ReplyAsync("This command can only be used in a guild");
-                return;
-            }
-            if (Context.User.Id != Context.Guild.OwnerId)
-            {
-                await ReplyAsync("Guild owner only command");
-                return;
-            }
-            if (Tag == "")
-            {
-                await ReplyAsync("Enter the tag of a server to delete from the list | `mc/delserver (Tag)` | `mc/delserver sf`");
-                return;
-            }
-            _Guild Guild = _Config.MCGuilds.Find(x => x.ID == Context.Guild.Id);
-            if (Guild != null)
-            {
-                _Server Server = Guild.Servers.Find(x => x.Tag.ToLower() == Tag.ToLower());
-                if (Server == null)
-                {
-                    await ReplyAsync("This server is not on the list");
-                    return;
-                }
-                Guild.Servers.Remove(Server);
-                _Task.SaveGuild(Context.Guild.Id);
-                await ReplyAsync($"Removed server {Server.Name} from the guild list | `mc/list`");
             }
         }
 
@@ -687,7 +660,7 @@ namespace Bot.Commands
             await ReplyAsync("", false, embed);
         }
 
-        [Command("minime"), Remarks("minime (Player)"), Summary("Minify yourself")]
+        [Command("minime"), Remarks("minime (Player)"), Summary("Minify player skin")]
         public async Task Minime(string Player)
         {
             UuidAtTimeResponse uuid = new UuidAtTime(Player, DateTime.Now).PerformRequest().Result;
@@ -765,6 +738,235 @@ namespace Bot.Commands
             };
             await ReplyAsync("", false, embed);
         }
+
+        [Command("admin"), Remarks("admin"), Summary("Guild admin commands")]
+        public async Task Admin()
+        {
+            if (Context.Guild == null)
+            {
+                await ReplyAsync("<:error:350172479936921611> Guild command only");
+                return;
+            }
+            IGuildUser GU = await Context.Guild.GetUserAsync(Context.User.Id);
+            if (!GU.GuildPermissions.Administrator)
+            {
+                await ReplyAsync("<:error:350172479936921611> You are not a guild admin");
+                return;
+            }
+            List<string> Commands = new List<string>();
+            foreach (var I in _Commands.Commands.Where(x => x.Module.Name == "GuildAdmin"))
+            {
+                if (I.Summary == null || I.Summary == "") continue;
+                try
+                {
+                    I.Summary.Trim();
+                    Commands.Add($"[ mc/{I.Remarks} ]( {I.Summary} )");
+                }
+                catch { }
+            }
+            var embed = new EmbedBuilder()
+            {
+                Title = "Guild Admin Commands",
+                Description = "```md" + Environment.NewLine + $"{string.Join(Environment.NewLine, Commands)}" + Environment.NewLine + "< Use mc/list for a list of this guilds minecraft servers >```",
+                Color = DiscordUtils.GetRoleColor(Context.Channel as ITextChannel),
+                Footer = new EmbedFooterBuilder()
+                { Text = ""}
+                
+            };
+            await ReplyAsync("", false, embed);
+        }
+        
+    }
+    public class GuildAdmin : ModuleBase
+    {
+        [Command("addserver"), Remarks("addserver"), Summary("Add a MC server to this guild list")]
+        public async Task Addserver(string Tag = "", string IP = "", [Remainder]string Name = "")
+        {
+            if (Context.Guild == null)
+            {
+                await ReplyAsync("<:error:350172479936921611> Guild command only");
+                return;
+            }
+            IGuildUser GU = await Context.Guild.GetUserAsync(Context.User.Id);
+            if (!GU.GuildPermissions.Administrator)
+            {
+                await ReplyAsync("<:error:350172479936921611> You are not a guild admin");
+                return;
+            }
+            if (Tag == "" || IP == "" || Name == "")
+            {
+                await ReplyAsync("Enter a tag, ip and name | `mc/addserver (Tag) (IP) (Name)` | `mc/addserver sf sky.minecraft.net Skyfactory 2`");
+                return;
+            }
+            _Guild Guild = _Config.MCGuilds.Find(x => x.ID == Context.Guild.Id);
+            if (Guild == null)
+            {
+                await ReplyAsync("Could not find guild data contact xXBuilderBXx#9113");
+                return;
+            }
+            _Server Server = Guild.Servers.Find(x => x.Tag.ToLower() == Tag.ToLower());
+                if (Server != null)
+                {
+                    await ReplyAsync("This server already exists on the list");
+                    return;
+                }
+                ushort Port = 25565;
+                if (IP.Contains(":"))
+                {
+                    string[] GetPort = IP.Split(':');
+                    IP = GetPort.First();
+                    Port = Convert.ToUInt16(GetPort.Last());
+
+                }
+                _Server NewServer = new _Server()
+                {
+                    Tag = Tag,
+                    Ip = IP,
+                    Name = Name,
+                    Port = Port
+                };
+                Guild.Servers.Add(NewServer);
+                _Task.SaveGuild(Context.Guild.Id);
+                await ReplyAsync($"Added server {Name} to the guild list | `mc/list`");
+            
+        }
+
+        [Command("delserver"), Remarks("delserver"), Summary("Remove a MC server from this guild list")]
+        public async Task Delserver(string Tag = "")
+        {
+            if (Context.Guild == null)
+            {
+                await ReplyAsync("<:error:350172479936921611> Guild command only");
+                return;
+            }
+            IGuildUser GU = await Context.Guild.GetUserAsync(Context.User.Id);
+            if (!GU.GuildPermissions.Administrator)
+            {
+                await ReplyAsync("<:error:350172479936921611> You are not a guild admin");
+                return;
+            }
+            if (Tag == "")
+            {
+                await ReplyAsync("Enter the tag of a server to delete from the list | `mc/delserver (Tag)` | `mc/delserver sf`");
+                return;
+            }
+            _Guild Guild = _Config.MCGuilds.Find(x => x.ID == Context.Guild.Id);
+            if (Guild == null)
+            {
+                await ReplyAsync("Could not find guild data contact xXBuilderBXx#9113");
+                return;
+            }
+                _Server Server = Guild.Servers.Find(x => x.Tag.ToLower() == Tag.ToLower());
+                if (Server == null)
+                {
+                    await ReplyAsync("This server is not on the list");
+                    return;
+                }
+                Guild.Servers.Remove(Server);
+                _Task.SaveGuild(Context.Guild.Id);
+                await ReplyAsync($"Removed server {Server.Name} from the guild list | `mc/list`");
+            
+        }
+
+        [Command("setname"), Remarks("setname (Name)"), Summary("Set the community name")]
+        public async Task SetName([Remainder]string Name = "")
+        {
+            if (Context.Guild == null)
+            {
+                await ReplyAsync("<:error:350172479936921611> Guild command only");
+                return;
+            }
+            IGuildUser GU = await Context.Guild.GetUserAsync(Context.User.Id);
+            if (!GU.GuildPermissions.Administrator)
+            {
+                await ReplyAsync("<:error:350172479936921611> You are not a guild admin");
+                return;
+            }
+            _Guild Guild = _Config.MCGuilds.Find(x => x.ID == Context.Guild.Id);
+            if (Guild == null)
+            {
+                await ReplyAsync("Could not find guild data contact xXBuilderBXx#9113");
+                return;
+            }
+            if (Name == "")
+            {
+                await ReplyAsync("<:error:350172479936921611> You need to enter a name mc/setname (Name) | mc/setname Mineplex");
+                return;
+            }
+            Guild.CommunityName = Name;
+            _Task.SaveGuild(Context.Guild.Id);
+            await ReplyAsync("<:success:350172481186955267> Community name has been set");
+        }
+
+        [Command("setdesc"), Remarks("setdesc (Text)"), Summary("Set the community description")]
+        public async Task SetDesc([Remainder]string Desc = "")
+        {
+            if (Context.Guild == null)
+            {
+                await ReplyAsync("<:error:350172479936921611> Guild command only");
+                return;
+            }
+            IGuildUser GU = await Context.Guild.GetUserAsync(Context.User.Id);
+            if (!GU.GuildPermissions.Administrator)
+            {
+                await ReplyAsync("<:error:350172479936921611> You are not a guild admin");
+                return;
+            }
+            _Guild Guild = _Config.MCGuilds.Find(x => x.ID == Context.Guild.Id);
+            if (Guild == null)
+            {
+                await ReplyAsync("Could not find guild data contact xXBuilderBXx#9113");
+                return;
+            }
+            if (Guild.CommunityName == "")
+            {
+                await ReplyAsync("<:error:350172479936921611> Community name has not been set | mc/setname (Name)");
+                return;
+            }
+            if (Desc == "")
+            {
+                await ReplyAsync("<:error:350172479936921611> You need to enter a description mc/setname (Text) | mc/setname Best minecraft community");
+                return;
+            }
+            Guild.CommunityDescription = Desc;
+            _Task.SaveGuild(Context.Guild.Id);
+            await ReplyAsync("<:success:350172481186955267> Community description has been set");
+        }
+
+        [Command("setlink"), Remarks("setlink (Link)"), Summary("Set the community link")]
+        public async Task SetLink(string Link = "")
+        {
+            if (Context.Guild == null)
+            {
+                await ReplyAsync("<:error:350172479936921611> Guild command only");
+                return;
+            }
+            IGuildUser GU = await Context.Guild.GetUserAsync(Context.User.Id);
+            if (!GU.GuildPermissions.Administrator)
+            {
+                await ReplyAsync("<:error:350172479936921611> You are not a guild admin");
+                return;
+            }
+            _Guild Guild = _Config.MCGuilds.Find(x => x.ID == Context.Guild.Id);
+            if (Guild == null)
+            {
+                await ReplyAsync("Could not find guild data contact xXBuilderBXx#9113");
+                return;
+            }
+            if (Guild.CommunityName == "")
+            {
+                await ReplyAsync("<:error:350172479936921611> Community name has not been set | mc/setname (Name)");
+                return;
+            }
+            if (Link == "")
+            {
+                await ReplyAsync("<:error:350172479936921611> You need to enter a link mc/setlink (Link) | mc/setname https://minecraftpro.com");
+                return;
+            }
+            Guild.Website = Link;
+            _Task.SaveGuild(Context.Guild.Id);
+            await ReplyAsync("<:success:350172481186955267> Community link has been set");
+        }
     }
 
     public class Quiz : InteractiveModuleBase
@@ -792,7 +994,7 @@ namespace Bot.Commands
                 }
                 else
                 {
-                    string YesNo = "<:error:350172479936921611> Incorrect {User}";
+                    string YesNo = $"<:error:350172479936921611> Incorrect {User}";
                     if (Quiz.Answer.Contains(response.Content.ToLower()))
                     {
                         YesNo = $"<:success:350172481186955267> Correct! {User}";

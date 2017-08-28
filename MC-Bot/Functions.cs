@@ -291,7 +291,9 @@ namespace Bot.Classes
     public class _Guild
     {
         public ulong ID;
-        public string Website;
+        public string CommunityName = "";
+        public string CommunityDescription = "";
+        public string Website = "";
         public List<_Server> Servers = new List<_Server>();
     }
 }
