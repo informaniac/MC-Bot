@@ -277,6 +277,7 @@ namespace Bot.Classes
         public string AttackHard;
         public _MobType Type;
         public string Note;
+        public string WikiLink;
     }
     public class _Quiz
     {

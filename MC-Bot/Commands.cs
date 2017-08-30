@@ -31,7 +31,7 @@ namespace Bot.Commands
         }
         public string NewsText = "";
 
-        [Command("help")]
+        [Command("help"), Alias("commands")]
         public async Task Help()
         {
             if (Context.Guild != null)
@@ -51,7 +51,8 @@ namespace Bot.Commands
                 }
             }
             List<string> Commands = new List<string>();
-            foreach(var I in _Commands.Commands.Where(x => x.Module.Name == "Main"))
+            List<string> WikiCommands = new List<string>();
+            foreach (var I in _Commands.Commands.Where(x => x.Module.Name == "Main"))
             {
                 if (I.Summary == null || I.Summary == "") continue;
                 try
@@ -60,6 +61,10 @@ namespace Bot.Commands
                         Commands.Add($"[ mc/{I.Remarks} ]( {I.Summary} )");
                 }
                 catch { }
+            }
+            foreach(var i in _Commands.Commands.Where(x => x.Module.Name == "Wiki"))
+            {
+                WikiCommands.Add($"{i.Remarks}");
             }
             string CommunityName = "";
             string CommunityDesc = "";
@@ -104,11 +109,16 @@ namespace Bot.Commands
                     embed.AddField($"This Community - {CommunityName}", $"Servers {Servers} [Website]({CommunityLink})" + Environment.NewLine + CommunityDesc);
                 }
             }
-            embed.AddInlineField("Commands", "```md" + Environment.NewLine + string.Join(Environment.NewLine, Commands) + "```");
+            embed.AddField("Wiki", string.Join(" | ", WikiCommands));
+            embed.AddField("Commands", "```md" + Environment.NewLine + string.Join(Environment.NewLine, Commands) + "```");
             embed.AddField("Links", "[MultiMC](https://multimc.org/) MultiMC allows you to manage and launch multiple versions with easy forge/mods installation" + Environment.NewLine + "[Ftb Legacy](http://ftb.cursecdn.com/FTB2/launcher/FTB_Launcher.exe) | [Technic Launcher](https://www.technicpack.net/download) | [AT Launcher](https://www.atlauncher.com/downloads)");
-            
-            
-            await ReplyAsync("", false, embed);
+
+            ITextChannel TE = await Context.Guild.GetTextChannelAsync(351033810961301506);
+            var Delete = await TE.GetMessageAsync(352287809949794317);
+            IUserMessage Update = await TE.GetMessageAsync(351404116527808512) as IUserMessage;
+            await Delete.DeleteAsync();
+            await Update.ModifyAsync(x => { x.Embed = embed.Build(); });
+            //await ReplyAsync("", false, embed);
         }
 
         [Command("quiztestblahlol"),Remarks("quiz"), Summary("Minecraft quiz :D")]
@@ -127,8 +137,7 @@ namespace Bot.Commands
             }
         }
 
-        [Command("colors"), Remarks("colors"), Summary("MC color codes")]
-        [Alias("color")]
+        [Command("colors"), Remarks("colors"), Summary("MC color codes"), Alias("color")]
         public async Task Colors()
         {
             var embed = new EmbedBuilder()
@@ -139,205 +148,19 @@ namespace Bot.Commands
             await ReplyAsync("", false, embed);
         }
 
-        [Command("item"), Remarks("item (ID/Name)"), Summary("Item/Block info")]
-        [Alias("block")]
-        public async Task Items(string ID = "0", string Meta = "0")
-        {
-            if (_Config.MCItems.Count == 0)
-            {
-                using (StreamReader reader = new StreamReader(_Config.BotPath + "Items.json"))
-                {
-                    string json = reader.ReadToEnd();
-                    JArray a = JArray.Parse(json);
-                    foreach (JObject o in a.Children<JObject>())
-                    {
-                        string GetID = "";
-                        string GetMeta = "";
-                        string GetName = "";
-                        string GetText = "";
-                        foreach (JProperty p in o.Properties())
-                        {
-                            if (p.Name == "type")
-                            {
-                                GetID = (string)p.Value;
-                            }
-                            if (p.Name == "meta")
-                            {
-                                GetMeta = (string)p.Value;
-                            }
-                            if (p.Name == "name")
-                            {
-                                GetName = (string)p.Value;
-                            }
-                            if (p.Name == "text_type")
-                            {
-                                GetText = (string)p.Value;
-                            }
-                        }
-                        _Item ThisItem = new _Item()
-                        {
-                            ID = GetID,
-                            Meta = GetMeta,
-                            Name = GetName,
-                            Text = GetText
-                        };
-                        _Config.MCItems.Add(ThisItem);
-                    }
-                }
-            }
-            if (ID.Contains(":"))
-            {
-                string[] Split = ID.Split(':');
-                ID = Split.First();
-                Meta = Split.Last();
-            }
-            _Item Item = _Config.MCItems.Find(x => x.ID == ID & x.Meta == Meta);
-            if (Item == null)
-            {
-                Item = _Config.MCItems.Find(x => x.Name.ToLower() == ID.ToLower());
-            }
-            if (Item == null)
-            {
-                await ReplyAsync("Cannot find item ID");
-                return;
-            }
-            var embed = new EmbedBuilder()
-            {
-                Description = $"{Item.ID}:{Item.Meta} | {Item.Name}",
-                ThumbnailUrl = "http://lolis.ml/mcitems/" + ID + "-" + Meta + ".png",
-                Color = Bot.Utils.DiscordUtils.GetRoleColor(Context.Channel as ITextChannel),
-                Footer = new EmbedFooterBuilder()
-                { Text = $"/give {Context.User.Username} {Item.Text}" }
-            };
-            await ReplyAsync("", false, embed);
-        }
-
-        [Command("mob"), Remarks("mob (Mob Name)"), Summary("Mob/Monster info")]
-        [Alias("mobs")]
-        public async Task Mob([Remainder]string Name = "")
-        {
-            if (Name != "")
-            {
-                if (Name.ToLower() == "herobrine")
-                {
-                    var embedh = new EmbedBuilder()
-                    {
-                        Title = "Herobrine",
-                        Description = "Always watching you...",
-                        ThumbnailUrl = "https://lh3.googleusercontent.com/AQ5S9Xj1z6LBbNis2BdUHM-mQbDrkvbrrlx5rTIxCPc-SwdITwjkJP370gZxNpjG92ND8wImuMuLyKnKi7te7w",
-                        Footer = new EmbedFooterBuilder()
-                        {
-                            Text = "Hey you found a secret command :D"
-                        },
-                        Color = DiscordUtils.GetRoleColor(Context.Channel as ITextChannel)
-                    };
-                    await ReplyAsync("", false, embedh);
-                    return;
-                }
-                if (Name.ToLower() == "giant")
-                {
-                    _Mob Giant = _Config.MCMobs.Find(x => x.Name == "Giant");
-                    var embed = new EmbedBuilder()
-                    {
-                        Title = $"{Giant.ID} | {Giant.Name}",
-                        ThumbnailUrl = Giant.PicUrl,
-                        Description = Giant.Note,
-                        Color = DiscordUtils.GetRoleColor(Context.Channel as ITextChannel),
-                        Footer = new EmbedFooterBuilder()
-                        {
-                            Text = "Hey you found a secret command :D"
-                        }
-                    };
-                    embed.AddInlineField("Stats", $"**Health:** {Giant.Health} :heart:" + Environment.NewLine + "**Attack** :crossed_swords:" + Environment.NewLine + $"**Easy:** {Giant.AttackEasy}" + Environment.NewLine + $"**Normal:** {Giant.AttackNormal}" + Environment.NewLine + $"**Hard:** {Giant.AttackHard}");
-                    embed.AddInlineField("Info", $"**Height:** {Giant.Height} blocks" + Environment.NewLine + $"**Width:** {Giant.Width} blocks" + Environment.NewLine + $"**Version:** {Giant.Version}" + Environment.NewLine + $"**Type:** {Giant.Type}");
-                    await ReplyAsync("", false, embed);
-                    return;
-                }
-                _Mob Mob = _Config.MCMobs.Find(x => x.Name.ToLower() == Name.ToLower().Replace(" ", ""));
-                if (Mob != null)
-                {
-                    var embed = new EmbedBuilder()
-                    {
-                        Title = $"{Mob.ID} | {Mob.Name}",
-                        Description = Mob.Note,
-                        ThumbnailUrl = Mob.PicUrl,
-                        Color = DiscordUtils.GetRoleColor(Context.Channel as ITextChannel)
-                    };
-                    string Height = Mob.Height + " blocks";
-                    string Width = Mob.Width + " blocks";
-                    if (Mob.Height == "Rip")
-                    {
-                        Height = "Unknown";
-                    }
-                    if (Mob.Width == "Rip")
-                    {
-                        Width = "Unknown";
-                    }
-                    if (Mob.AttackEasy == "")
-                    {
-                        embed.AddInlineField("Stats", $"**Health:** {Mob.Health} :heart:" + Environment.NewLine + $"**Type:** {Mob.Type}");
-                        embed.AddInlineField("Info", $"**Height:** {Height}" + Environment.NewLine + $"**Width:** {Width}" + Environment.NewLine + $"**Version:** {Mob.Version}");
-                    }
-                    else
-                    {
-                        embed.AddInlineField("Stats", $"**Health:** {Mob.Health} :heart:" + Environment.NewLine + "**Attack** :crossed_swords:" + Environment.NewLine + $"**Easy:** {Mob.AttackEasy}" + Environment.NewLine + $"**Normal:** {Mob.AttackNormal}" + Environment.NewLine + $"**Hard:** {Mob.AttackHard}");
-                        embed.AddInlineField("Info", $"**Height:** {Height}" + Environment.NewLine + $"**Width:** {Width}" + Environment.NewLine + $"**Version:** {Mob.Version}" + Environment.NewLine + $"**Type:** {Mob.Type}");
-                    }
-                    await ReplyAsync("", false, embed);
-                }
-                else
-                {
-                    await ReplyAsync("Could not find mob");
-                }
-            }
-            else
-            {
-                List<string> Passive = new List<string>();
-                List<string> Tameable = new List<string>();
-                List<string> Neutral = new List<string>();
-                List<string> Hostile = new List<string>();
-                List<string> Boss = new List<string>();
-                foreach (var i in _Config.MCMobs)
-                {
-                    if (i.Type == _MobType.Passive)
-                    {
-                        Passive.Add($"<:{i.Name}:{i.EmojiID}>");
-                    } else if (i.Type == _MobType.Tameable)
-                    {
-                        Tameable.Add($"<:{i.Name}:{i.EmojiID}>");
-                    } else if (i.Type == _MobType.Neutral)
-                    {
-                        Neutral.Add($"<:{i.Name}:{i.EmojiID}>");
-                    } else if (i.Type == _MobType.Hostile)
-                    {
-                        Hostile.Add($"<:{i.Name}:{i.EmojiID}>");
-                    } else if (i.Type == _MobType.Boss)
-                    {
-                        Boss.Add($"<:{i.Name}:{i.EmojiID}>");
-                    }
-                }
-
-                var embed = new EmbedBuilder()
-                {
-                    Description = "Get more info with mc/mob (Mob Name) | mc/mob Bat"
-                };
-                embed.AddInlineField("Passive", string.Join(" ", Passive));
-                embed.AddInlineField("Tameable", string.Join(" ", Tameable));
-                embed.AddInlineField("Neutral", string.Join(" ", Neutral));
-                embed.AddInlineField("Hostile", string.Join(" ", Hostile));
-                embed.AddInlineField("Boss", string.Join(" ", Boss));
-
-                await ReplyAsync("", false, embed);
-            }
-        }
-
         [Command("uuid"), Remarks("uuid (Player)"), Summary("Player UUID")]
         public async Task Uuid([Remainder]string Name)
         {
             UuidAtTimeResponse uuid = new UuidAtTime(Name, DateTime.Now).PerformRequest().Result;
             if (uuid.IsSuccess)
             {
-                await ReplyAsync($"UUID for `{Name}` > `{uuid.Uuid.Value}`");
+                var embed = new EmbedBuilder()
+                {
+                    Title = $"UUID | {Name}",
+                    Color = DiscordUtils.GetRoleColor(Context.Channel as ITextChannel),
+                    Description = uuid.Uuid.Value
+                };
+                await ReplyAsync("", false, embed);
             }
             else
             {
@@ -388,42 +211,66 @@ namespace Bot.Commands
                     }
                 }
             }
+            var ErrorEmbed = new EmbedBuilder()
+            {
+                Description = "<:error:350172479936921611> IP is invalid"
+            };
             try
             {
                 Ping PingTest = new Ping();
                 PingReply PingReply = PingTest.Send(IP);
                 if (PingReply.Status != IPStatus.Success)
                 {
-                    await ReplyAsync("IP is invalid");
+                   
+                    await ReplyAsync("", false, ErrorEmbed);
                     return;
                 }
+                
             }
             catch (PingException)
             {
-                await ReplyAsync("IP is invalid");
+                await ReplyAsync("", false, ErrorEmbed);
                 return;
             }
             MineStat Ping = new MineStat(IP, Port);
             if (Ping.ServerUp)
             {
-                var embed = new EmbedBuilder()
+                if (Ping.CurrentPlayers == "")
                 {
-                    Title = $"[{Ping.Version}] {IP}:{Port}",
-                    Color = new Color(0,200, 0),
-                    Description = $"Players {Ping.CurrentPlayers}/{Ping.MaximumPlayers}",
-                    Footer = new EmbedFooterBuilder()
+                    var embed = new EmbedBuilder()
                     {
-                        Text = Ping.Motd
+                        Title = $"[{Ping.Version}] {IP}:{Port}",
+                        Description = "Server is loading!",
+                        Color = new Color(0, 191, 255),
+
+                    };
+                    await ReplyAsync("", false, embed);
+                }
+                else
+                {
+                    var embed = new EmbedBuilder()
+                    {
+                        Title = $"[{Ping.Version}] {IP}:{Port}",
+                        Color = new Color(0, 200, 0),
+                        Description = $"Players {Ping.CurrentPlayers}/{Ping.MaximumPlayers}",
+                        Footer = new EmbedFooterBuilder()
+                        {
+                            Text = Ping.Motd.Replace("§a", "").Replace("§1", "").Replace("§2", "").Replace("§3", "").Replace("§4", "").Replace("§5", "").Replace("§6", "").Replace("§7", "").Replace("§8", "").Replace("§9", "").Replace("§b", "").Replace("§c", "").Replace("§d", "").Replace("§e", "").Replace("§f", "")
+                        }
+                    };
+                    if (Ping.Version.Contains("BungeeCord"))
+                    {
+                        embed.WithDescription(embed.Description + Environment.NewLine + "Servers running with BungeeCord will not get the right player count for a single server");
                     }
-                };
-                await ReplyAsync("", false, embed);
+                    await ReplyAsync("", false, embed);
+                }
             }
             else
             {
                 var embed = new EmbedBuilder()
                 {
-                    Description = "Server is offline",
-                    Color = new Color(200, 0, 0)
+                    Description = "<:warning:350172481757118478> Server is offline",
+                    Color = new Color(255, 165, 0)
                 };
                 await ReplyAsync("", false, embed);
             }
@@ -447,23 +294,28 @@ namespace Bot.Commands
             }
             if (Guild.Servers.Count == 0)
             {
-                await ReplyAsync("This guild has no servers listed :(" + Environment.NewLine + "Guild owner should use `mc/addserver`");
+                await ReplyAsync("This guild has no servers listed :(" + Environment.NewLine + "Guild administrators should use `mc/admin`");
                 return;
             }
             List<string> Servers = new List<string>();
             foreach (var i in Guild.Servers)
             {
-                Servers.Add($"{i.Tag} | `{i.Ip}` | {i.Name}");
+                Servers.Add($"<{i.Tag} {i.Ip} = {i.Name}>");
+            }
+            string Name = Context.Guild.Name;
+            if (Guild.CommunityName != "")
+            {
+                Name = Guild.CommunityName;
             }
             var embed = new EmbedBuilder()
             {
                 Author = new EmbedAuthorBuilder()
                 {
-                    Name = $"{Context.Guild.Name} Servers",
+                    Name = $"{Name} Servers",
                     IconUrl = Context.Guild.IconUrl
                 },
                 Color = Bot.Utils.DiscordUtils.GetRoleColor(Context.Channel as ITextChannel),
-                Description = string.Join(Environment.NewLine, Servers)
+                Description = "```md" + Environment.NewLine + string.Join(Environment.NewLine, Servers) + "```"
             };
             await ReplyAsync("", false, embed);
         }
@@ -571,15 +423,15 @@ namespace Bot.Commands
                     {
                         if (entry.ChangedToAt.HasValue)
                         {
-                            Names.Add($"{entry.Name} ({entry.ChangedToAt})");
+                            Names.Add($"[ {entry.Name} ]( {entry.ChangedToAt.Value.Day}/{entry.ChangedToAt.Value.Month}/{entry.ChangedToAt.Value.Year} )");
                         }
                         else
                         {
-                            Names.Add($"{entry.Name}");
+                            Names.Add($"[ {entry.Name} ]( First Name )");
                         }
                     }
 
-                    await ReplyAsync(string.Join(Environment.NewLine, Names));
+                    await ReplyAsync("```" + Environment.NewLine + string.Join(Environment.NewLine, Names) + "```");
                 }
                 else
                 {
@@ -620,25 +472,17 @@ namespace Bot.Commands
             }
         }
 
-        [Command("forgecraft")]
-        public async Task Forge()
-        {
-            var embed = new EmbedBuilder()
-            {
-                Description = "Forgecraft is the set of private whitelisted servers for mod developers to gather and beta-test their mods in a private environment. Many YouTubers and live-streamers also gather on the server to interact with the mod developers, help play-test the mods, and create videos to let the general public know what the mod developers are doing." + Environment.NewLine +
-                "[Wiki And Forgecraft Users](http://feed-the-beast.wikia.com/wiki/Forgecraft) | [Wallpaper](http://www.minecraftforum.net/forums/show-your-creation/fan-art/other-fan-art/1582624-forgecraft-wallpaper)",
-                Color = Bot.Utils.DiscordUtils.GetRoleColor(Context.Channel as ITextChannel),
-                Footer = new EmbedFooterBuilder()
-                {
-                    Text = "Hey you found a secret command :D"
-                }
-            };
-            await ReplyAsync("", false, embed);
-        }
+        
 
         [Command("get"), Remarks("get (Text)"), Summary("Get an achievement")]
         public async Task Get([Remainder]string Text)
         {
+            if (Text.Length > 20)
+            {
+                await ReplyAsync("Text cannot be more than 20 letters/numbers");
+                return;
+            }
+
             Random RNG = new Random();
             int Number = RNG.Next(1, 39);
             var embed = new EmbedBuilder()
@@ -649,7 +493,7 @@ namespace Bot.Commands
             await ReplyAsync("", false, embed);
         }
 
-        [Command("skinedit")]
+        [Command("skinedit"), Remarks("skinedit"), Summary("Online skin editor")]
         public async Task Misc()
         {
             var embed = new EmbedBuilder()
@@ -679,65 +523,7 @@ namespace Bot.Commands
             }
         }
 
-        [Command("bukkit")]
-        public async Task Bukkit()
-        {
-            var embed = new EmbedBuilder()
-            {
-                Color = Bot.Utils.DiscordUtils.GetRoleColor(Context.Channel as ITextChannel),
-                Description = "RIP Bukkit you will be missed along with other server solutions.... [Bukkit News](https://bukkit.org/threads/bukkit-its-time-to-say.305106/)",
-                Footer = new EmbedFooterBuilder()
-                {
-                    Text = "Hey you found a secret command :D"
-                }
-            };
-            await ReplyAsync("", false, embed);
-        }
-
-        [Command("direwolf20")]
-        public async Task DW()
-        {
-            var embed = new EmbedBuilder()
-            {
-                Color = Bot.Utils.DiscordUtils.GetRoleColor(Context.Channel as ITextChannel),
-                Description = "Direwolf20 is a popular youtuber known for his lets plays and mod tutorials on modded minecraft. He also plays on a private server called Forgecraft with a bunch of mod developers and other youtubers with his friends Soaryn and Pahimar" + Environment.NewLine + "[Youtube](https://www.youtube.com/channel/UC_ViSsVg_3JUDyLS3E2Un5g) | [Twitch](https://www.twitch.tv/direwolf20) | [Twitter](https://twitter.com/Direwolf20) | [Reddit](https://www.reddit.com/r/DW20/) | [Discord](https://discordapp.com/invite/SQ6wjHg)",
-                Footer = new EmbedFooterBuilder()
-                {
-                    Text = "Hey you found a secret command :D"
-                }
-            };
-            await ReplyAsync("", false, embed);
-        }
-
-        [Command("israphel")]
-        public async Task IS()
-        {
-            var embed = new EmbedBuilder()
-            {
-                Color = Bot.Utils.DiscordUtils.GetRoleColor(Context.Channel as ITextChannel),
-                Description = "The best youtube minecraft series that will never die in our hearts... 2010 - 2012 RIP [Youtube](https://www.youtube.com/playlist?list=PLF60520313D07F366)",
-                Footer = new EmbedFooterBuilder()
-                {
-                    Text = "Hey you found a secret command :D"
-                }
-            };
-            await ReplyAsync("", false, embed);
-        }
         
-        [Command("notch")]
-        public async Task Notch()
-        {
-            var embed = new EmbedBuilder()
-            {
-                Description = "Minecraft was created by Notch aka Markus Persson" + Environment.NewLine + "https://en.wikipedia.org/wiki/Markus_Persson",
-                Color = DiscordUtils.GetRoleColor(Context.Channel as ITextChannel),
-                Footer = new EmbedFooterBuilder()
-                {
-                    Text = "Hey you found a secret command :D"
-                }
-            };
-            await ReplyAsync("", false, embed);
-        }
 
         [Command("admin"), Remarks("admin"), Summary("Guild admin commands")]
         public async Task Admin()
@@ -775,8 +561,169 @@ namespace Bot.Commands
             };
             await ReplyAsync("", false, embed);
         }
-        
+
+        [Command("inviteblahblahlol"), Remarks("invite"), Summary("Get the bot invite")]
+        public async Task InvitePlaceholder()
+        {
+
+        }
+
     }
+    public class Hidden : ModuleBase
+    {
+        [Command("classic")]
+        public async Task Classic()
+        {
+            var embed = new EmbedBuilder()
+            {
+                Title = "Minecraft Classic",
+                Description = "[Wiki](https://minecraft.gamepedia.com/Classic) Minecraft classic was the second phase of developent in 2009 that allowed players to play in the browser using java on the minecraft.net website which was primarly used to build things",
+                Color = DiscordUtils.GetRoleColor(Context.Channel as ITextChannel),
+                Footer = new EmbedFooterBuilder()
+                {
+                    Text = "Hey you found a secret command :D"
+                }
+            };
+            await ReplyAsync("", false, embed);
+        }
+
+        [Command("storymode")]
+        public async Task Storymode()
+        {
+
+        }
+
+        [Command("forgecraft")]
+        public async Task Forge()
+        {
+            var embed = new EmbedBuilder()
+            {
+                Description = "Forgecraft is the set of private whitelisted servers for mod developers to gather and beta-test their mods in a private environment. Many YouTubers and live-streamers also gather on the server to interact with the mod developers, help play-test the mods, and create videos to let the general public know what the mod developers are doing." + Environment.NewLine +
+                "[Wiki And Forgecraft Users](http://feed-the-beast.wikia.com/wiki/Forgecraft) | [Wallpaper](http://www.minecraftforum.net/forums/show-your-creation/fan-art/other-fan-art/1582624-forgecraft-wallpaper)",
+                Color = Bot.Utils.DiscordUtils.GetRoleColor(Context.Channel as ITextChannel),
+                Footer = new EmbedFooterBuilder()
+                {
+                    Text = "Hey you found a secret command :D"
+                }
+            };
+            await ReplyAsync("", false, embed);
+        }
+
+        [Command("forgecraftwallpaper")]
+        public async Task ForgecraftWallpaper()
+        {
+            var embed = new EmbedBuilder()
+            {
+                Author = new EmbedAuthorBuilder()
+                {
+                    Name = "Forgecraft Wallpaper",
+                    Url = "http://www.minecraftforum.net/forums/show-your-creation/fan-art/other-fan-art/1582624-forgecraft-wallpaper"
+                },
+                ImageUrl = "https://dl.dropbox.com/u/25591134/ForgeCraft/ForgeCraft-480x270.jpg",
+                Color = DiscordUtils.GetRoleColor(Context.Channel as ITextChannel),
+                Footer = new EmbedFooterBuilder()
+                {
+                    Text = "Hey you found a secret command :D"
+                }
+            };
+            await ReplyAsync("", false, embed);
+        }
+
+        [Command("bukkit")]
+        public async Task Bukkit()
+        {
+            var embed = new EmbedBuilder()
+            {
+                Color = Bot.Utils.DiscordUtils.GetRoleColor(Context.Channel as ITextChannel),
+                Description = "RIP Bukkit you will be missed along with other server solutions.... [Bukkit News](https://bukkit.org/threads/bukkit-its-time-to-say.305106/)",
+                Footer = new EmbedFooterBuilder()
+                {
+                    Text = "Hey you found a secret command :D"
+                }
+            };
+            await ReplyAsync("", false, embed);
+        }
+
+        [Command("direwolf20")]
+        public async Task DW()
+        {
+            var embed = new EmbedBuilder()
+            {
+                Color = Bot.Utils.DiscordUtils.GetRoleColor(Context.Channel as ITextChannel),
+                Description = "Direwolf20 is a popular youtuber known for his lets plays and mod tutorials on modded minecraft. He also plays on a private server called Forgecraft with a bunch of mod developers and other youtubers with his friends Soaryn and Pahimar" + Environment.NewLine + "[Youtube](https://www.youtube.com/channel/UC_ViSsVg_3JUDyLS3E2Un5g) | [Twitch](https://www.twitch.tv/direwolf20) | [Twitter](https://twitter.com/Direwolf20) | [Reddit](https://www.reddit.com/r/DW20/) | [Discord](https://discordapp.com/invite/SQ6wjHg)",
+                Footer = new EmbedFooterBuilder()
+                {
+                    Text = "Hey you found a secret command :D"
+                }
+            };
+            await ReplyAsync("", false, embed);
+        }
+
+        [Command("herobrine")]
+        public async Task Herobrine()
+        {
+            var embedh = new EmbedBuilder()
+            {
+                Title = "Herobrine",
+                Description = "[Wiki](http://minecraftcreepypasta.wikia.com/wiki/Herobrine) Always watching you...",
+                ThumbnailUrl = "https://lh3.googleusercontent.com/AQ5S9Xj1z6LBbNis2BdUHM-mQbDrkvbrrlx5rTIxCPc-SwdITwjkJP370gZxNpjG92ND8wImuMuLyKnKi7te7w",
+                Footer = new EmbedFooterBuilder()
+                {
+                    Text = "Hey you found a secret command :D"
+                },
+                Color = DiscordUtils.GetRoleColor(Context.Channel as ITextChannel)
+            };
+            await ReplyAsync("", false, embedh);
+        }
+
+        [Command("entity303")]
+        public async Task Entity303()
+        {
+            var embedh = new EmbedBuilder()
+            {
+                Title = "Entity 303",
+                Description = "[Wiki](http://minecraftcreepypasta.wikia.com/wiki/Entity_303) A minecraft creepy pasta of a former Mojang employee who was fired by Notch and now want revenge",
+                ThumbnailUrl = "https://vignette3.wikia.nocookie.net/minecraftcreepypasta/images/4/49/Entity_303.png",
+                Footer = new EmbedFooterBuilder()
+                {
+                    Text = "Hey you found a secret command :D"
+                },
+                Color = DiscordUtils.GetRoleColor(Context.Channel as ITextChannel)
+            };
+            await ReplyAsync("", false, embedh);
+        }
+
+        [Command("israphel")]
+        public async Task IS()
+        {
+            var embed = new EmbedBuilder()
+            {
+                Color = Bot.Utils.DiscordUtils.GetRoleColor(Context.Channel as ITextChannel),
+                Description = "The best youtube minecraft series that will never die in our hearts... 2010 - 2012 RIP [Youtube](https://www.youtube.com/playlist?list=PLF60520313D07F366)",
+                Footer = new EmbedFooterBuilder()
+                {
+                    Text = "Hey you found a secret command :D"
+                }
+            };
+            await ReplyAsync("", false, embed);
+        }
+
+        [Command("notch")]
+        public async Task Notch()
+        {
+            var embed = new EmbedBuilder()
+            {
+                Description = "Minecraft was created by Notch aka Markus Persson" + Environment.NewLine + "https://en.wikipedia.org/wiki/Markus_Persson",
+                Color = DiscordUtils.GetRoleColor(Context.Channel as ITextChannel),
+                Footer = new EmbedFooterBuilder()
+                {
+                    Text = "Hey you found a secret command :D"
+                }
+            };
+            await ReplyAsync("", false, embed);
+        }
+    }
+
     public class GuildAdmin : ModuleBase
     {
         [Command("addserver"), Remarks("addserver"), Summary("Add a MC server to this guild list")]
@@ -968,7 +915,239 @@ namespace Bot.Commands
             await ReplyAsync("<:success:350172481186955267> Community link has been set");
         }
     }
+    public class Wiki : ModuleBase
+    {
+        [Command("item"), Remarks("mc/item (ID/Name)")]
+        [Alias("block")]
+        public async Task Items(string ID = "0", string Meta = "0")
+        {
+            if (_Config.MCItems.Count == 0)
+            {
+                using (StreamReader reader = new StreamReader(_Config.BotPath + "Items.json"))
+                {
+                    string json = reader.ReadToEnd();
+                    JArray a = JArray.Parse(json);
+                    foreach (JObject o in a.Children<JObject>())
+                    {
+                        string GetID = "";
+                        string GetMeta = "";
+                        string GetName = "";
+                        string GetText = "";
+                        foreach (JProperty p in o.Properties())
+                        {
+                            if (p.Name == "type")
+                            {
+                                GetID = (string)p.Value;
+                            }
+                            if (p.Name == "meta")
+                            {
+                                GetMeta = (string)p.Value;
+                            }
+                            if (p.Name == "name")
+                            {
+                                GetName = (string)p.Value;
+                            }
+                            if (p.Name == "text_type")
+                            {
+                                GetText = (string)p.Value;
+                            }
+                        }
+                        _Item ThisItem = new _Item()
+                        {
+                            ID = GetID,
+                            Meta = GetMeta,
+                            Name = GetName,
+                            Text = GetText
+                        };
+                        _Config.MCItems.Add(ThisItem);
+                    }
+                }
+            }
+            if (ID.Contains(":"))
+            {
+                string[] Split = ID.Split(':');
+                ID = Split.First();
+                Meta = Split.Last();
+            }
+            _Item Item = _Config.MCItems.Find(x => x.ID == ID & x.Meta == Meta);
+            if (Item == null)
+            {
+                Item = _Config.MCItems.Find(x => x.Name.ToLower() == ID.ToLower());
+            }
+            if (Item == null)
+            {
+                await ReplyAsync("Cannot find item ID");
+                return;
+            }
+            var embed = new EmbedBuilder()
+            {
+                Description = $"{Item.ID}:{Item.Meta} | {Item.Name}",
+                ThumbnailUrl = "http://lolis.ml/mcitems/" + ID + "-" + Meta + ".png",
+                Color = Bot.Utils.DiscordUtils.GetRoleColor(Context.Channel as ITextChannel),
+                Footer = new EmbedFooterBuilder()
+                { Text = $"/give {Context.User.Username} {Item.Text}" }
+            };
+            await ReplyAsync("", false, embed);
+        }
 
+        [Command("mob"), Remarks("mc/mob (Mob Name)")]
+        [Alias("mobs")]
+        public async Task Mob([Remainder]string Name = "")
+        {
+            if (Name != "")
+            {
+                if (Name.ToLower() == "herobrine")
+                {
+                    var embedh = new EmbedBuilder()
+                    {
+                        Title = "Herobrine",
+                        Description = "[Wiki](http://minecraftcreepypasta.wikia.com/wiki/Herobrine) Always watching you...",
+                        ThumbnailUrl = "https://lh3.googleusercontent.com/AQ5S9Xj1z6LBbNis2BdUHM-mQbDrkvbrrlx5rTIxCPc-SwdITwjkJP370gZxNpjG92ND8wImuMuLyKnKi7te7w",
+                        Footer = new EmbedFooterBuilder()
+                        {
+                            Text = "Hey you found a secret command :D"
+                        },
+                        Color = DiscordUtils.GetRoleColor(Context.Channel as ITextChannel)
+                    };
+                    await ReplyAsync("", false, embedh);
+                    return;
+                }
+                if (Name.ToLower() == "entity303" || Name.ToLower() == "entity 303")
+                {
+                    var embedh = new EmbedBuilder()
+                    {
+                        Title = "Entity 303",
+                        Description = "[Wiki](http://minecraftcreepypasta.wikia.com/wiki/Entity_303) A minecraft creepy pasta of a former Mojang employee who was fired by Notch and now want revenge",
+                        ThumbnailUrl = "https://vignette3.wikia.nocookie.net/minecraftcreepypasta/images/4/49/Entity_303.png",
+                        Footer = new EmbedFooterBuilder()
+                        {
+                            Text = "Hey you found a secret command :D"
+                        },
+                        Color = DiscordUtils.GetRoleColor(Context.Channel as ITextChannel)
+                    };
+                    await ReplyAsync("", false, embedh);
+                    return;
+                }
+                _Mob Mob = _Config.MCMobs.Find(x => x.Name.ToLower() == Name.ToLower().Replace(" ", ""));
+                if (Mob != null)
+                {
+                    var embed = new EmbedBuilder()
+                    {
+                        Title = $"[{Mob.ID}] {Mob.Name}",
+                        Description = $"[Wiki]({Mob.WikiLink}) {Mob.Note}",
+                        ThumbnailUrl = Mob.PicUrl,
+                        Color = DiscordUtils.GetRoleColor(Context.Channel as ITextChannel)
+                    };
+                    if (Mob.Type == _MobType.Secret)
+                    {
+                        embed.WithFooter(new EmbedFooterBuilder() { Text = "Hey you found a secret command :D" });
+                    }
+                    string Height = Mob.Height + " blocks";
+                    string Width = Mob.Width + " blocks";
+                    if (Mob.Height == "Rip")
+                    {
+                        Height = "Unknown";
+                    }
+                    if (Mob.Width == "Rip")
+                    {
+                        Width = "Unknown";
+                    }
+                    if (Mob.AttackEasy == "")
+                    {
+
+                        string PlayerText = "";
+                        if (Mob.Name == "Player")
+                        {
+                            embed.WithTitle("Player");
+                            PlayerText = Environment.NewLine + "**Fist Attack:** 0.5 :heart:";
+                        }
+                        embed.AddInlineField("Stats", $"**Health:** {Mob.Health} :heart:" + Environment.NewLine + $"**Type:** {Mob.Type}" + PlayerText);
+                        embed.AddInlineField("Info", $"**Height:** {Height}" + Environment.NewLine + $"**Width:** {Width}" + Environment.NewLine + $"**Version:** {Mob.Version}");
+                    }
+                    else
+                    {
+                        embed.AddInlineField("Stats", $"**Health:** {Mob.Health} :heart:" + Environment.NewLine + "**Attack** :crossed_swords:" + Environment.NewLine + $"**Easy:** {Mob.AttackEasy}" + Environment.NewLine + $"**Normal:** {Mob.AttackNormal}" + Environment.NewLine + $"**Hard:** {Mob.AttackHard}");
+                        embed.AddInlineField("Info", $"**Height:** {Height}" + Environment.NewLine + $"**Width:** {Width}" + Environment.NewLine + $"**Version:** {Mob.Version}" + Environment.NewLine + $"**Type:** {Mob.Type}");
+                    }
+                    await ReplyAsync("", false, embed);
+                }
+                else
+                {
+                    await ReplyAsync("Could not find mob");
+                }
+            }
+            else
+            {
+                List<string> Passive = new List<string>();
+                List<string> Tameable = new List<string>();
+                List<string> Neutral = new List<string>();
+                List<string> Hostile = new List<string>();
+                List<string> Boss = new List<string>();
+                foreach (var i in _Config.MCMobs)
+                {
+                    if (i.EmojiID != "")
+                    {
+                        if (i.Type == _MobType.Passive)
+                        {
+                            Passive.Add($"<:{i.Name}:{i.EmojiID}>");
+                        }
+                        else if (i.Type == _MobType.Tameable)
+                        {
+                            Tameable.Add($"<:{i.Name}:{i.EmojiID}>");
+                        }
+                        else if (i.Type == _MobType.Neutral)
+                        {
+                            Neutral.Add($"<:{i.Name}:{i.EmojiID}>");
+                        }
+                        else if (i.Type == _MobType.Hostile)
+                        {
+                            Hostile.Add($"<:{i.Name}:{i.EmojiID}>");
+                        }
+                        else if (i.Type == _MobType.Boss)
+                        {
+                            Boss.Add($"<:{i.Name}:{i.EmojiID}>");
+                        }
+                    }
+                }
+
+                var embed = new EmbedBuilder()
+                {
+                    Description = "Get more info with mc/mob (Mob Name) | mc/mob Bat"
+                };
+                embed.AddInlineField("Passive", string.Join(" ", Passive));
+                embed.AddInlineField("Tameable", string.Join(" ", Tameable));
+                embed.AddInlineField("Neutral", string.Join(" ", Neutral));
+                embed.AddInlineField("Hostile", string.Join(" ", Hostile));
+                embed.AddInlineField("Boss", string.Join(" ", Boss));
+
+                await ReplyAsync("", false, embed);
+            }
+        }
+
+        [Command("potion"), Remarks("~~mc/potion~~")]
+        public async Task Potion()
+        {
+            await ReplyAsync("Command coming soon please wait");
+        }
+
+        [Command("music"), Remarks("~~mc/music~~")]
+        public async Task Music()
+        {
+            await ReplyAsync("I wonder what this command is 0_o");
+        }
+
+        [Command("enchant"), Remarks("~~mc/enchant~~")]
+        public async Task Enchant()
+        {
+            await ReplyAsync("Command coming soon please wait");
+        }
+
+        [Command("biome"), Remarks("~~mc/biome~~")]
+        public async Task Biome()
+        {
+            await ReplyAsync("Command coming soon please wait");
+        }
+    }
     public class Quiz : InteractiveModuleBase
     {
         [Command("quiz")]
@@ -980,7 +1159,13 @@ namespace Bot.Commands
                 int Num = Ran.Next(1, _Config.MCQuiz.Count);
                 _Quiz Quiz = _Config.MCQuiz[Num - 1];
                 string User = $"{Context.User.Username}#{Context.User.Discriminator}";
-                await ReplyAsync(Quiz.Question);
+                var qembed = new EmbedBuilder()
+                {
+                    Title = $"Question - {User}",
+                    Description = Quiz.Question,
+                    Color = new Color(135, 206, 235)
+                };
+                await ReplyAsync("", false, qembed);
                 var response = await WaitForMessage(Context.Message.Author, Context.Channel, new TimeSpan(0, 0, 10));
                 if (response == null)
                 {
@@ -988,24 +1173,33 @@ namespace Bot.Commands
                     {
                         Title = "Minecraft Quiz",
                         Description = $"{User} you ran out of time :(",
-                        Color = DiscordUtils.GetRoleColor(Context.Channel as ITextChannel)
+                        Color = new Color(200, 0, 0)
                     };
                     await ReplyAsync("", false, embed);
                 }
                 else
                 {
-                    string YesNo = $"<:error:350172479936921611> Incorrect {User}";
                     if (Quiz.Answer.Contains(response.Content.ToLower()))
                     {
-                        YesNo = $"<:success:350172481186955267> Correct! {User}";
+                        var embed = new EmbedBuilder()
+                        {
+                            Title = "Minecraft Quiz",
+                            Description = $"<:success:350172481186955267> Correct! {User}" + Environment.NewLine + Quiz.Note,
+                            Color = new Color(0,200,0)
+                        };
+                        await ReplyAsync("", false, embed);
                     }
-                    var embed = new EmbedBuilder()
+                    else
                     {
-                        Title = "Minecraft Quiz",
-                        Description = YesNo + Environment.NewLine + Quiz.Note,
-                        Color = DiscordUtils.GetRoleColor(Context.Channel as ITextChannel)
-                    };
-                    await ReplyAsync("", false, embed);
+                        var embed = new EmbedBuilder()
+                        {
+                            Title = "Minecraft Quiz",
+                            Description = $"<:error:350172479936921611> Incorrect {User}",
+                            Color = new Color(200, 0, 0)
+                        };
+                        await ReplyAsync("", false, embed);
+                    }
+                    
                 }
             }
             else
@@ -1018,7 +1212,7 @@ namespace Bot.Commands
                     {
                         Text = $"Questions Available {_Config.MCQuiz.Count()}"
                     },
-                    Color = DiscordUtils.GetRoleColor(Context.Channel as ITextChannel)
+                    Color = new Color(135, 206, 235)
                 };
                 await ReplyAsync("", false, embed);
             }
