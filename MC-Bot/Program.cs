@@ -847,7 +847,7 @@ namespace Bot.Commands
             };
             if (Context.Guild == null)
             {
-                await Context.Channel.SendMessageAsync("", false, embed);
+                await Context.Channel.SendMessageAsync("", false, embed.Build());
             }
             else
             {
@@ -859,7 +859,7 @@ namespace Bot.Commands
                 else
                 {
 
-                    await Context.Channel.SendMessageAsync("", false, embed);
+                    await Context.Channel.SendMessageAsync("", false, embed.Build());
                 }
             }
         }
@@ -885,7 +885,7 @@ namespace Bot.Commands
             };
             if (Context.Guild == null)
             {
-                await Context.Channel.SendMessageAsync("", false, embed);
+                await Context.Channel.SendMessageAsync("", false, embed.Build());
             }
             else
             {
@@ -897,7 +897,7 @@ namespace Bot.Commands
                 else
                 {
 
-                    await Context.Channel.SendMessageAsync("", false, embed);
+                    await Context.Channel.SendMessageAsync("", false, embed.Build());
                 }
             }
         }
@@ -1008,7 +1008,7 @@ namespace Bot.Commands
                     },
                     Color = DiscordUtils.GetRoleColor(Context.Channel as ITextChannel)
                 };
-                await ReplyAsync("", false, embed);
+                await ReplyAsync("", false, embed.Build());
             }
 
             [Command("leavehere"), Remarks("leavehere")]
@@ -1285,7 +1285,7 @@ namespace Bot.Commands
                         Description = Message,
                         Color = DiscordUtils.GetRoleColor(Context.Channel as ITextChannel)
                     };
-                    await ReplyAsync("", false, embed);
+                    await ReplyAsync("", false, embed.Build());
                 }
                 else
                 {
@@ -1317,7 +1317,7 @@ namespace Bot.Commands
                             Description = Message,
                             Color = DiscordUtils.GetRoleColor(Chan as ITextChannel)
                         };
-                        await Chan.SendMessageAsync("", false, embed);
+                        await Chan.SendMessageAsync("", false, embed.Build());
                     }
                     else
                     {
@@ -1361,7 +1361,7 @@ namespace Bot.Commands
                             Description = Message,
                             Color = DiscordUtils.GetRoleColor(Chan as ITextChannel)
                         };
-                        await Chan.SendMessageAsync("", false, embed);
+                        await Chan.SendMessageAsync("", false, embed.Build());
                     }
                     else
                     {
@@ -1410,7 +1410,7 @@ namespace Bot.Commands
                     },
                     Color = DiscordUtils.GetRoleColor(Context.Channel as ITextChannel)
                 };
-                await ReplyAsync("", false, embed).ConfigureAwait(false);
+                await ReplyAsync("", false, embed.Build()).ConfigureAwait(false);
 
             }
 
@@ -1449,7 +1449,7 @@ namespace Bot.Commands
                 else
                 {
 
-                    await Context.Channel.SendMessageAsync("", false, embed);
+                    await Context.Channel.SendMessageAsync("", false, embed.Build());
                 }
 
             }

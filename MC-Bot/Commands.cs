@@ -19,11 +19,16 @@ using System.IO;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Discord.Addons.InteractiveCommands;
+using jsimple.util.function;
+using Bot.Services;
 
 namespace Bot.Commands
 {
+    
     public class Main : ModuleBase
     {
+        
+
         private CommandService _Commands;
         public Main(CommandService Commands)
         {
@@ -113,12 +118,12 @@ namespace Bot.Commands
             embed.AddField("Commands", "```md" + Environment.NewLine + string.Join(Environment.NewLine, Commands) + "```");
             embed.AddField("Links", "[MultiMC](https://multimc.org/) MultiMC allows you to manage and launch multiple versions with easy forge/mods installation" + Environment.NewLine + "[Ftb Legacy](http://ftb.cursecdn.com/FTB2/launcher/FTB_Launcher.exe) | [Technic Launcher](https://www.technicpack.net/download) | [AT Launcher](https://www.atlauncher.com/downloads)");
 
-            ITextChannel TE = await Context.Guild.GetTextChannelAsync(351033810961301506);
-            var Delete = await TE.GetMessageAsync(352287809949794317);
-            IUserMessage Update = await TE.GetMessageAsync(351404116527808512) as IUserMessage;
-            await Delete.DeleteAsync();
-            await Update.ModifyAsync(x => { x.Embed = embed.Build(); });
-            //await ReplyAsync("", false, embed);
+            //ITextChannel TE = await Context.Guild.GetTextChannelAsync(351033810961301506);
+            //var Delete = await TE.GetMessageAsync(352287809949794317);
+            //IUserMessage Update = await TE.GetMessageAsync(351404116527808512) as IUserMessage;
+            //await Delete.DeleteAsync();
+            //await Update.ModifyAsync(x => { x.Embed = embed.Build(); });
+            await ReplyAsync("", false, embed.Build());
         }
 
         [Command("quiztestblahlol"),Remarks("quiz"), Summary("Minecraft quiz :D")]
@@ -145,7 +150,7 @@ namespace Bot.Commands
                 Title = "Minecraft Color Codes",
                 ImageUrl = "https://lolis.ml/img-1o4ubn88Z474.png"
             };
-            await ReplyAsync("", false, embed);
+            await ReplyAsync("", false, embed.Build());
         }
 
         [Command("uuid"), Remarks("uuid (Player)"), Summary("Player UUID")]
@@ -160,7 +165,7 @@ namespace Bot.Commands
                     Color = DiscordUtils.GetRoleColor(Context.Channel as ITextChannel),
                     Description = uuid.Uuid.Value
                 };
-                await ReplyAsync("", false, embed);
+                await ReplyAsync("", false, embed.Build());
             }
             else
             {
@@ -172,6 +177,8 @@ namespace Bot.Commands
         [Command("ping"), Priority(0), Remarks("ping (IP)"), Summary("Ping a server")]
         public async Task Ping(string IP = "", ushort Port = 25565)
         {
+
+            
             if (IP == "" || IP.Contains("("))
             {
                 await ReplyAsync("Enter an IP | `mc/ping my.server.net` | `mc/ping other.server.net:25566` | `mc/ping this.server.net 25567`");
@@ -187,6 +194,18 @@ namespace Bot.Commands
                     return;
                 case "0.0.0.0":
                     await ReplyAsync("Not enough zeros?");
+                    return;
+                case "google.com":
+                    await ReplyAsync("This is for minecraft servers not google :(");
+                    return;
+                case "youtube.com":
+                    await ReplyAsync("This is for minecraft servers not youtube :(");
+                    return;
+                case "blazeweb.ml":
+                    await ReplyAsync("Trying to ping my own website :D");
+                    return;
+                case "mc.hypixel.net":
+                    await ReplyAsync("Hypixel network has blocked the ping sorry :(");
                     return;
             }
             if (IP.Contains(":"))
@@ -208,73 +227,139 @@ namespace Bot.Commands
                         {
                             IP = Server.Ip; Port = Server.Port;
                         }
+                        else
+                        {
+                            var ValidEmbed = new EmbedBuilder()
+                            {
+                                Description = "<:error:350172479936921611> This is not a valid ip",
+                                Color = new Color(200, 0,0)
+                            };
+                            await ReplyAsync("", false, ValidEmbed.Build());
+                            return;
+                        }
                     }
                 }
             }
-            var ErrorEmbed = new EmbedBuilder()
+            else
             {
-                Description = "<:error:350172479936921611> IP is invalid"
-            };
-            try
-            {
-                Ping PingTest = new Ping();
-                PingReply PingReply = PingTest.Send(IP);
-                if (PingReply.Status != IPStatus.Success)
+                if (!IP.Contains("."))
                 {
-                   
-                    await ReplyAsync("", false, ErrorEmbed);
+                    var ValidEmbed = new EmbedBuilder()
+                    {
+                        Description = "<:error:350172479936921611> This is not a valid ip",
+                        Color = new Color(200, 0, 0)
+                    };
+                    await ReplyAsync("", false, ValidEmbed.Build());
                     return;
                 }
-                
             }
-            catch (PingException)
+            Cooldown Cooldown;
+            _Config.PingCooldown.TryGetValue(Context.User.Id, out Cooldown);
+            if (Cooldown == null)
             {
-                await ReplyAsync("", false, ErrorEmbed);
-                return;
+                _Config.PingCooldown.Add(Context.User.Id, new Cooldown() { Count = 0, Date = DateTime.Now });
+                _Config.PingCooldown.TryGetValue(Context.User.Id, out Cooldown);
             }
-            MineStat Ping = new MineStat(IP, Port);
-            if (Ping.ServerUp)
+            if (Cooldown.Count == 3)
             {
-                if (Ping.CurrentPlayers == "")
+                if (DateTime.Now.Hour == Cooldown.Date.Hour)
                 {
-                    var embed = new EmbedBuilder()
+                    if ((DateTime.Now - Cooldown.Date).TotalMinutes >= 3)
                     {
-                        Title = $"[{Ping.Version}] {IP}:{Port}",
-                        Description = "Server is loading!",
-                        Color = new Color(0, 191, 255),
+                        Cooldown.Date = DateTime.Now;
+                        Cooldown.Count = 1;
+                    }
+                    else
+                    {
+                        await ReplyAsync("You are on cooldown for 2 mins!");
+                        return;
+                    }
+                }
+                else
+                {
+                    Cooldown.Date = DateTime.Now;
+                    Cooldown.Count = 1;
+                }
+            }
+            else
+            {
+                Cooldown.Date = DateTime.Now;
+                Cooldown.Count++;
+            }
+            Console.WriteLine(Cooldown.Date);
+            Console.WriteLine(DateTime.Now);
+            var Info = await ReplyAsync($"Please wait while i ping `{IP}`");
+            var ErrorEmbed = new EmbedBuilder()
+            {
+                Description = "<:error:350172479936921611> IP is invalid",
+                Color = new Color(200, 0, 0)
+            };
+            await Task.Run(async () =>
+            {
+                    try
+                    {
+                        Ping PingTest = new Ping();
+                        PingReply PingReply = PingTest.Send(IP);
+                        if (PingReply.Status != IPStatus.Success)
+                        {
+                            await Info.DeleteAsync();
+                            await ReplyAsync("", false, ErrorEmbed.Build());
+                            return;
+                        }
 
-                    };
-                    await ReplyAsync("", false, embed);
+                    }
+                    catch (PingException)
+                    {
+                        await Info.DeleteAsync();
+                        await ReplyAsync("", false, ErrorEmbed.Build());
+                        return;
+                    }
+                MineStat Ping = new MineStat(IP, Port);
+                if (Ping.ServerUp)
+                {
+                    if (Ping.CurrentPlayers == "")
+                    {
+                        var embed = new EmbedBuilder()
+                        {
+                            Title = $"[{Ping.Version}] {IP}:{Port}",
+                            Description = "Server is loading!",
+                            Color = new Color(0, 191, 255),
+
+                        };
+                        await Info.DeleteAsync();
+                        await ReplyAsync("", false, embed.Build());
+                    }
+                    else
+                    {
+                        var embed = new EmbedBuilder()
+                        {
+                            Title = $"[{Ping.Version}] {IP}:{Port}",
+                            Color = new Color(0, 200, 0),
+                            Description = $"Players {Ping.CurrentPlayers}/{Ping.MaximumPlayers}",
+                            Footer = new EmbedFooterBuilder()
+                            {
+                                Text = Ping.Motd.Replace("§a", "").Replace("§1", "").Replace("§2", "").Replace("§3", "").Replace("§4", "").Replace("§5", "").Replace("§6", "").Replace("§7", "").Replace("§8", "").Replace("§9", "").Replace("§b", "").Replace("§c", "").Replace("§d", "").Replace("§e", "").Replace("§f", "").Replace("§l", "")
+                            }
+                        };
+                        if (Ping.Version.Contains("BungeeCord"))
+                        {
+                            embed.WithDescription(embed.Description + Environment.NewLine + "Servers running with BungeeCord will not get the right player count for a single server");
+                        }
+                        await Info.DeleteAsync();
+                        await ReplyAsync("", false, embed.Build());
+                    }
                 }
                 else
                 {
                     var embed = new EmbedBuilder()
                     {
-                        Title = $"[{Ping.Version}] {IP}:{Port}",
-                        Color = new Color(0, 200, 0),
-                        Description = $"Players {Ping.CurrentPlayers}/{Ping.MaximumPlayers}",
-                        Footer = new EmbedFooterBuilder()
-                        {
-                            Text = Ping.Motd.Replace("§a", "").Replace("§1", "").Replace("§2", "").Replace("§3", "").Replace("§4", "").Replace("§5", "").Replace("§6", "").Replace("§7", "").Replace("§8", "").Replace("§9", "").Replace("§b", "").Replace("§c", "").Replace("§d", "").Replace("§e", "").Replace("§f", "")
-                        }
+                        Description = "<:warning:350172481757118478> Server is offline",
+                        Color = new Color(255, 165, 0)
                     };
-                    if (Ping.Version.Contains("BungeeCord"))
-                    {
-                        embed.WithDescription(embed.Description + Environment.NewLine + "Servers running with BungeeCord will not get the right player count for a single server");
-                    }
-                    await ReplyAsync("", false, embed);
+                    await Info.DeleteAsync();
+                    await ReplyAsync("", false, embed.Build());
                 }
-            }
-            else
-            {
-                var embed = new EmbedBuilder()
-                {
-                    Description = "<:warning:350172481757118478> Server is offline",
-                    Color = new Color(255, 165, 0)
-                };
-                await ReplyAsync("", false, embed);
-            }
-            
+            });
         }
 
         [Command("list"), Remarks("list"), Summary("List guild MC servers")]
@@ -317,7 +402,7 @@ namespace Bot.Commands
                 Color = Bot.Utils.DiscordUtils.GetRoleColor(Context.Channel as ITextChannel),
                 Description = "```md" + Environment.NewLine + string.Join(Environment.NewLine, Servers) + "```"
             };
-            await ReplyAsync("", false, embed);
+            await ReplyAsync("", false, embed.Build());
         }
 
         [Command("info"), Remarks("info"), Summary("MC sales info")]
@@ -340,7 +425,7 @@ namespace Bot.Commands
                         Text = "Stats may be slightly off due to caching"
                     }
                 };
-                await ReplyAsync("", false, embed);
+                await ReplyAsync("", false, embed.Build());
             }
             else
             {
@@ -401,7 +486,7 @@ namespace Bot.Commands
                 Color = Bot.Utils.DiscordUtils.GetRoleColor(Context.Channel as ITextChannel),
                 ImageUrl = Url
             };
-            await ReplyAsync("", false, embed);
+            await ReplyAsync("", false, embed.Build());
         }
 
         [Command("names"), Remarks("names (Player)"), Summary("MC account name history")]
@@ -423,7 +508,7 @@ namespace Bot.Commands
                     {
                         if (entry.ChangedToAt.HasValue)
                         {
-                            Names.Add($"[ {entry.Name} ]( {entry.ChangedToAt.Value.Day}/{entry.ChangedToAt.Value.Month}/{entry.ChangedToAt.Value.Year} )");
+                            Names.Add($"[ {entry.Name} ][ {entry.ChangedToAt.Value.Day}/{entry.ChangedToAt.Value.Month}/{entry.ChangedToAt.Value.Year} ]");
                         }
                         else
                         {
@@ -464,7 +549,7 @@ namespace Bot.Commands
                 {
                     embed.Color = new Color(255, 165, 0);
                 }
-                await ReplyAsync("", false, embed);
+                await ReplyAsync("", false, embed.Build());
             }
             else
             {
@@ -472,7 +557,18 @@ namespace Bot.Commands
             }
         }
 
-        
+        [Command("music"), Remarks("music"), Summary("Play some music")]
+        public async Task Music()
+        {
+            
+            var embed = new EmbedBuilder()
+            {
+            };
+            embed.AddField("Commands", "```md" + Environment.NewLine + "[ mc/music play (ID) ][ Play a song by ID ]" + Environment.NewLine + "[ mc/music stop ][ Stop the current playing music ]" + Environment.NewLine + "[ mc/music leave ][ Stop current song and leave the voice channel ]```");
+            embed.AddField("Playlist", "```md" + Environment.NewLine + "<1 Mine Diamonds>" + Environment.NewLine + "<2 Screw the nether - Yogscast>" + Environment.NewLine + "<3 Mincraft Style - Captain Sparklez>```");
+            //await ReplyAsync("", false, embed.Build());
+            await ReplyAsync("Coming Soon");
+        }
 
         [Command("get"), Remarks("get (Text)"), Summary("Get an achievement")]
         public async Task Get([Remainder]string Text)
@@ -490,7 +586,7 @@ namespace Bot.Commands
                 Color = Bot.Utils.DiscordUtils.GetRoleColor(Context.Channel as ITextChannel),
                 ImageUrl = "https://www.minecraftskinstealer.com/achievement/a.php?i=" + Number.ToString() + "&h=Achievement+Get!&t=" + Text.Replace(" ", "+")
             };
-            await ReplyAsync("", false, embed);
+            await ReplyAsync("", false, embed.Build());
         }
 
         [Command("skinedit"), Remarks("skinedit"), Summary("Online skin editor")]
@@ -501,7 +597,7 @@ namespace Bot.Commands
                 Color = Bot.Utils.DiscordUtils.GetRoleColor(Context.Channel as ITextChannel),
                 Description = "[Online Skin Editor](https://www.minecraftskinstealer.com/skineditor.php)"
             };
-            await ReplyAsync("", false, embed);
+            await ReplyAsync("", false, embed.Build());
         }
 
         [Command("minime"), Remarks("minime (Player)"), Summary("Minify player skin")]
@@ -515,7 +611,7 @@ namespace Bot.Commands
                     Color = Bot.Utils.DiscordUtils.GetRoleColor(Context.Channel as ITextChannel),
                     ImageUrl = "https://avatar.yourminecraftservers.com/avatar/trnsp/not_found/tall/128/" + Player + ".png"
                 };
-                await ReplyAsync("", false, embed);
+                await ReplyAsync("", false, embed.Build());
             }
             else
             {
@@ -559,7 +655,7 @@ namespace Bot.Commands
                 { Text = ""}
                 
             };
-            await ReplyAsync("", false, embed);
+            await ReplyAsync("", false, embed.Build());
         }
 
         [Command("inviteblahblahlol"), Remarks("invite"), Summary("Get the bot invite")]
@@ -569,6 +665,119 @@ namespace Bot.Commands
         }
 
     }
+    public class Music : ModuleBase
+    {
+        private MusicService _MusicService;
+        public Music(MusicService MusicService)
+        {
+            _MusicService = MusicService;
+        }
+        [Command("music play")]
+        public async Task MusicPlay([Remainder]string Song)
+        {
+            IGuildUser GU = (IGuildUser)Context.User;
+            if (GU.VoiceChannel == null)
+            {
+                await ReplyAsync("You are not in a voice channel");
+                return;
+            }
+            MusicService._MusicPlayer MP = _MusicService.GetMusicPlayer(Context.Guild);
+            
+            
+            string SongPath = "";
+            switch(Song)
+            {
+                case "1":
+                    SongPath = "C:/music1.mp3";
+                    break;
+                case "2":
+                    SongPath = "C:/music2.mp3";
+                    break;
+                case "3":
+                    SongPath = "C:/music3.mp3";
+                    break;
+                default:
+                    await ReplyAsync("You need to choose a song ID > mc/music");
+                    return;
+            }
+            if (MP._BotUser.VoiceChannel == null)
+            {
+               await MP.PlayMusic(SongPath, GU.VoiceChannel, false);
+            }
+            else
+            {
+                if (MP._BotUser.VoiceChannel.Id == GU.VoiceChannel.Id)
+                {
+                        MP._AudioClient = await GU.VoiceChannel.ConnectAsync();
+                    await MP.PlayMusic(SongPath, GU.VoiceChannel, false);
+                }
+                else
+                {
+                    IEnumerable<IGuildUser> Users = await MP._BotUser.VoiceChannel.GetUsersAsync().Flatten();
+                    if (Users.Where(x => !x.IsBot).Count() == 1)
+                    {
+                        if (Users.First().Id == Context.User.Id)
+                        {
+                            await MP.PlayMusic(SongPath, GU.VoiceChannel, true);
+                        }
+                        else
+                        {
+                            await ReplyAsync("Cannot switch channels while someone is listening to music");
+                        }
+                    }else if (Users.Where(x => !x.IsBot).Count() > 0)
+                    {
+                        await ReplyAsync("Cannot switch channels while someone is listening to music");
+                    }
+                    else
+                    {
+                        await MP.PlayMusic(SongPath, GU.VoiceChannel, true);
+                    }
+                }
+            }
+        }
+
+        [Command("music stop")]
+        public async Task MusicStop()
+        {
+            IGuildUser GU = (IGuildUser)Context.User;
+            if (GU.VoiceChannel == null)
+            {
+                await ReplyAsync("You are not in a voice channel");
+                return;
+            }
+            MusicService._MusicPlayer MP = _MusicService.GetMusicPlayer(Context.Guild);
+            if (MP._BotUser.VoiceChannel == null)
+            {
+                await ReplyAsync("I am not in a voice channel");
+                return;
+            }
+            MP._Process.Close();
+        }
+
+        [Command("music leave")]
+        public async Task MusicLeave()
+        {
+            MusicService._MusicPlayer MP = _MusicService.GetMusicPlayer(Context.Guild);
+            if (MP._BotUser.VoiceChannel == null)
+            {
+                await ReplyAsync("I am not in a voice channel");
+            }
+            else
+            {
+                if (MP._AudioClient == null)
+                {
+                    var AC = await MP._BotUser.VoiceChannel.ConnectAsync();
+                    await AC.StopAsync();
+                }
+                else
+                {
+                    MP.Stop(true);
+                }
+            }
+        }
+
+    }
+
     public class Hidden : ModuleBase
     {
         [Command("classic")]
@@ -584,7 +793,7 @@ namespace Bot.Commands
                     Text = "Hey you found a secret command :D"
                 }
             };
-            await ReplyAsync("", false, embed);
+            await ReplyAsync("", false, embed.Build());
         }
 
         [Command("storymode")]
@@ -606,7 +815,7 @@ namespace Bot.Commands
                     Text = "Hey you found a secret command :D"
                 }
             };
-            await ReplyAsync("", false, embed);
+            await ReplyAsync("", false, embed.Build());
         }
 
         [Command("forgecraftwallpaper")]
@@ -626,7 +835,7 @@ namespace Bot.Commands
                     Text = "Hey you found a secret command :D"
                 }
             };
-            await ReplyAsync("", false, embed);
+            await ReplyAsync("", false, embed.Build());
         }
 
         [Command("bukkit")]
@@ -641,7 +850,7 @@ namespace Bot.Commands
                     Text = "Hey you found a secret command :D"
                 }
             };
-            await ReplyAsync("", false, embed);
+            await ReplyAsync("", false, embed.Build());
         }
 
         [Command("direwolf20")]
@@ -656,7 +865,7 @@ namespace Bot.Commands
                     Text = "Hey you found a secret command :D"
                 }
             };
-            await ReplyAsync("", false, embed);
+            await ReplyAsync("", false, embed.Build());
         }
 
         [Command("herobrine")]
@@ -673,7 +882,7 @@ namespace Bot.Commands
                 },
                 Color = DiscordUtils.GetRoleColor(Context.Channel as ITextChannel)
             };
-            await ReplyAsync("", false, embedh);
+            await ReplyAsync("", false, embedh.Build());
         }
 
         [Command("entity303")]
@@ -690,7 +899,7 @@ namespace Bot.Commands
                 },
                 Color = DiscordUtils.GetRoleColor(Context.Channel as ITextChannel)
             };
-            await ReplyAsync("", false, embedh);
+            await ReplyAsync("", false, embedh.Build());
         }
 
         [Command("israphel")]
@@ -705,7 +914,7 @@ namespace Bot.Commands
                     Text = "Hey you found a secret command :D"
                 }
             };
-            await ReplyAsync("", false, embed);
+            await ReplyAsync("", false, embed.Build());
         }
 
         [Command("notch")]
@@ -720,7 +929,7 @@ namespace Bot.Commands
                     Text = "Hey you found a secret command :D"
                 }
             };
-            await ReplyAsync("", false, embed);
+            await ReplyAsync("", false, embed.Build());
         }
     }
 
@@ -915,9 +1124,10 @@ namespace Bot.Commands
             await ReplyAsync("<:success:350172481186955267> Community link has been set");
         }
     }
+
     public class Wiki : ModuleBase
     {
-        [Command("item"), Remarks("mc/item (ID/Name)")]
+        [Command("item"), Remarks("mc/item")]
         [Alias("block")]
         public async Task Items(string ID = "0", string Meta = "0")
         {
@@ -987,10 +1197,10 @@ namespace Bot.Commands
                 Footer = new EmbedFooterBuilder()
                 { Text = $"/give {Context.User.Username} {Item.Text}" }
             };
-            await ReplyAsync("", false, embed);
+            await ReplyAsync("", false, embed.Build());
         }
 
-        [Command("mob"), Remarks("mc/mob (Mob Name)")]
+        [Command("mob"), Remarks("mc/mob")]
         [Alias("mobs")]
         public async Task Mob([Remainder]string Name = "")
         {
@@ -1009,7 +1219,7 @@ namespace Bot.Commands
                         },
                         Color = DiscordUtils.GetRoleColor(Context.Channel as ITextChannel)
                     };
-                    await ReplyAsync("", false, embedh);
+                    await ReplyAsync("", false, embedh.Build());
                     return;
                 }
                 if (Name.ToLower() == "entity303" || Name.ToLower() == "entity 303")
@@ -1025,7 +1235,7 @@ namespace Bot.Commands
                         },
                         Color = DiscordUtils.GetRoleColor(Context.Channel as ITextChannel)
                     };
-                    await ReplyAsync("", false, embedh);
+                    await ReplyAsync("", false, embedh.Build());
                     return;
                 }
                 _Mob Mob = _Config.MCMobs.Find(x => x.Name.ToLower() == Name.ToLower().Replace(" ", ""));
@@ -1061,15 +1271,15 @@ namespace Bot.Commands
                             embed.WithTitle("Player");
                             PlayerText = Environment.NewLine + "**Fist Attack:** 0.5 :heart:";
                         }
-                        embed.AddInlineField("Stats", $"**Health:** {Mob.Health} :heart:" + Environment.NewLine + $"**Type:** {Mob.Type}" + PlayerText);
-                        embed.AddInlineField("Info", $"**Height:** {Height}" + Environment.NewLine + $"**Width:** {Width}" + Environment.NewLine + $"**Version:** {Mob.Version}");
+                        embed.AddField("Stats", $"**Health:** {Mob.Health} :heart:" + Environment.NewLine + $"**Type:** {Mob.Type}" + PlayerText, true);
+                        embed.AddField("Info", $"**Height:** {Height}" + Environment.NewLine + $"**Width:** {Width}" + Environment.NewLine + $"**Version:** {Mob.Version}", true);
                     }
                     else
                     {
-                        embed.AddInlineField("Stats", $"**Health:** {Mob.Health} :heart:" + Environment.NewLine + "**Attack** :crossed_swords:" + Environment.NewLine + $"**Easy:** {Mob.AttackEasy}" + Environment.NewLine + $"**Normal:** {Mob.AttackNormal}" + Environment.NewLine + $"**Hard:** {Mob.AttackHard}");
-                        embed.AddInlineField("Info", $"**Height:** {Height}" + Environment.NewLine + $"**Width:** {Width}" + Environment.NewLine + $"**Version:** {Mob.Version}" + Environment.NewLine + $"**Type:** {Mob.Type}");
+                        embed.AddField("Stats", $"**Health:** {Mob.Health} :heart:" + Environment.NewLine + "**Attack** :crossed_swords:" + Environment.NewLine + $"**Easy:** {Mob.AttackEasy}" + Environment.NewLine + $"**Normal:** {Mob.AttackNormal}" + Environment.NewLine + $"**Hard:** {Mob.AttackHard}", true);
+                        embed.AddField("Info", $"**Height:** {Height}" + Environment.NewLine + $"**Width:** {Width}" + Environment.NewLine + $"**Version:** {Mob.Version}" + Environment.NewLine + $"**Type:** {Mob.Type}", true);
                     }
-                    await ReplyAsync("", false, embed);
+                    await ReplyAsync("", false, embed.Build());
                 }
                 else
                 {
@@ -1114,32 +1324,117 @@ namespace Bot.Commands
                 {
                     Description = "Get more info with mc/mob (Mob Name) | mc/mob Bat"
                 };
-                embed.AddInlineField("Passive", string.Join(" ", Passive));
-                embed.AddInlineField("Tameable", string.Join(" ", Tameable));
-                embed.AddInlineField("Neutral", string.Join(" ", Neutral));
-                embed.AddInlineField("Hostile", string.Join(" ", Hostile));
-                embed.AddInlineField("Boss", string.Join(" ", Boss));
+                embed.AddField("Passive", string.Join(" ", Passive),true);
+                embed.AddField("Tameable", string.Join(" ", Tameable), true);
+                embed.AddField("Neutral", string.Join(" ", Neutral), true);
+                embed.AddField("Hostile", string.Join(" ", Hostile), true);
+                embed.AddField("Boss", string.Join(" ", Boss), true);
 
-                await ReplyAsync("", false, embed);
+                await ReplyAsync("", false, embed.Build());
             }
         }
 
-        [Command("potion"), Remarks("~~mc/potion~~")]
-        public async Task Potion()
+        [Command("potion"), Remarks("mc/potion"), Alias("potions")]
+        public async Task Potion([Remainder]string Name = "")
         {
-            await ReplyAsync("Command coming soon please wait");
+            if (Name == "")
+            {
+                var embed = new EmbedBuilder()
+                {
+                    Title = "Minecraft Potions",
+                    Description = "Get a single potion using `mc/potion Instant Health`" + Environment.NewLine + "Or list them all `mc/potion all`",
+                    Color = DiscordUtils.GetRoleColor(Context.Channel as ITextChannel)
+                };
+                await ReplyAsync("", false, embed.Build());
+            }
+            else if (Name.ToLower() == "all")
+            {
+                List<string> Potions = new List<string>();
+                foreach(_Potion Potion in _Config.MCPotions)
+                {
+                    if (Potion.Extended != null && Potion.Level2 != null)
+                    {
+                        Potions.Add($"<{Potion.Base} + {Potion.Ingredient} = {Potion.Name.Replace(" ", "")}> II ⏳");
+                    }
+                    else if (Potion.Level2 != null)
+                    {
+                        Potions.Add($"<{Potion.Base} + {Potion.Ingredient} = {Potion.Name.Replace(" ", "")}> II");
+                    }else
+                    {
+                        Potions.Add($"<{Potion.Base} + {Potion.Ingredient} = {Potion.Name.Replace(" ", "")}> ⏳");
+                    }
+                }
+                var embed = new EmbedBuilder()
+                {
+                    Color = DiscordUtils.GetRoleColor(Context.Channel as ITextChannel),
+                    Footer = new EmbedFooterBuilder()
+                    {
+                        Text = "II Has level 2 | ⏳ Can strengthen"
+                    }
+                };
+                embed.AddField("Base Potions", "```md" + Environment.NewLine + "<NetherWart + Water Bottle = Awkward(Base1) >" + Environment.NewLine + "< Potion of swiftness = (Base2) >" + Environment.NewLine + "< Potion of strength = (Base3) >```");
+                embed.AddField("Potions", "```md" + Environment.NewLine + string.Join(Environment.NewLine, Potions) + "```");
+                await ReplyAsync("", false, embed.Build());
+            }
+            else
+            {
+               _Potion Potion = _Config.MCPotions.Find(x => x.Name.ToLower().Replace(" ", "").Contains(Name.ToLower().Replace(" ", "")));
+                if (Potion == null)
+                {
+                    await ReplyAsync("Could not find potion");
+                }
+                else
+                {
+                    var embed = new EmbedBuilder()
+                    {
+                        Title = $"Potion of {Potion.Name}",
+                        Color = DiscordUtils.GetRoleColor(Context.Channel as ITextChannel),
+                        Description = "```md" + Environment.NewLine + $"Base: {Potion.GetBase()}```" + "```md" + Environment.NewLine + $"Recipe: <{Potion.Base} + {Potion.Ingredient} = {Potion.Name.Replace(" ", "")}>" + Environment.NewLine + $"<Duration {Potion.GetDuration()}> <Note {Potion.Note}```",
+                        ThumbnailUrl = Potion.Image
+                    };
+                    if (Potion.Extended != null)
+                    {
+                        embed.AddField("Extended - Add redstone", "```md" + Environment.NewLine + $"<Duration {Potion.Extended.GetDuration()}>```");
+                    }
+                    if (Potion.Level2 != null)
+                    {
+                        embed.AddField("Level 2 - Add glowstone", "```md" + Environment.NewLine + $"<Duration {Potion.Level2.GetDuration()}> <Note {Potion.Level2.Note}>```");
+                    }
+                    await ReplyAsync("", false, embed.Build());
+                }
+            }
         }
 
-        [Command("music"), Remarks("~~mc/music~~")]
-        public async Task Music()
+        [Command("enchant"), Remarks("mc/enchant")]
+        public async Task Enchant([Remainder]string Name = "")
         {
-            await ReplyAsync("I wonder what this command is 0_o");
-        }
-
-        [Command("enchant"), Remarks("~~mc/enchant~~")]
-        public async Task Enchant()
-        {
-            await ReplyAsync("Command coming soon please wait");
+            if (Name == "")
+            {
+                var embed = new EmbedBuilder()
+                {
+                    Description = "Get enchantment info using `mc/enchant (Name)` or `mc/enchant protection`",
+                    Color = DiscordUtils.GetRoleColor(Context.Channel as ITextChannel)
+                };
+                embed.AddField("Armor", "Protection | FireProt | Feather Falling | Blast Prot | Projectile Prot | Respiration | Aqua Affinity | Thorns | Depth Strider | Frost Walker");
+                embed.AddField("Weapons", "Sharpness | Smite | Arthropods | Knockback | Fire Aspect | Looting");
+                embed.AddField("Bows", "Power | Punch | Infinity | Flame");
+                embed.AddField("Tools", "Efficiency | Silk Touch | Fortune");
+                embed.AddField("Fishing Rod", "Luck Of The Sea | Lure");
+                embed.AddField("All", "Unbreaking Mending");
+                await ReplyAsync("", false, embed.Build());
+            }
+            else
+            {
+                _Enchant Enchant = _Config.MCEnchantments.Find(x => x.Name.ToLower().Replace(" ", "").Contains(Name.ToLower().Replace(" ", "")));
+                var embed = new EmbedBuilder()
+                {
+                    Title = $"[{Enchant.ID}] {Enchant.Name}",
+                    Description = "```md" +Environment.NewLine + $"<Version {Enchant.Version}> <Type {Enchant.Type}> <MaxLevel {Enchant.MaxLevel}>" + Environment.NewLine + $"<Note {Enchant.Note}>```",
+                    ThumbnailUrl = Enchant.GetEnchantItem(),
+                    Color = DiscordUtils.GetRoleColor(Context.Channel as ITextChannel)
+                };
+                await ReplyAsync("", false, embed.Build());
+            }
         }
 
         [Command("biome"), Remarks("~~mc/biome~~")]
@@ -1148,6 +1443,7 @@ namespace Bot.Commands
             await ReplyAsync("Command coming soon please wait");
         }
     }
+
     public class Quiz : InteractiveModuleBase
     {
         [Command("quiz")]

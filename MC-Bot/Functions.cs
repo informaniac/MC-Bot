@@ -255,6 +255,81 @@ namespace Bot.Classes
         public string Ip;
         public ushort Port;
     }
+    public enum _EnchantType
+    {
+        Armor, Weapon, Bow, Tool, FishingRod, All
+    }
+    public enum _EnchantItem
+    {
+        None, Sword, Helmet, Boot, Bow, FishingRod
+    }
+    public class _Enchant
+    {
+        public string Name;
+        public int ID;
+        public int MaxLevel;
+        public string Note;
+        public _EnchantType Type;
+        public string Version;
+        public _EnchantItem Item = _EnchantItem.None;
+        public string GetEnchantItem()
+        {
+                switch (Item)
+                {
+                    case _EnchantItem.FishingRod:
+                        return "https://minecraft.gamepedia.com/media/minecraft.gamepedia.com/c/c7/Fishing_Rod.png";
+                    case _EnchantItem.Bow:
+                        return "https://minecraft.gamepedia.com/media/minecraft.gamepedia.com/4/46/PE_Bow.png";
+                    case _EnchantItem.Boot:
+                        return "https://minecraft.gamepedia.com/media/minecraft.gamepedia.com/0/0b/Diamond_Boots.png";
+                    case _EnchantItem.Sword:
+                        return "https://minecraft.gamepedia.com/media/minecraft.gamepedia.com/a/a0/Diamond_Sword.png";
+                    case _EnchantItem.Helmet:
+                        return "https://minecraft.gamepedia.com/media/minecraft.gamepedia.com/1/1d/Diamond_Helmet.png";
+                    default:
+                        return "";
+                }
+        }
+    }
+    
+    public enum _PotionBase
+    {
+        Base1, Base2, Base3
+    }
+    public class _Potion
+    {
+        public string Name;
+        public string Ingredient;
+        public _PotionBase Base;
+        public _Potion Level2 = null;
+        public _Potion Extended = null;
+        public string Duration;
+        public string Note;
+        public string Image;
+        public string GetDuration()
+        {
+            if (Duration == "Instant")
+                return "Instant";
+            else
+                return $"{Duration} Mins";
+        }
+
+        public string GetBase()
+        {
+            if (Base == _PotionBase.Base1)
+            {
+                return "<NetherWart + Water Bottle = Awkward(Base1) >";
+            }
+            else if (Base == _PotionBase.Base2)
+            {
+                return "< Potion of swiftness = (Base2) >";
+            }
+            else
+            {
+                return "< Potion of strength = (Base3) >";
+            }
+        }
+    }
     public class _Item
     {
         public string ID;
@@ -284,6 +359,11 @@ namespace Bot.Classes
         public string Question;
         public string Answer;
         public string Note;
+    }
+    public class Cooldown
+    {
+        public int Count;
+        public DateTime Date;
     }
     public enum _MobType
     {

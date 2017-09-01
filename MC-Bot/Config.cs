@@ -28,6 +28,9 @@ namespace Bot
         public static List<_Item> MCItems = new List<_Item>();
         public static List<_Mob> MCMobs = new List<_Mob>();
         public static List<_Quiz> MCQuiz = new List<_Quiz>();
+        public static List<_Potion> MCPotions = new List<_Potion>();
+        public static List<_Enchant> MCEnchantments = new List<_Enchant>();
+        public static Dictionary<ulong, Cooldown> PingCooldown = new Dictionary<ulong, Cooldown>();
         public class Class
         {
             public string Discord = "";
@@ -40,12 +43,65 @@ namespace Bot
                 .AddSingleton(Client)
                 .AddSingleton(Commands)
                 .AddSingleton(new GuildCheck(Client))
+                .AddSingleton(new MusicService(Client))
                 .AddSingleton<CommandHandler>(new CommandHandler(Client, Commands)).BuildServiceProvider();
-            
             var commandHandler = Services.GetService<CommandHandler>();
             commandHandler.Setup(Services);
             AddMobs();
             AddQuiz();
+            AddPotions();
+            AddEnchants();
+        }
+        public static void AddEnchants()
+        {
+            MCEnchantments.Add(new _Enchant() { Name = "Protection", ID = 0, Type = _EnchantType.Armor, Version = "0", Note = "Reduces all damage except for void and hunger damage.", MaxLevel = 4});
+            MCEnchantments.Add(new _Enchant() { Name = "Fire Protection", ID = 1, Type = _EnchantType.Armor, Version = "0", Note = "Makes you immune to fire damage.", MaxLevel = 4 });
+            MCEnchantments.Add(new _Enchant() { Name = "Feather Falling", Item = _EnchantItem.Boot, ID = 2, Type = _EnchantType.Armor, Version = "0", Note = "Reduces fall damage and ender pearl teleportation damage.", MaxLevel = 4 });
+            MCEnchantments.Add(new _Enchant() { Name = "Blast Protection", ID = 3, Type = _EnchantType.Armor, Version = "0", Note = "Reduces explosion damage (15 * level)%. Does not stack with more peices.", MaxLevel = 4 });
+            MCEnchantments.Add(new _Enchant() { Name = "Projectile Protection", ID = 4, Type = _EnchantType.Armor, Version = "0", Note = "Reduces projectile damage from arrows, ghast and blaze.", MaxLevel = 4 });
+            MCEnchantments.Add(new _Enchant() { Name = "Respiration", Item = _EnchantItem.Helmet, ID = 5, Type = _EnchantType.Armor, Version = "0", Note = "Increases underwater breathing time by +15 seconds * level and improves underwater vision.", MaxLevel = 3 });
+            MCEnchantments.Add(new _Enchant() { Name = "Aqua Affinity", Item = _EnchantItem.Helmet, ID = 6, Type = _EnchantType.Armor, Version = "0", Note = "Breaking blocks underwater is allowed at regular speed when not floating.", MaxLevel = 1 });
+            MCEnchantments.Add(new _Enchant() { Name = "Thorns", ID = 7, Type = _EnchantType.Armor, Version = "0", Note = "Attacker are damaged when they attack the user. (level * 15)% chance to inflict 0.5-2 hearts of damage and reduces durability.", MaxLevel = 3 });
+            MCEnchantments.Add(new _Enchant() { Name = "Depth Strider", Item = _EnchantItem.Boot, ID = 8, Type = _EnchantType.Armor, Version = "1.8", Note = "Increases underwater movement speed and flowing water. Level 3 will make you swim as fast as you walk on land.", MaxLevel = 3 });
+            MCEnchantments.Add(new _Enchant() { Name = "Frost Walker", Item = _EnchantItem.Boot, ID = 9, Type = _EnchantType.Armor, Version = "1.9", Note = "Creates ice blocks under you to walk over water and protection from magma blocks.", MaxLevel = 2 });
+
+            MCEnchantments.Add(new _Enchant() { Name = "Sharpness", Item = _EnchantItem.Sword, ID = 16, Type = _EnchantType.Weapon, Version = "0", Note = "Increases melee damage. Level 1 half a heart of damage, Additional levels add 1/4 of a heart of damage.", MaxLevel = 5 });
+            MCEnchantments.Add(new _Enchant() { Name = "Smite", ID = 17, Item = _EnchantItem.Sword, Type = _EnchantType.Weapon, Version = "0", Note = "Increases damage to undead mobs such as skeletons, zombies, wither, wither skeletons and zombie pigmen. 1.25 hearts * level of damage added.", MaxLevel = 15 });
+            MCEnchantments.Add(new _Enchant() { Name = "Bane Of Arthropods", Item = _EnchantItem.Sword, ID = 18, Type = _EnchantType.Weapon, Version = "0", Note = "Increases damage to spides, cave spiders, silverfish and endermites. It also gives them slowness.", MaxLevel = 15 });
+            MCEnchantments.Add(new _Enchant() { Name = "Knockback", Item = _EnchantItem.Sword, ID = 19, Type = _EnchantType.Weapon, Version = "0", Note = "level * 3 = block distance for knockback", MaxLevel = 2 });
+            MCEnchantments.Add(new _Enchant() { Name = "Fire Aspect", Item = _EnchantItem.Sword, ID = 20, Type = _EnchantType.Weapon, Version = "0", Note = "Sets the target on fire for 4 seconds.", MaxLevel = 2 });
+            MCEnchantments.Add(new _Enchant() { Name = "Looting", Item = _EnchantItem.Sword, ID = 21, Type = _EnchantType.Weapon, Version = "0", Note = "Increases loot of mobs you kill.", MaxLevel = 3 });
+
+            MCEnchantments.Add(new _Enchant() { Name = "Efficiency", ID = 32, Type = _EnchantType.Tool, Version = "0", Note = "Increases mining speed. https://minecraft.gamepedia.com/Breaking#Speed", MaxLevel = 5 });
+            MCEnchantments.Add(new _Enchant() { Name = "Silk Touch", ID = 33, Type = _EnchantType.Tool, Version = "0", Note = "Drops blocks instead of items for use on ore blocks, glass, mushroom blocks, ice, mycelium, podzol, ender chests and bookshelfs", MaxLevel = 1 });
+            MCEnchantments.Add(new _Enchant() { Name = "Fortune", ID = 35, Type = _EnchantType.Tool, Version = "0", Note = "Increases block drop of coal, diamond, emerald, nether quartz and lapis. Level 1 33% chance, Level 2 25% 2-3 each, Level 20% 2-3-4 each.", MaxLevel = 3 });
+
+            MCEnchantments.Add(new _Enchant() { Name = "Power", Item = _EnchantItem.Bow, ID = 48, Type = _EnchantType.Bow, Version = "0", Note = "Increases arrow damage (25% * level + 1)", MaxLevel = 5 });
+            MCEnchantments.Add(new _Enchant() { Name = "Punch", Item = _EnchantItem.Bow, ID = 49, Type = _EnchantType.Bow, Version = "0", Note = "Increases knockback of arrows", MaxLevel = 2 });
+            MCEnchantments.Add(new _Enchant() { Name = "Flame", Item = _EnchantItem.Bow, ID = 50, Type = _EnchantType.Bow, Version = "0", Note = "Deals 2 heart of damage over 5 seconds to a target.", MaxLevel = 1 });
+            MCEnchantments.Add(new _Enchant() { Name = "Infinity", Item = _EnchantItem.Bow, ID = 51, Type = _EnchantType.Bow, Version = "0", Note = "Allows user to shoot unlimited ammount of arrows if you have 1 arrow in your inventory. Does not work for tipped or spectral arrows.", MaxLevel = 1 });
+
+            MCEnchantments.Add(new _Enchant() { Name = "Luck Of The Sea", Item = _EnchantItem.FishingRod, ID = 61, Type = _EnchantType.FishingRod, Version = "1.8", Note = "Increases fishing loot but lowering junk and increasing treasure catches.", MaxLevel = 3 });
+            MCEnchantments.Add(new _Enchant() { Name = "Lure", ID = 62, Item = _EnchantItem.FishingRod, Type = _EnchantType.FishingRod, Version = "1.8", Note = "Decreases waiting time for catching fish by 5 * level.", MaxLevel = 3 });
+
+            MCEnchantments.Add(new _Enchant() { Name = "Unbreaking", ID = 34, Type = _EnchantType.All, Version = "0", Note = "Increases durability of items.", MaxLevel = 3 });
+            MCEnchantments.Add(new _Enchant() { Name = "Mending", ID = 70, Type = _EnchantType.All, Version = "0", Note = "Repairs durability of held item with experience. Rate is 2 durability per XP.", MaxLevel = 1 });
+        }
+        public static void AddPotions()
+        {
+            MCPotions.Add(new _Potion() { Name = "Regeneration", Image = "https://vignette2.wikia.nocookie.net/minecraft/images/f/f0/Potion-of-regeneration.png", Base = _PotionBase.Base1, Ingredient = "Ghast Tear", Duration = "0:45", Note = "Restores 9 heart of health over time > half a heart every 2.5 seconds", Extended = new _Potion() { Duration = "1:30", Note = "" }, Level2 = new _Potion() { Duration = "0:22", Note = "Restores 9 heart of health over time > half a heart every 1.25 seconds" } });
+            MCPotions.Add(new _Potion() { Name = "Swiftness", Image = "https://vignette2.wikia.nocookie.net/minecraft/images/4/49/Potion-of-swiftness.png", Base = _PotionBase.Base1, Ingredient = "Sugar", Duration = "3:00", Note = "Increases speed by 20%", Extended = new _Potion() { Duration = "8:00", Note = "" }, Level2 = new _Potion() { Duration = "1:30", Note = "Increases speed by 40%" } });
+            MCPotions.Add(new _Potion() { Name = "Fire Resistance", Image = "https://vignette3.wikia.nocookie.net/minecraft/images/9/97/Potion-of-fire-resistance.png", Base = _PotionBase.Base1, Ingredient = "Magma Cream", Duration = "3:00", Note = "Immune to fire and lava damage", Extended = new _Potion() { Duration = "8:00", Note = "" } });
+            MCPotions.Add(new _Potion() { Name = "Instant Health", Image = "https://vignette2.wikia.nocookie.net/minecraft/images/a/a0/Potion-of-healing.png", Base = _PotionBase.Base1, Ingredient = "Glistering Melon", Duration = "Instant", Note = "Restores 2 hearts of health", Level2 = new _Potion() { Duration = "Instant", Note = "Restores 4 hearts of health" } });
+            MCPotions.Add(new _Potion() { Name = "Night Vision", Image = "https://vignette4.wikia.nocookie.net/minecraft/images/4/48/Potion-of-night-vision.png", Base = _PotionBase.Base1, Ingredient = "Golden Carrot", Duration = "3:00", Note = "Allows you to see in the dark",Extended = new _Potion() { Duration = "8:00", Note = "" } });
+            MCPotions.Add(new _Potion() { Name = "Strength", Image = "https://vignette1.wikia.nocookie.net/minecraft/images/4/44/Potion-of-strength.png", Base = _PotionBase.Base1, Ingredient = "Blaze Powder", Duration = "3:00", Note = "Increases melee damage by 1.5 hearts", Extended = new _Potion() { Duration = "8:00", Note = "" }, Level2 = new _Potion() { Duration = "1:30", Note = "" } });
+            MCPotions.Add(new _Potion() { Name = "Leaping", Image = "https://vignette1.wikia.nocookie.net/minecraft/images/b/b5/Potion-of-leaping.png", Base = _PotionBase.Base1, Ingredient = "Rabbit Foot", Duration = "3:00", Note = "Increases jump height and reduces fall damage",Extended = new _Potion() { Duration = "8:00", Note = "Increases jump height even further" }, Level2 = new _Potion() { Duration = "1:30", Note = "" } });
+            MCPotions.Add(new _Potion() { Name = "Water Breathing", Image = "https://vignette1.wikia.nocookie.net/minecraft/images/c/c1/Potion-of-water-breating.png", Base = _PotionBase.Base1, Ingredient = "Pufferfish", Duration = "3:00", Note = "Lets you breath and see better underwater", Extended = new _Potion() { Duration = "8:00", Note = "" } });
+            MCPotions.Add(new _Potion() { Name = "Invisibility", Image = "https://vignette3.wikia.nocookie.net/minecraft/images/b/be/Potion-of-invisibility.png", Base = _PotionBase.Base1, Ingredient = "Golden Carrot + Fermented Spider Eye", Duration = "3:00", Note = "Makes player/mob disappear, mobs will act neutral unless player is wearing armor which will still be visible", Extended = new _Potion() { Duration = "8:00", Note = "" } });
+            MCPotions.Add(new _Potion() { Name = "Poison", Image = "https://vignette2.wikia.nocookie.net/minecraft/images/d/da/Potion-of-poison.png", Base = _PotionBase.Base1, Ingredient = "Spider Eye", Duration = "0:45", Note = "Deals 18 hearts of damage over time but wont cause death", Extended = new _Potion() { Duration = "1:30", Note = "" }, Level2 = new _Potion() { Duration = "0:22", Note = "" } });
+            MCPotions.Add(new _Potion() { Name = "Weakness", Image = "https://vignette4.wikia.nocookie.net/minecraft/images/d/d9/Potion-of-weakness.png", Base = _PotionBase.Base3, Ingredient = "Fermented Spider Eye", Duration = "1:30", Note = "Reduces melee damage by 2 hearts", Extended = new _Potion() { Duration = "4:00", Note = "" } });
+            MCPotions.Add(new _Potion() { Name = "Slowness", Image = "https://vignette1.wikia.nocookie.net/minecraft/images/5/55/Potion-of-slowness.png", Base = _PotionBase.Base2, Ingredient = "Sugar + Fermented Spider Eye", Duration = "1:30", Note = "Slows players/mobs by 15%", Extended = new _Potion() { Duration = "4:00", Note = "" } });
+            MCPotions.Add(new _Potion() { Name = "Harming", Image = "https://vignette1.wikia.nocookie.net/minecraft/images/9/92/Potion-of-harming.png", Base = _PotionBase.Base1, Ingredient = "Spider Eye + Fermented Spider Eye", Duration = "Instant", Note = "Deals 3 hearts of damage", Level2 = new _Potion() { Duration = "Instant", Note = "Deals 6 hearts of damage to player" } });
         }
         public static void AddMobs()
         {
