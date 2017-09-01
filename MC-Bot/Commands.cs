@@ -1447,6 +1447,11 @@ namespace Bot.Commands
     public class Quiz : InteractiveModuleBase
     {
         [Command("quiz")]
+        public async Task QuizBroke()
+        {
+            await ReplyAsync("Currently broken due to library updates will fix as soon as i can");
+        }
+        [Command("quiz22")]
         public async Task QuizCom(string Accept = "")
         {
             if (Accept == "start")
