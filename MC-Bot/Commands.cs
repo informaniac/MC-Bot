@@ -1447,11 +1447,6 @@ namespace Bot.Commands
     public class Quiz : InteractiveModuleBase
     {
         [Command("quiz")]
-        public async Task QuizBroke()
-        {
-            await ReplyAsync("Currently broken due to library updates will fix as soon as i can");
-        }
-        [Command("quiz22")]
         public async Task QuizCom(string Accept = "")
         {
             if (Accept == "start")
@@ -1466,7 +1461,7 @@ namespace Bot.Commands
                     Description = Quiz.Question,
                     Color = new Color(135, 206, 235)
                 };
-                await ReplyAsync("", false, qembed);
+                await ReplyAsync("", false, qembed.Build());
                 var response = await WaitForMessage(Context.Message.Author, Context.Channel, new TimeSpan(0, 0, 10));
                 if (response == null)
                 {
@@ -1476,7 +1471,7 @@ namespace Bot.Commands
                         Description = $"{User} you ran out of time :(",
                         Color = new Color(200, 0, 0)
                     };
-                    await ReplyAsync("", false, embed);
+                    await ReplyAsync("", false, embed.Build());
                 }
                 else
                 {
@@ -1488,7 +1483,7 @@ namespace Bot.Commands
                             Description = $"<:success:350172481186955267> Correct! {User}" + Environment.NewLine + Quiz.Note,
                             Color = new Color(0,200,0)
                         };
-                        await ReplyAsync("", false, embed);
+                        await ReplyAsync("", false, embed.Build());
                     }
                     else
                     {
@@ -1498,7 +1493,7 @@ namespace Bot.Commands
                             Description = $"<:error:350172479936921611> Incorrect {User}",
                             Color = new Color(200, 0, 0)
                         };
-                        await ReplyAsync("", false, embed);
+                        await ReplyAsync("", false, embed.Build());
                     }
                     
                 }
@@ -1515,7 +1510,7 @@ namespace Bot.Commands
                     },
                     Color = new Color(135, 206, 235)
                 };
-                await ReplyAsync("", false, embed);
+                await ReplyAsync("", false, embed.Build());
             }
         }
     }
