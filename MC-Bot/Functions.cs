@@ -12,47 +12,6 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Bot.Services
-{
-    public class GuildCheck
-    {
-        DiscordSocketClient _Client;
-        public GuildCheck(DiscordSocketClient Client)
-        {
-            _Client = Client;
-            _Task.LoadGuilds();
-            _Client.GuildAvailable += _Client_GuildAvailable;
-            _Client.JoinedGuild += _Client_JoinedGuild;
-        }
-
-        private Task _Client_JoinedGuild(SocketGuild g)
-        {
-            if (!_Bot._Blacklist.Check(g.Id))
-            {
-                var Guild = _Config.MCGuilds.Find(x => x.ID == g.Id);
-                if (Guild == null)
-                {
-                    _Task.NewGuild(g.Id);
-                }
-            }
-            return Task.CompletedTask;
-        }
-
-        private Task _Client_GuildAvailable(SocketGuild g)
-        {
-            if (!_Bot._Blacklist.Check(g.Id))
-            {
-                var Guild = _Config.MCGuilds.Find(x => x.ID == g.Id);
-                if (Guild == null)
-                {
-                    _Task.NewGuild(g.Id);
-                }
-            }
-            return Task.CompletedTask;
-        }
-    }
-
-}
 namespace Bot.Functions
 {
     public class _Task
@@ -71,6 +30,7 @@ namespace Bot.Functions
             }
             _Config.MCGuilds.Add(NewConfig);
         }
+
         public static void SaveGuild(ulong ID)
         {
             _Guild Guild = _Config.MCGuilds.Find(x => x.ID == ID);
@@ -84,6 +44,31 @@ namespace Bot.Functions
                 }
             }
         }
+        /// <summary>
+        /// Set ID to 0 for no guild
+        /// </summary>
+        public static void GetGuild(IGuild ID, out _Guild Guild, out int LangInt)
+        {
+            if (ID != null)
+            {
+                Guild = _Config.MCGuilds.Find(x => x.ID == ID.Id);
+                if (Guild == null)
+                {
+                    Guild = null;
+                    LangInt = 0;
+                }
+                else
+                {
+                    LangInt = (int)Guild.Language;
+                }
+            }
+            else
+            {
+                Guild = null;
+                LangInt = 0;
+            }
+        }
+
         public static void LoadGuilds()
         {
             foreach(var i in Directory.GetFiles(_Config.BotPath + "Guilds/"))
@@ -369,6 +354,10 @@ namespace Bot.Classes
     {
         Passive, Neutral, Hostile, Boss, Tameable, Secret
     }
+    public enum _Language
+    {
+        English = 0, French = 1
+    }
     public class _Guild
     {
         public ulong ID;
@@ -376,5 +365,6 @@ namespace Bot.Classes
         public string CommunityDescription = "";
         public string Website = "";
         public List<_Server> Servers = new List<_Server>();
+        public _Language Language = _Language.English;
     }
 }

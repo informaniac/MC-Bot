@@ -1,4 +1,5 @@
 ﻿using Bot.Classes;
+using Bot.Functions;
 using Bot.Services;
 using Discord;
 using Discord.Commands;
@@ -31,6 +32,7 @@ namespace Bot
         public static List<_Potion> MCPotions = new List<_Potion>();
         public static List<_Enchant> MCEnchantments = new List<_Enchant>();
         public static Dictionary<ulong, Cooldown> PingCooldown = new Dictionary<ulong, Cooldown>();
+        public static int Count = 0;
         public class Class
         {
             public string Discord = "";
@@ -42,17 +44,17 @@ namespace Bot
             Services = new ServiceCollection()
                 .AddSingleton(Client)
                 .AddSingleton(Commands)
-                .AddSingleton(new GuildCheck(Client))
                 .AddSingleton(new MusicService(Client))
                 .AddSingleton<CommandHandler>(new CommandHandler(Client, Commands)).BuildServiceProvider();
             var commandHandler = Services.GetService<CommandHandler>();
+            _Task.LoadGuilds();
             commandHandler.Setup(Services);
             AddMobs();
             AddQuiz();
             AddPotions();
             AddEnchants();
         }
-        public static void AddEnchants()
+        private static void AddEnchants()
         {
             MCEnchantments.Add(new _Enchant() { Name = "Protection", ID = 0, Type = _EnchantType.Armor, Version = "0", Note = "Reduces all damage except for void and hunger damage.", MaxLevel = 4});
             MCEnchantments.Add(new _Enchant() { Name = "Fire Protection", ID = 1, Type = _EnchantType.Armor, Version = "0", Note = "Makes you immune to fire damage.", MaxLevel = 4 });
@@ -87,7 +89,7 @@ namespace Bot
             MCEnchantments.Add(new _Enchant() { Name = "Unbreaking", ID = 34, Type = _EnchantType.All, Version = "0", Note = "Increases durability of items.", MaxLevel = 3 });
             MCEnchantments.Add(new _Enchant() { Name = "Mending", ID = 70, Type = _EnchantType.All, Version = "0", Note = "Repairs durability of held item with experience. Rate is 2 durability per XP.", MaxLevel = 1 });
         }
-        public static void AddPotions()
+        private static void AddPotions()
         {
             MCPotions.Add(new _Potion() { Name = "Regeneration", Image = "https://vignette2.wikia.nocookie.net/minecraft/images/f/f0/Potion-of-regeneration.png", Base = _PotionBase.Base1, Ingredient = "Ghast Tear", Duration = "0:45", Note = "Restores 9 heart of health over time > half a heart every 2.5 seconds", Extended = new _Potion() { Duration = "1:30", Note = "" }, Level2 = new _Potion() { Duration = "0:22", Note = "Restores 9 heart of health over time > half a heart every 1.25 seconds" } });
             MCPotions.Add(new _Potion() { Name = "Swiftness", Image = "https://vignette2.wikia.nocookie.net/minecraft/images/4/49/Potion-of-swiftness.png", Base = _PotionBase.Base1, Ingredient = "Sugar", Duration = "3:00", Note = "Increases speed by 20%", Extended = new _Potion() { Duration = "8:00", Note = "" }, Level2 = new _Potion() { Duration = "1:30", Note = "Increases speed by 40%" } });
@@ -103,7 +105,7 @@ namespace Bot
             MCPotions.Add(new _Potion() { Name = "Slowness", Image = "https://vignette1.wikia.nocookie.net/minecraft/images/5/55/Potion-of-slowness.png", Base = _PotionBase.Base2, Ingredient = "Sugar + Fermented Spider Eye", Duration = "1:30", Note = "Slows players/mobs by 15%", Extended = new _Potion() { Duration = "4:00", Note = "" } });
             MCPotions.Add(new _Potion() { Name = "Harming", Image = "https://vignette1.wikia.nocookie.net/minecraft/images/9/92/Potion-of-harming.png", Base = _PotionBase.Base1, Ingredient = "Spider Eye + Fermented Spider Eye", Duration = "Instant", Note = "Deals 3 hearts of damage", Level2 = new _Potion() { Duration = "Instant", Note = "Deals 6 hearts of damage to player" } });
         }
-        public static void AddMobs()
+        private static void AddMobs()
         {
             MCMobs.Add(new _Mob() { Name = "Player", EmojiID = "352238802900615178", ID = "0", Health = "10", Height = "1.8", Width = "0.6", Type = _MobType.Passive, Version = "0", PicUrl = "https://minecraft.gamepedia.com/media/minecraft.gamepedia.com/thumb/f/f3/Steve.png/166px-Steve.png", Note = "Main character in the game called Steve" + Environment.NewLine + "or in newer versions Alex", AttackEasy = "", WikiLink = "https://minecraft.gamepedia.com/The_Player" });
             MCMobs.Add(new _Mob() { Name = "Bat", EmojiID = "350864494991245313", ID = "65", Health = "3", Height = "0.9", Width = "0.5", Type = _MobType.Passive, Version = "1.4.2", AttackEasy = "", AttackNormal = "", AttackHard = "", PicUrl = "https://minecraft.gamepedia.com/media/minecraft.gamepedia.com/0/09/Bat.gif", Note = "Bats are useless in the game", WikiLink = "https://minecraft.gamepedia.com/Bat" });
@@ -161,7 +163,7 @@ namespace Bot
             MCMobs.Add(new _Mob() { Name = "KillerRabbit", EmojiID = "", ID = "104", Health = "1.5", Height = "0.5", Width = "0.4", Type = _MobType.Secret, Version = "1.8", AttackEasy = "2.5", AttackNormal = "4", AttackHard = "6", PicUrl = "https://minecraft.gamepedia.com/media/minecraft.gamepedia.com/thumb/e/e6/White_Rabbit.png/150px-White_Rabbit.png", Note = "Mystery killer rabbits", WikiLink = "https://minecraft.gamepedia.com/Rabbit#The_Killer_Bunny" });
             MCMobs.Add(new _Mob() { Name = "Illusioner", EmojiID = "", ID = "37", Health = "16", Height = "2", Width = "0.6", Type = _MobType.Secret, Version = "1.12", AttackEasy = "0.5-2", AttackNormal = "0.5-2", AttackHard = "0.5-2.5", PicUrl = "https://minecraft.gamepedia.com/media/minecraft.gamepedia.com/thumb/f/f8/Illusioner_attacking.png/295px-Illusioner_attacking.png", Note = "Coming soon to 1.12", WikiLink = "https://minecraft.gamepedia.com/Illusioner" });
         }
-        public static void AddQuiz()
+        private static void AddQuiz()
         {
             MCQuiz.Add(new _Quiz() { Question = "How many villager professions/careers are there not including the default villager", Answer = "6 six", Note = "The 6 professions are Farmer, Librarian, Priest, Blacksmith, Butcher and Nitwit"});
             MCQuiz.Add(new _Quiz() { Question = "What item can iron golems spawn with", Answer = "poppy, poppies", Note = "Iron golems can spawn with a poppy in their hand and offer them to villagers" });
