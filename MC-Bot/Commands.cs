@@ -51,7 +51,7 @@ namespace Bot.Commands
                     {
                         Text = "If you have any issues please contact xXBuilderBXx#9113"
                     },
-                    Color = DiscordUtils.GetRoleColor(Context.Channel as ITextChannel)
+                    Color = _Utils_Discord.GetRoleColor(Context.Channel as ITextChannel)
                 };
                 IGuildUser Owner = await Context.Guild.GetOwnerAsync();
                 NewGuildEmbed.AddField("Language", $"<@{Owner.Id}> Please User" + Environment.NewLine + "`mc/lang 0` English **Default**" + Environment.NewLine + "`mc/lang 1` français", true);
@@ -103,7 +103,7 @@ namespace Bot.Commands
             {
                 Title = $"Bot News > {NewsText}",
                 Description = "",
-                Color = Bot.Utils.DiscordUtils.GetRoleColor(Context.Channel as ITextChannel),
+                Color = _Utils_Discord.GetRoleColor(Context.Channel as ITextChannel),
                 Footer = new EmbedFooterBuilder()
                 {
                     Text = _TransMain.HelpFooterHiddenCommands[LangInt]
@@ -181,7 +181,7 @@ namespace Bot.Commands
                 var embed = new EmbedBuilder()
                 {
                     Title = $"UUID | {Player}",
-                    Color = DiscordUtils.GetRoleColor(Context.Channel as ITextChannel),
+                    Color = _Utils_Discord.GetRoleColor(Context.Channel as ITextChannel),
                     Description = uuid.Uuid.Value
                 };
                 await ReplyAsync("", false, embed.Build());
@@ -421,7 +421,7 @@ namespace Bot.Commands
                     Name = $"{Name} {_TransMain.Servers[LangInt]}",
                     IconUrl = Context.Guild.IconUrl
                 },
-                Color = Bot.Utils.DiscordUtils.GetRoleColor(Context.Channel as ITextChannel),
+                Color = _Utils_Discord.GetRoleColor(Context.Channel as ITextChannel),
                 Description = "```md" + Environment.NewLine + string.Join(Environment.NewLine, Servers) + "```"
             };
             await ReplyAsync("", false, embed.Build());
@@ -446,7 +446,7 @@ namespace Bot.Commands
                         Name = _TransMain.MinecraftSales[LangInt],
                         Url = _TransMain.MinecraftSalesUrl[LangInt]
                     },
-                    Color = Bot.Utils.DiscordUtils.GetRoleColor(Context.Channel as ITextChannel),
+                    Color = _Utils_Discord.GetRoleColor(Context.Channel as ITextChannel),
                     Description = $"Total: {stats.Total}" + Environment.NewLine + $"24 Hours: {stats.Last24h}" + Environment.NewLine + $"Average Per Second: {stats.SaleVelocity}",
                     Footer = new EmbedFooterBuilder()
                     {
@@ -508,7 +508,7 @@ namespace Bot.Commands
             }
             var embed = new EmbedBuilder()
             {
-                Color = Bot.Utils.DiscordUtils.GetRoleColor(Context.Channel as ITextChannel),
+                Color = _Utils_Discord.GetRoleColor(Context.Channel as ITextChannel),
                 ImageUrl = Url
             };
             await ReplyAsync("", false, embed.Build());
@@ -630,7 +630,7 @@ namespace Bot.Commands
             int Number = RNG.Next(1, 39);
             var embed = new EmbedBuilder()
             {
-                Color = Bot.Utils.DiscordUtils.GetRoleColor(Context.Channel as ITextChannel),
+                Color = _Utils_Discord.GetRoleColor(Context.Channel as ITextChannel),
                 ImageUrl = "https://www.minecraftskinstealer.com/achievement/a.php?i=" + Number.ToString() + "&h=Achievement+Get!&t=" + Text.Replace(" ", "+")
             };
             await ReplyAsync("", false, embed.Build());
@@ -647,7 +647,7 @@ namespace Bot.Commands
             }
             var embed = new EmbedBuilder()
             {
-                Color = Bot.Utils.DiscordUtils.GetRoleColor(Context.Channel as ITextChannel),
+                Color = _Utils_Discord.GetRoleColor(Context.Channel as ITextChannel),
                 Description = $"[{_TransMain.OnlineSkinEditor[LangInt]}](https://www.minecraftskinstealer.com/skineditor.php)"
             };
             await ReplyAsync("", false, embed.Build());
@@ -667,7 +667,7 @@ namespace Bot.Commands
             {
                 var embed = new EmbedBuilder()
                 {
-                    Color = Bot.Utils.DiscordUtils.GetRoleColor(Context.Channel as ITextChannel),
+                    Color = _Utils_Discord.GetRoleColor(Context.Channel as ITextChannel),
                     ImageUrl = "https://avatar.yourminecraftservers.com/avatar/trnsp/not_found/tall/128/" + Player + ".png"
                 };
                 await ReplyAsync("", false, embed.Build());
@@ -822,7 +822,7 @@ namespace Bot.Commands
             {
                 Title = "Minecraft Classic",
                 Description = $"{_TransHidden.MinecraftClassic[LangInt]} [Wiki](https://minecraft.gamepedia.com/Classic)",
-                Color = DiscordUtils.GetRoleColor(Context.Channel as ITextChannel),
+                Color = _Utils_Discord.GetRoleColor(Context.Channel as ITextChannel),
                 Footer = new EmbedFooterBuilder()
                 {
                     Text = _TransHidden.FoundSecretCommand[LangInt]
@@ -850,7 +850,7 @@ namespace Bot.Commands
             {
                 Description = _TransHidden.Forgecraft[LangInt] + Environment.NewLine +
                 $"[{_TransHidden.ForgecraftWallpaper[LangInt]}](http://feed-the-beast.wikia.com/wiki/Forgecraft) | [{_TransHidden.Wallpaper[LangInt]}](http://www.minecraftforum.net/forums/show-your-creation/fan-art/other-fan-art/1582624-forgecraft-wallpaper)",
-                Color = Bot.Utils.DiscordUtils.GetRoleColor(Context.Channel as ITextChannel),
+                Color = _Utils_Discord.GetRoleColor(Context.Channel as ITextChannel),
                 Footer = new EmbedFooterBuilder()
                 {
                     Text = _TransHidden.FoundSecretCommand[LangInt]
@@ -876,7 +876,7 @@ namespace Bot.Commands
                     Url = "http://www.minecraftforum.net/forums/show-your-creation/fan-art/other-fan-art/1582624-forgecraft-wallpaper"
                 },
                 ImageUrl = "https://dl.dropbox.com/u/25591134/ForgeCraft/ForgeCraft-480x270.jpg",
-                Color = DiscordUtils.GetRoleColor(Context.Channel as ITextChannel),
+                Color = _Utils_Discord.GetRoleColor(Context.Channel as ITextChannel),
                 Footer = new EmbedFooterBuilder()
                 {
                     Text = _TransHidden.FoundSecretCommand[LangInt]
@@ -896,7 +896,7 @@ namespace Bot.Commands
             }
             var embed = new EmbedBuilder()
             {
-                Color = Bot.Utils.DiscordUtils.GetRoleColor(Context.Channel as ITextChannel),
+                Color = _Utils_Discord.GetRoleColor(Context.Channel as ITextChannel),
                 Description = $"{_TransHidden.Bukkit[LangInt]} [{_TransHidden.BukkitNews[LangInt]}](https://bukkit.org/threads/bukkit-its-time-to-say.305106/)",
                 Footer = new EmbedFooterBuilder()
                 {
@@ -917,7 +917,7 @@ namespace Bot.Commands
             }
             var embed = new EmbedBuilder()
             {
-                Color = Bot.Utils.DiscordUtils.GetRoleColor(Context.Channel as ITextChannel),
+                Color = _Utils_Discord.GetRoleColor(Context.Channel as ITextChannel),
                 Description = _TransHidden.Direwolf20[LangInt] + Environment.NewLine + "[Youtube](https://www.youtube.com/channel/UC_ViSsVg_3JUDyLS3E2Un5g) | [Twitch](https://www.twitch.tv/direwolf20) | [Twitter](https://twitter.com/Direwolf20) | [Reddit](https://www.reddit.com/r/DW20/) | [Discord](https://discordapp.com/invite/SQ6wjHg)",
                 Footer = new EmbedFooterBuilder()
                 {
@@ -945,7 +945,7 @@ namespace Bot.Commands
                 {
                     Text = _TransHidden.FoundSecretCommand[LangInt]
                 },
-                Color = DiscordUtils.GetRoleColor(Context.Channel as ITextChannel)
+                Color = _Utils_Discord.GetRoleColor(Context.Channel as ITextChannel)
             };
             await ReplyAsync("", false, embedh.Build());
         }
@@ -968,7 +968,7 @@ namespace Bot.Commands
                 {
                     Text = _TransHidden.FoundSecretCommand[LangInt]
                 },
-                Color = DiscordUtils.GetRoleColor(Context.Channel as ITextChannel)
+                Color = _Utils_Discord.GetRoleColor(Context.Channel as ITextChannel)
             };
             await ReplyAsync("", false, embedh.Build());
         }
@@ -984,7 +984,7 @@ namespace Bot.Commands
             }
             var embed = new EmbedBuilder()
             {
-                Color = Bot.Utils.DiscordUtils.GetRoleColor(Context.Channel as ITextChannel),
+                Color = _Utils_Discord.GetRoleColor(Context.Channel as ITextChannel),
                 Description = $"{_TransHidden.Israphel[LangInt]} [Youtube](https://www.youtube.com/playlist?list=PLF60520313D07F366)",
                 Footer = new EmbedFooterBuilder()
                 {
@@ -1006,7 +1006,7 @@ namespace Bot.Commands
             var embed = new EmbedBuilder()
             {
                 Description = $"{_TransHidden.Notch[LangInt]} [Wiki](https://en.wikipedia.org/wiki/Markus_Persson)",
-                Color = DiscordUtils.GetRoleColor(Context.Channel as ITextChannel),
+                Color = _Utils_Discord.GetRoleColor(Context.Channel as ITextChannel),
                 Footer = new EmbedFooterBuilder()
                 {
                     Text = _TransHidden.FoundSecretCommand[LangInt]
@@ -1045,7 +1045,7 @@ namespace Bot.Commands
             {
                 Title = _TransAdmin.GuildCommand[LangInt],
                 Description = "```md" + Environment.NewLine + $"{string.Join(Environment.NewLine, _TransAdmin.Commands[LangInt])}" + Environment.NewLine + $"< {_TransAdmin.UseList[LangInt]} >```",
-                Color = DiscordUtils.GetRoleColor(Context.Channel as ITextChannel),
+                Color = _Utils_Discord.GetRoleColor(Context.Channel as ITextChannel),
                 Footer = new EmbedFooterBuilder()
                 { Text = "" }
 
@@ -1261,7 +1261,7 @@ namespace Bot.Commands
                 {
                     Title = _TransAdmin.ChangeLang[LangInt],
                     Description = "```md" + Environment.NewLine + "<0 English> mc/lang 0" + Environment.NewLine + "<1 français> mc/lang 1```",
-                    Color = DiscordUtils.GetRoleColor(Context.Channel as ITextChannel),
+                    Color = _Utils_Discord.GetRoleColor(Context.Channel as ITextChannel),
                     Footer = new EmbedFooterBuilder()
                     {
                         Text = $"{_TransAdmin.LanguageTranslate[LangInt]} xXBuilderBXx#9113"
@@ -1356,7 +1356,7 @@ namespace Bot.Commands
             {
                 Description = $"{Item.ID}:{Item.Meta} | {Item.Name}",
                 ThumbnailUrl = "https://lolis.ml/mcitems/" + ID + "-" + Meta + ".png",
-                Color = Bot.Utils.DiscordUtils.GetRoleColor(Context.Channel as ITextChannel),
+                Color = _Utils_Discord.GetRoleColor(Context.Channel as ITextChannel),
                 Footer = new EmbedFooterBuilder()
                 { Text = $"/give {Context.User.Username} {Item.Text}" }
             };
@@ -1380,7 +1380,7 @@ namespace Bot.Commands
                         {
                             Text = "Hey you found a secret command :D"
                         },
-                        Color = DiscordUtils.GetRoleColor(Context.Channel as ITextChannel)
+                        Color = _Utils_Discord.GetRoleColor(Context.Channel as ITextChannel)
                     };
                     await ReplyAsync("", false, embedh.Build());
                     return;
@@ -1396,7 +1396,7 @@ namespace Bot.Commands
                         {
                             Text = "Hey you found a secret command :D"
                         },
-                        Color = DiscordUtils.GetRoleColor(Context.Channel as ITextChannel)
+                        Color = _Utils_Discord.GetRoleColor(Context.Channel as ITextChannel)
                     };
                     await ReplyAsync("", false, embedh.Build());
                     return;
@@ -1409,7 +1409,7 @@ namespace Bot.Commands
                         Title = $"[{Mob.ID}] {Mob.Name}",
                         Description = $"[Wiki]({Mob.WikiLink}) {Mob.Note}",
                         ThumbnailUrl = Mob.PicUrl,
-                        Color = DiscordUtils.GetRoleColor(Context.Channel as ITextChannel)
+                        Color = _Utils_Discord.GetRoleColor(Context.Channel as ITextChannel)
                     };
                     if (Mob.Type == _MobType.Secret)
                     {
@@ -1506,7 +1506,7 @@ namespace Bot.Commands
                 {
                     Title = "Minecraft Potions",
                     Description = "Get a single potion using `mc/potion Instant Health`" + Environment.NewLine + "Or list them all `mc/potion all`",
-                    Color = DiscordUtils.GetRoleColor(Context.Channel as ITextChannel)
+                    Color = _Utils_Discord.GetRoleColor(Context.Channel as ITextChannel)
                 };
                 await ReplyAsync("", false, embed.Build());
             }
@@ -1530,7 +1530,7 @@ namespace Bot.Commands
                 }
                 var embed = new EmbedBuilder()
                 {
-                    Color = DiscordUtils.GetRoleColor(Context.Channel as ITextChannel),
+                    Color = _Utils_Discord.GetRoleColor(Context.Channel as ITextChannel),
                     Footer = new EmbedFooterBuilder()
                     {
                         Text = "II Has level 2 | ⏳ Can strengthen"
@@ -1552,7 +1552,7 @@ namespace Bot.Commands
                     var embed = new EmbedBuilder()
                     {
                         Title = $"Potion of {Potion.Name}",
-                        Color = DiscordUtils.GetRoleColor(Context.Channel as ITextChannel),
+                        Color = _Utils_Discord.GetRoleColor(Context.Channel as ITextChannel),
                         Description = "```md" + Environment.NewLine + $"Base: {Potion.GetBase()}```" + "```md" + Environment.NewLine + $"Recipe: <{Potion.Base} + {Potion.Ingredient} = {Potion.Name.Replace(" ", "")}>" + Environment.NewLine + $"<Duration {Potion.GetDuration()}> <Note {Potion.Note}```",
                         ThumbnailUrl = Potion.Image
                     };
@@ -1577,7 +1577,7 @@ namespace Bot.Commands
                 var embed = new EmbedBuilder()
                 {
                     Description = "Get enchantment info using `mc/enchant (Name)` or `mc/enchant protection`",
-                    Color = DiscordUtils.GetRoleColor(Context.Channel as ITextChannel)
+                    Color = _Utils_Discord.GetRoleColor(Context.Channel as ITextChannel)
                 };
                 embed.AddField("Armor", "Protection | FireProt | Feather Falling | Blast Prot | Projectile Prot | Respiration | Aqua Affinity | Thorns | Depth Strider | Frost Walker");
                 embed.AddField("Weapons", "Sharpness | Smite | Arthropods | Knockback | Fire Aspect | Looting");
@@ -1595,7 +1595,7 @@ namespace Bot.Commands
                     Title = $"[{Enchant.ID}] {Enchant.Name}",
                     Description = "```md" + Environment.NewLine + $"<Version {Enchant.Version}> <Type {Enchant.Type}> <MaxLevel {Enchant.MaxLevel}>" + Environment.NewLine + $"<Note {Enchant.Note}>```",
                     ThumbnailUrl = Enchant.GetEnchantItem(),
-                    Color = DiscordUtils.GetRoleColor(Context.Channel as ITextChannel)
+                    Color = _Utils_Discord.GetRoleColor(Context.Channel as ITextChannel)
                 };
                 await ReplyAsync("", false, embed.Build());
             }

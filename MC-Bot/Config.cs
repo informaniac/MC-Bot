@@ -38,21 +38,21 @@ namespace Bot
             public string Discord = "";
         }
 
-        public static async Task ConfigureServices(IServiceProvider Services, DiscordSocketClient Client, CommandService Commands)
+        public static IServiceProvider AddServices(_Bot ThisBot, DiscordSocketClient Client, CommandService CommandService)
         {
-            await Commands.AddModulesAsync(Assembly.GetEntryAssembly());
-            Services = new ServiceCollection()
-                .AddSingleton(Client)
-                .AddSingleton(Commands)
-                .AddSingleton(new MusicService(Client))
-                .AddSingleton<CommandHandler>(new CommandHandler(Client, Commands)).BuildServiceProvider();
-            var commandHandler = Services.GetService<CommandHandler>();
-            _Task.LoadGuilds();
-            commandHandler.Setup(Services);
             AddMobs();
             AddQuiz();
             AddPotions();
             AddEnchants();
+            _Task.LoadGuilds();
+            return new ServiceCollection()
+                .AddSingleton(Client)
+                .AddSingleton<_Bot>(ThisBot)
+                .AddSingleton(CommandService)
+                .AddSingleton(new MusicService(Client))
+                .AddSingleton<CommandHandler>(new CommandHandler(ThisBot, Client))
+                .BuildServiceProvider();
+            
         }
         private static void AddEnchants()
         {
