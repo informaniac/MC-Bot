@@ -183,7 +183,6 @@ namespace Bot
 
     public class _CacheItem
     {
-        public int Index;
         public IGuild Guild;
         public IGuildUser Bot;
     }
@@ -598,11 +597,16 @@ namespace Bot
         #region ClientEvents
         private async Task JoinedGuild(SocketGuild g)
         {
+
             if (!GuildCache.ContainsKey(g.Id))
             {
-                GuildCache.Add(g.Id, new _CacheItem() { Index = GuildCache.Keys.Count + 1, Guild = g, Bot = g.CurrentUser });
+                GuildCache.Add(g.Id, new _CacheItem() { Guild = g, Bot = g.GetUser(_Client.CurrentUser.Id) });
             }
-            GuildCache.TryGetValue(g.Id, out _CacheItem CI);
+            else
+            {
+                GuildCache.TryGetValue(g.Id, out _CacheItem CI);
+                CI.Bot = g.GetUser(_Client.CurrentUser.Id);
+            }
             if (!DevMode)
             {
                 if (_Bot._Blacklist.Check(g.Id))
@@ -725,16 +729,14 @@ namespace Bot
             _CacheItem CI;
             if (!GuildCache.ContainsKey(g.Id))
             {
-                if (GuildCache.Keys.Count == 0)
-                {
-                    GuildCache.Add(g.Id, new _CacheItem() { Index = 1, Guild = g, Bot = g.CurrentUser });
-                }
-                else
-                {
-                    GuildCache.Add(g.Id, new _CacheItem() { Index = GuildCache.Keys.Count + 1, Guild = g, Bot = g.CurrentUser });
-                }
+                GuildCache.Add(g.Id, new _CacheItem() { Guild = g, Bot = g.GetUser(_Client.CurrentUser.Id) });
+                GuildCache.TryGetValue(g.Id, out CI);
             }
-            GuildCache.TryGetValue(g.Id, out CI);
+            else
+            {
+                GuildCache.TryGetValue(g.Id, out CI);
+                CI.Bot = g.GetUser(_Client.CurrentUser.Id);
+            }
 
             if (!DevMode)
             {
@@ -787,8 +789,6 @@ namespace Bot
             }
             return Task.CompletedTask;
         }
-
-
         #endregion
     }
 
@@ -1738,7 +1738,7 @@ namespace Bot.Utils
                 _Bot.GuildCache.TryGetValue(Chan.Guild.Id, out _CacheItem Cache);
                 if (Cache.Bot != null && Cache.Bot.RoleIds.Count != 1 && Cache.Bot.GuildPermissions.EmbedLinks || Cache.Bot.GetPermissions(Chan).EmbedLinks)
                 {
-                    RoleColor = Cache.Bot.Guild.Roles.Where(x => x.Id != Chan.Guild.EveryoneRole.Id).OrderByDescending(x => x.Position).First().Color;
+                    RoleColor = Cache.Bot.Guild.Roles.Where(x => x.Id != Chan.Guild.EveryoneRole.Id && Cache.Bot.RoleIds.Contains(x.Id)).First().Color;
                 }
             }
             return RoleColor;
