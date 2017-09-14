@@ -356,7 +356,7 @@ namespace Bot.Classes
     }
     public enum _Language
     {
-        English = 0, French = 1
+        English = 0, French = 1, Spanish = 2
     }
     public class _Guild
     {

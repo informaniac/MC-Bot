@@ -13,6 +13,47 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+namespace Bot.Services
+{
+    public class GuildCheck
+    {
+        DiscordSocketClient _Client;
+        public GuildCheck(DiscordSocketClient Client)
+        {
+            _Client = Client;
+            _Task.LoadGuilds();
+            _Client.GuildAvailable += _Client_GuildAvailable;
+            _Client.JoinedGuild += _Client_JoinedGuild;
+        }
+
+        private Task _Client_JoinedGuild(SocketGuild g)
+        {
+            if (!_Bot._Blacklist.Check(g.Id))
+            {
+                var Guild = _Config.MCGuilds.Find(x => x.ID == g.Id);
+                if (Guild == null)
+                {
+                    _Task.NewGuild(g.Id);
+                }
+            }
+            return Task.CompletedTask;
+        }
+
+        private Task _Client_GuildAvailable(SocketGuild g)
+        {
+            if (!_Bot._Blacklist.Check(g.Id))
+            {
+                var Guild = _Config.MCGuilds.Find(x => x.ID == g.Id);
+                if (Guild == null)
+                {
+                    _Task.NewGuild(g.Id);
+                }
+            }
+            return Task.CompletedTask;
+        }
+    }
+
+}
 namespace Bot
 {
     public class _Config
@@ -49,6 +90,7 @@ namespace Bot
                 .AddSingleton(Client)
                 .AddSingleton<_Bot>(ThisBot)
                 .AddSingleton(CommandService)
+                .AddSingleton(new GuildCheck(Client))
                 .AddSingleton(new MusicService(Client))
                 .AddSingleton<CommandHandler>(new CommandHandler(ThisBot, Client))
                 .BuildServiceProvider();

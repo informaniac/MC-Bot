@@ -40,102 +40,109 @@ namespace Bot.Commands
         [Command("help"), Alias("commands")]
         public async Task Help(string Action = "")
         {
-            _Task.GetGuild(Context.Guild, out _Guild Guild, out int LangInt);
-            if (Context.Guild != null&& Guild == null)
+            try
             {
-                var NewGuildEmbed = new EmbedBuilder()
+                _Task.GetGuild(Context.Guild, out _Guild Guild, out int LangInt);
+                if (Context.Guild != null && Guild == null)
                 {
-                    Title = ":wave: Hi im Minecraft Bot",
-                    Description = "Im packed full of Minecraft commands and special features such as player skins, name history, quiz and some other secret commands",
-                    Footer = new EmbedFooterBuilder()
+                    var NewGuildEmbed = new EmbedBuilder()
                     {
-                        Text = "If you have any issues please contact xXBuilderBXx#9113"
-                    },
-                    Color = _Utils_Discord.GetRoleColor(Context.Channel as ITextChannel)
-                };
-                IGuildUser Owner = await Context.Guild.GetOwnerAsync();
-                NewGuildEmbed.AddField("Language", $"<@{Owner.Id}> Please User" + Environment.NewLine + "`mc/lang 0` English **Default**" + Environment.NewLine + "`mc/lang 1` français", true);
-                NewGuildEmbed.AddField("Commands", "`mc/help` Commands" + Environment.NewLine + "`mc/admin` Guild Admin" + Environment.NewLine + "`mc/ping` Ping A Server" + Environment.NewLine + "`mc/invite` Bot Invite", true);
-                await ReplyAsync("", false, NewGuildEmbed.Build());
-                _Task.NewGuild(Context.Guild.Id);
-                return;
-            }
-            if (Context.Guild != null)
-            {
-                IGuildUser GU = await Context.Guild.GetUserAsync(Context.Client.CurrentUser.Id);
-                if (!GU.GuildPermissions.EmbedLinks || !GU.GetPermissions(Context.Channel as ITextChannel).EmbedLinks)
-                {
-                    await ReplyAsync("```python" + Environment.NewLine + $"{_TransMain.NoEmbedPerm[LangInt]}```");
+                        Title = ":wave: Hi im Minecraft Bot",
+                        Description = "Im packed full of Minecraft commands and special features such as player skins, name history, quiz and some other secret commands",
+                        Footer = new EmbedFooterBuilder()
+                        {
+                            Text = "If you have any issues please contact xXBuilderBXx#9113"
+                        },
+                        Color = _Utils_Discord.GetRoleColor(Context.Channel as ITextChannel)
+                    };
+                    IGuildUser Owner = await Context.Guild.GetOwnerAsync();
+                    NewGuildEmbed.AddField("Language", $"<@{Owner.Id}> Please User" + Environment.NewLine + "`mc/lang 0` English **Default**" + Environment.NewLine + "`mc/lang 1` français", true);
+                    NewGuildEmbed.AddField("Commands", "`mc/help` Commands" + Environment.NewLine + "`mc/admin` Guild Admin" + Environment.NewLine + "`mc/ping` Ping A Server" + Environment.NewLine + "`mc/invite` Bot Invite", true);
+                    await ReplyAsync("", false, NewGuildEmbed.Build());
+                    _Task.NewGuild(Context.Guild.Id);
                     return;
                 }
-            }
-            if (NewsText == "" && File.Exists(_Config.BotPath + "News.txt"))
-            {
-                using (StreamReader reader = new StreamReader(_Config.BotPath + "News.txt"))
+                if (Context.Guild != null)
                 {
-                    NewsText = reader.ReadLine();
-                }
-            }
-            List<string> WikiCommands = new List<string>();
-
-            foreach (var i in _Commands.Commands.Where(x => x.Module.Name == "Wiki"))
-            {
-                WikiCommands.Add($"{i.Remarks}");
-            }
-            string CommunityName = "";
-            string CommunityDesc = "";
-            string CommunityLink = "";
-            int Servers = 0;
-            if (Context.Guild != null)
-            {
-                if (Guild != null)
-                {
-                    if (Guild.CommunityName != "")
+                    IGuildUser GU = await Context.Guild.GetUserAsync(Context.Client.CurrentUser.Id);
+                    if (!GU.GuildPermissions.EmbedLinks || !GU.GetPermissions(Context.Channel as ITextChannel).EmbedLinks)
                     {
-                        CommunityName = Guild.CommunityName;
-                        CommunityDesc = Guild.CommunityDescription;
-                        CommunityLink = Guild.Website;
-                        Servers = Guild.Servers.Count();
+                        await ReplyAsync("```python" + Environment.NewLine + $"{_TransMain.NoEmbedPerm[LangInt]}```");
+                        return;
                     }
                 }
-            }
-            var embed = new EmbedBuilder()
-            {
-                Title = $"Bot News > {NewsText}",
-                Description = "",
-                Color = _Utils_Discord.GetRoleColor(Context.Channel as ITextChannel),
-                Footer = new EmbedFooterBuilder()
+                if (NewsText == "" && File.Exists(_Config.BotPath + "News.txt"))
                 {
-                    Text = _TransMain.HelpFooterHiddenCommands[LangInt]
+                    using (StreamReader reader = new StreamReader(_Config.BotPath + "News.txt"))
+                    {
+                        NewsText = reader.ReadLine();
+                    }
                 }
-            };
-            if (CommunityName == "")
-            {
-                embed.AddField(_TransMain.ThisCommunity[LangInt], _TransMain.CommunityError[LangInt]);
-            }
-            else
-            {
-                if (CommunityLink == "")
+                List<string> WikiCommands = new List<string>();
+
+                foreach (var i in _Commands.Commands.Where(x => x.Module.Name == "Wiki"))
                 {
-                    embed.AddField(_TransMain.ThisCommunity[LangInt], CommunityName + Environment.NewLine + CommunityDesc);
+                    WikiCommands.Add($"{i.Remarks}");
+                }
+                string CommunityName = "";
+                string CommunityDesc = "";
+                string CommunityLink = "";
+                int Servers = 0;
+                if (Context.Guild != null)
+                {
+                    if (Guild != null)
+                    {
+                        if (Guild.CommunityName != "")
+                        {
+                            CommunityName = Guild.CommunityName;
+                            CommunityDesc = Guild.CommunityDescription;
+                            CommunityLink = Guild.Website;
+                            Servers = Guild.Servers.Count();
+                        }
+                    }
+                }
+                var embed = new EmbedBuilder()
+                {
+                    Title = $"Bot News > {NewsText}",
+                    Description = "",
+                    Color = _Utils_Discord.GetRoleColor(Context.Channel as ITextChannel),
+                    Footer = new EmbedFooterBuilder()
+                    {
+                        Text = _TransMain.HelpFooterHiddenCommands[LangInt]
+                    }
+                };
+                if (CommunityName == "")
+                {
+                    embed.AddField(_TransMain.ThisCommunity[LangInt], _TransMain.CommunityError[LangInt]);
                 }
                 else
                 {
-                    embed.AddField($"{_TransMain.ThisCommunity[LangInt]} - {CommunityName}", $"{_TransMain.Servers[LangInt]} {Servers} [Website]({CommunityLink})" + Environment.NewLine + CommunityDesc);
+                    if (CommunityLink == "")
+                    {
+                        embed.AddField(_TransMain.ThisCommunity[LangInt], CommunityName + Environment.NewLine + CommunityDesc);
+                    }
+                    else
+                    {
+                        embed.AddField($"{_TransMain.ThisCommunity[LangInt]} - {CommunityName}", $"{_TransMain.Servers[LangInt]} {Servers} [Website]({CommunityLink})" + Environment.NewLine + CommunityDesc);
+                    }
+                }
+                embed.AddField("Wiki", string.Join(" | ", WikiCommands));
+                embed.AddField(_TransMain.HelpCommands[LangInt], "```md" + Environment.NewLine + string.Join(Environment.NewLine, _TransMain.Commands[LangInt]) + "```");
+                embed.AddField(_TransMain.HelpLinks[LangInt], $"[MultiMC](https://multimc.org/) {_TransMain.MultiMC[LangInt]}" + Environment.NewLine + "[Ftb Legacy](http://ftb.cursecdn.com/FTB2/launcher/FTB_Launcher.exe) | [Technic Launcher](https://www.technicpack.net/download) | [AT Launcher](https://www.atlauncher.com/downloads)");
+                if (Action == "update" && Context.User.Id == 190590364871032834)
+                {
+                    ITextChannel TE = await Context.Guild.GetTextChannelAsync(351033810961301506);
+                    IUserMessage Update = await TE.GetMessageAsync(351404116527808512) as IUserMessage;
+                    await Update.ModifyAsync(x => { x.Embed = embed.Build(); });
+                }
+                else
+                {
+                    await ReplyAsync("", false, embed.Build());
                 }
             }
-            embed.AddField("Wiki", string.Join(" | ", WikiCommands));
-            embed.AddField(_TransMain.HelpCommands[LangInt], "```md" + Environment.NewLine + string.Join(Environment.NewLine, _TransMain.Commands[LangInt]) + "```");
-            embed.AddField(_TransMain.HelpLinks[LangInt], $"[MultiMC](https://multimc.org/) {_TransMain.MultiMC[LangInt]}" + Environment.NewLine + "[Ftb Legacy](http://ftb.cursecdn.com/FTB2/launcher/FTB_Launcher.exe) | [Technic Launcher](https://www.technicpack.net/download) | [AT Launcher](https://www.atlauncher.com/downloads)");
-            if (Action == "update" && Context.User.Id == 190590364871032834)
+            catch(Exception ex)
             {
-                ITextChannel TE = await Context.Guild.GetTextChannelAsync(351033810961301506);
-                IUserMessage Update = await TE.GetMessageAsync(351404116527808512) as IUserMessage;
-                await Update.ModifyAsync(x => { x.Embed = embed.Build(); });
-            }
-            else
-            {
-                await ReplyAsync("", false, embed.Build());
+                Console.WriteLine(ex);
             }
         }
 
@@ -1260,7 +1267,7 @@ namespace Bot.Commands
                 var embed = new EmbedBuilder()
                 {
                     Title = _TransAdmin.ChangeLang[LangInt],
-                    Description = "```md" + Environment.NewLine + "<0 English> mc/lang 0" + Environment.NewLine + "<1 français> mc/lang 1```",
+                    Description = "```md" + Environment.NewLine + "<0 English> mc/lang 0" + Environment.NewLine + "<1 français> mc/lang 1" + Environment.NewLine + "<2 Español> mc/lang 2```",
                     Color = _Utils_Discord.GetRoleColor(Context.Channel as ITextChannel),
                     Footer = new EmbedFooterBuilder()
                     {
@@ -1281,6 +1288,11 @@ namespace Bot.Commands
                     case 1:
                         Guild.Language = _Language.French;
                         await ReplyAsync("Langue de la guilde réglée en français");
+                        _Task.SaveGuild(Context.Guild.Id);
+                        break;
+                    case 2:
+                        Guild.Language = _Language.Spanish;
+                        await ReplyAsync("Idioma del gremio ajustado al español");
                         _Task.SaveGuild(Context.Guild.Id);
                         break;
                 }
