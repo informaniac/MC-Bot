@@ -1732,13 +1732,24 @@ namespace Bot.Utils
 
         public static Color GetRoleColor(IChannel Channel)
         {
-            Color RoleColor = new Discord.Color(30, 0, 200);
+            Color RoleColor = new Discord.Color(30, 50, 200);
             if (Channel is ITextChannel Chan)
             {
                 _Bot.GuildCache.TryGetValue(Chan.Guild.Id, out _CacheItem Cache);
-                if (Cache.Bot != null && Cache.Bot.RoleIds.Count != 1 && Cache.Bot.GuildPermissions.EmbedLinks || Cache.Bot.GetPermissions(Chan).EmbedLinks)
+                if (Cache.Bot != null && Cache.Bot.GuildPermissions.EmbedLinks || Cache.Bot.GetPermissions(Chan).EmbedLinks)
                 {
-                    RoleColor = Cache.Bot.Guild.Roles.Where(x => x.Id != Chan.Guild.EveryoneRole.Id && Cache.Bot.RoleIds.Contains(x.Id)).First().Color;
+                    if (Cache.Guild.Roles.Count() > 1 && Cache.Bot.RoleIds.Count() > 1)
+                    {
+                        foreach (var i in Cache.Bot.Guild.Roles.Where(x => x.Id != Chan.Guild.EveryoneRole.Id && Cache.Bot.RoleIds.Contains(x.Id)).OrderByDescending(x => x.Position))
+                        {
+                            if (i.Color.R != 0 && i.Color.G != 0 && i.Color.B != 0)
+                            {
+                                RoleColor = i.Color;
+                                break;
+                            }
+                        }
+
+                    }
                 }
             }
             return RoleColor;
