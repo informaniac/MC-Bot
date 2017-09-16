@@ -215,7 +215,7 @@ namespace Bot
             MCQuiz.Add(new _Quiz() { Question = "What item can iron golems spawn with", Answer = "poppy, poppies", Note = "Iron golems can spawn with a poppy in their hand and offer them to villagers" });
             MCQuiz.Add(new _Quiz() { Question = "Can snow golems take fall damage", Answer = "no", Note = "Snow golems are immune to fall damage" });
             MCQuiz.Add(new _Quiz() { Question = "Who created minecraft", Answer = "notch Markus", Note = "Notch aka Markus Persson created Minecraft" });
-            MCQuiz.Add(new _Quiz() { Question = "Do endermites take damage on soul sand?", Answer = "yes", Note = "Endermites take damage on soul sound because of their small height" });
+            MCQuiz.Add(new _Quiz() { Question = "Do endermites take damage on soul sand?", Answer = "yes", Note = "Endermites take damage on soul sand because of their small height" });
             MCQuiz.Add(new _Quiz() { Question = "Can nether wart grow in the overworld", Answer = "no", Note = "Nether wart only grows in the nether" });
             MCQuiz.Add(new _Quiz() { Question = "What dimension is The End called", Answer = "sky", Note = "Press F3 and the dimension for The End is called Sky" });
             MCQuiz.Add(new _Quiz() { Question = "Can skeletons see through glass", Answer = "no", Note = "Skeletons cannot see through glass like zombies and spiders can" });

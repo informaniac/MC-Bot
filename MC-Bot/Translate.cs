@@ -42,13 +42,13 @@ namespace Bot
                         "[ mc/ping (IP) ]( Faire un ping sur un serveur )",
                         "[ mc/list ]( Liste des serveurs MC de la guilde )",
                         "[ mc/info ]( Informations sur les ventes MC )",
-                        "[ mc/skin (Joueur) ]( Peau du joueur )",
+                        "[ mc/skin (Joueur) ]( Skin du joueur )",
                         "[ mc/names (Joueur) ]( Historique des nom de compte MC )",
                         "[ mc/status ]( Status des serveur de Mojange )",
                         //"[ mc/music ]( Jouer de la musique )",
                         "[ mc/get (Texte) ]( Obtenir une réussite )",
-                        "[ mc/skinedit ]( Éditeur de peau en ligne )",
-                        "[ mc/minime (Joueur) ]( Minimiser la peau du joueur )",
+                        "[ mc/skinedit ]( Éditeur de skin en ligne )",
+                        "[ mc/minime (Joueur) ]( Minimiser la skin du joueur )",
                         "[ mc/admin ]( Commandes d'administration de la guilde )",
                         "[ mc/invite ]( Obtenir l'invitation de bot )"
                     },
@@ -77,7 +77,7 @@ namespace Bot
                 public string[] NoEmbedPerm = new string[]
                 {
                     "Bot requires permission \" Embed Links \"",
-                    "Bot nécessite une autorisation \" Liens incrémentés \"",
+                    "Bot nécessite l'autorisatio \" Liens incrémentés \"",
                     "Bot requiere permiso \" Enlazar Enlaces \""
                 };
                 public string[] HelpFooterHiddenCommands = new string[]
@@ -131,7 +131,7 @@ namespace Bot
                 public string[] MojangStatus = new string[]
                 {
                     "Mojang Status",
-                    "État de Mojang",
+                    "État des serveurs Mojang",
                     "Estado de Mojang"
                 };
                 public string[] ApiError = new string[]
@@ -149,7 +149,7 @@ namespace Bot
                 public string[] StoleASkin = new string[]
                 {
                     "Stole a skin",
-                    "Roule une peau",
+                    "Roule une skin",
                     "Robó una piel"
                 };
                 public string[] UnknownArg = new string[]
@@ -385,7 +385,7 @@ namespace Bot
                 {
                     "Hey you found a secret command :D",
                     "Hé, vous avez trouvé une commande secrète :D",
-                    "Hola, has encontrado un comando secreto: D"
+                    "Hola, has encontrado un comando secreto :D"
                 };
                 public string[] MinecraftClassic = new string[]
                 {
@@ -420,13 +420,13 @@ namespace Bot
                 public string[] Herobrine = new string[]
                 {
                     "Always watching you...",
-                    "Toujours te regarder...",
+                    "Te regarde toujours...",
                     "Siempre observándote ..."
                 };
                 public string[] Entity303 = new string[]
                 {
                     "A minecraft creepy pasta of a former Mojang employee who was fired by Notch and now want revenge",
-                    "Une minecraft pâté épouvantable d'un ancien employé de Mojang qui a été renvoyé par Notch et veut maintenant se venger",
+                    "Une creppy pasta de minecraft d'un ancien employé de Mojang qui a été renvoyé par Notch et veut maintenant se venger",
                     "Un minecraft espeluznante pasta de un ex empleado de Mojang que fue despedido por Notch y ahora quieren venganza"
                 };
                 public string[] Israphel = new string[]
@@ -473,12 +473,12 @@ namespace Bot
                     // Spanish
                     new string[]
                     {
-                        "[ mc/lang ]( Establecer el idioma de la comunidad )",
-                        "[ mc/addserver ]( Añade un servidor MC a esta lista de gremios )",
-                        "[ mc/delserver ]( Quitar un servidor MC de esta lista de gremios )",
-                        "[ mc/setname ]( Establecer el nombre de la comunidad )",
-                        "[ mc/setdesc ]( Establecer la descripción de la comunidad )",
-                        "[ mc/setlink ]( Establecer el vínculo de la comunidad )"
+                        "[ mc/lang ]( Définir la langue de la communauté )",
+                        "[ mc/addserver ]( Ajouter un serveur MC à cette liste de guilde )",
+                        "[ mc/delserver ]( Supprimez un serveur MC de cette liste de guilde )",
+                        "[ mc/setname ]( Définir le nom de la communauté )",
+                        "[ mc/setdesc ]( Définir la description de la communauté )",
+                        "[ mc/setlink ]( Définir le lien de la communauté )"
                     },
                 };
                 public string[] LanguageTranslate = new string[]

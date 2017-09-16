@@ -635,10 +635,11 @@ namespace Bot.Commands
             }
             Random RNG = new Random();
             int Number = RNG.Next(1, 39);
+            UriBuilder uriBuilder = new UriBuilder("https://www.minecraftskinstealer.com/achievement/a.php?i=" + Number.ToString() + "&h=Achievement+Get!&t=" + Text.Replace(" ", "+"));
             var embed = new EmbedBuilder()
             {
                 Color = _Utils_Discord.GetRoleColor(Context.Channel as ITextChannel),
-                ImageUrl = "https://www.minecraftskinstealer.com/achievement/a.php?i=" + Number.ToString() + "&h=Achievement+Get!&t=" + Text.Replace(" ", "+")
+                ImageUrl = uriBuilder.Uri.AbsoluteUri
             };
             await ReplyAsync("", false, embed.Build());
         }
@@ -1596,7 +1597,7 @@ namespace Bot.Commands
                 embed.AddField("Bows", "Power | Punch | Infinity | Flame");
                 embed.AddField("Tools", "Efficiency | Silk Touch | Fortune");
                 embed.AddField("Fishing Rod", "Luck Of The Sea | Lure");
-                embed.AddField("All", "Unbreaking Mending");
+                embed.AddField("All", "Unbreaking | Mending");
                 await ReplyAsync("", false, embed.Build());
             }
             else
