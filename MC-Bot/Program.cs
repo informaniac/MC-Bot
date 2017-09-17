@@ -286,7 +286,7 @@ namespace Bot
             Console.ForegroundColor = ConsoleColor.White;
             CreateTempConfig();
             LoadConfig();
-
+            
             _Services = _Config.AddServices(this, _Client, _Commands);
 
             if (File.Exists($"{_Config.BotPath}LIVE.txt"))
@@ -305,6 +305,7 @@ namespace Bot
             _Commands = _Services.GetService<CommandService>();
             await _Commands.AddModulesAsync(this.GetType().Assembly);
             CommandHandler.AddServices(_Services, _Commands);
+            _Config.Uptime.Start();
             await CommandHandler.StartHandle().ConfigureAwait(false);
             await Login().ConfigureAwait(false);
         }

@@ -22,6 +22,7 @@ using Discord.Addons.InteractiveCommands;
 using jsimple.util.function;
 using Bot.Services;
 using System.Text.RegularExpressions;
+using Discord.WebSocket;
 
 namespace Bot.Commands
 {
@@ -31,8 +32,10 @@ namespace Bot.Commands
         public _Translate.Commands.Main _TransMain = new _Translate.Commands.Main();
 
         private CommandService _Commands;
-        public Main(CommandService Commands)
+        private DiscordSocketClient _Client;
+        public Main(DiscordSocketClient Client, CommandService Commands)
         {
+            _Client = Client;
             _Commands = Commands;
         }
         public string NewsText = "";
@@ -127,7 +130,7 @@ namespace Bot.Commands
                     }
                 }
                 embed.AddField("Wiki", string.Join(" | ", WikiCommands));
-                embed.AddField(_TransMain.HelpCommands[LangInt], "```md" + Environment.NewLine + string.Join(Environment.NewLine, _TransMain.Commands[LangInt]) + "```");
+                embed.AddField(_TransMain.Commands[LangInt], "```md" + Environment.NewLine + string.Join(Environment.NewLine, _TransMain.HelpCommands[LangInt]) + "```");
                 embed.AddField(_TransMain.HelpLinks[LangInt], $"[MultiMC](https://multimc.org/) {_TransMain.MultiMC[LangInt]}" + Environment.NewLine + "[Ftb Legacy](http://ftb.cursecdn.com/FTB2/launcher/FTB_Launcher.exe) | [Technic Launcher](https://www.technicpack.net/download) | [AT Launcher](https://www.atlauncher.com/downloads)");
                 if (Action == "update" && Context.User.Id == 190590364871032834)
                 {
@@ -686,6 +689,53 @@ namespace Bot.Commands
             }
         }
 
+        [Command("bot")]
+        public async Task Bot()
+        {
+            int FrenchCount = 0;
+            int SpanishCount = 0;
+            _Task.GetGuild(Context.Guild, out _Guild Guild, out int LangInt);
+            foreach(var i in _Config.MCGuilds.Where(x => x.Language == _Language.French))
+            {
+                FrenchCount++;
+            }
+            foreach (var i in _Config.MCGuilds.Where(x => x.Language == _Language.Spanish))
+            {
+                SpanishCount++;
+            }
+            int Count = 0;
+            foreach(var i in _Commands.Commands.Where(x => x.Module.Name != "o" && x.Module.Name != "whitelist" && x.Module.Name != "blacklist" && x.Module.Name != "Music"))
+            {
+                Count++;
+            }
+            string Uptime = "";
+            if (_Config.Uptime.Elapsed.Hours == 0)
+            {
+                Uptime = $"{_Config.Uptime.Elapsed.Minutes}m {_Config.Uptime.Elapsed.Seconds}s";
+            }
+            else if (_Config.Uptime.Elapsed.Days == 0)
+            {
+                Uptime = $"{_Config.Uptime.Elapsed.Hours}h {_Config.Uptime.Elapsed.Minutes}m";
+            }
+            else
+            {
+                Uptime = $"{_Config.Uptime.Elapsed.Days}d {_Config.Uptime.Elapsed.Hours}h";
+            }
+            var embed = new EmbedBuilder()
+            {
+                Title = "",
+                Description = _TransMain.Bot_Desc[LangInt],
+                Footer = new EmbedFooterBuilder()
+                {
+                    Text = _TransMain.Bot_Footer[LangInt]
+                },
+                Color = _Utils_Discord.GetRoleColor(Context.Channel)
+            };
+            embed.AddField($"<:info:350172480645758976> {_TransMain.Info[LangInt]}", $"**{_TransMain.Bot_BotOwner[LangInt]}**" + Environment.NewLine + "xXBuilderBXx#9113" + Environment.NewLine + "<@190590364871032834>" + Environment.NewLine + Environment.NewLine + $"**{_TransMain.Language[LangInt]}:** C#" + Environment.NewLine + $"**{_TransMain.Library[LangInt]}:** {_Config.Library}", true);
+            embed.AddField($"<:stats:350172481157464065> {_TransMain.Stats[LangInt]}", $"**{_TransMain.Guilds[LangInt]}:** {_Client.Guilds.Count()}" + Environment.NewLine + $"**{_TransMain.Commands[LangInt]}:** {Count}" + Environment.NewLine + $"**{_TransMain.Uptime[LangInt]}:** {Uptime}" + Environment.NewLine + Environment.NewLine + $"**français:** {FrenchCount}" + Environment.NewLine + $"**Español:** {SpanishCount}", true);
+            embed.AddField($"<:world:350172484038950912> {_TransMain.Links[LangInt]}", $"[{_TransMain.Links[LangInt]}](https://discordapp.com/oauth2/authorize?&client_id=" + Context.Client.CurrentUser.Id + "&scope=bot&permissions=0)" + Environment.NewLine + $"[{_TransMain.Website[LangInt]}](https://blazeweb.ml)" + Environment.NewLine + "[Github](https://github.com/xXBuilderBXx/MC-Bot)" + Environment.NewLine + Environment.NewLine + $"**{_TransMain.BotListGuilds[LangInt]}**" + Environment.NewLine + "[Dbots](https://bots.discord.pw/bots/346346285953056770)" + Environment.NewLine + "[DBL](https://discordbots.org/bot/346346285953056770)" + Environment.NewLine + "[Novo](https://novo.archbox.pro/)", true);
+            await ReplyAsync("", false, embed.Build());
+        }
     }
     public class Music : ModuleBase
     {

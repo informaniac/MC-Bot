@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -59,11 +60,13 @@ namespace Bot
     public class _Config
     {
         public static string BotName = "Minecraft";
+        public static Stopwatch Uptime = new Stopwatch();
         public static string Prefix = "mc/";
         public static string DevPrefix = "tmc/";
         public static string Github = "https://github.com/xXBuilderBXx/MC-Bot";
         public static string BotPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "/MC-Bot/";
         public static bool Ready = false;
+        public static string Library = ".net V2-00828";
         public static bool DevMode = true;
         public static Class Tokens = new Class();
         public static List<_Guild> MCGuilds = new List<_Guild>();

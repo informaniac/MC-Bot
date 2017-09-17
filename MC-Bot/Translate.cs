@@ -12,11 +12,12 @@ namespace Bot
         {
             public class Main
             {
-                public List<string[]> Commands = new List<string[]>()
+                public List<string[]> HelpCommands = new List<string[]>()
                 {
                     // English
                     new string[]
                     {
+                        "[ mc/bot ]( Bot Invite/Info/Stats/Links )",
                         "[ mc/quiz ]( Minecraft quiz :D )",
                         "[ mc/colors ]( MC color codes )",
                         "[ mc/uuid (Player) ]( Player UUID )",
@@ -36,6 +37,7 @@ namespace Bot
                     // French
                     new string[]
                     {
+                        "[ mc/bot ]( Bot Inviter/Info/Stats/Liens )",
                         "[ mc/quiz ]( Essai de Minecraft :D )",
                         "[ mc/colors ]( Codes de couleur MC )",
                         "[ mc/uuid (Joueur) ]( Joueur UUID )",
@@ -55,6 +57,7 @@ namespace Bot
                     // Spanish
                     new string[]
                     {
+                        "[ mc/bot ]( Bot Invitación/Información/Estadísticas/Campo de golf )",
                         "[ mc/quiz ]( Minecraft quiz :D )",
                         "[ mc/colors ]( MC color codes )",
                         "[ mc/uuid (Player) ]( Jugador UUID )",
@@ -73,7 +76,18 @@ namespace Bot
                     },
                 };
 
-
+                public string[] Commands = new string[]
+                {
+                    "Commands",
+                    "Commandes",
+                    "Comandos"
+                };
+                public string[] BotListGuilds = new string[]
+                {
+                    "Bot List Guilds",
+                    "Liste alphabétique",
+                    "Bot List Guilds"
+                };
                 public string[] NoEmbedPerm = new string[]
                 {
                     "Bot requires permission \" Embed Links \"",
@@ -302,12 +316,7 @@ namespace Bot
                         "Des liens",
                         "Campo de golf"
                     };
-                public string[] HelpCommands = new string[]
-                {
-                    "Commands",
-                    "Commandes",
-                    "Comandos"
-                };
+
                 public string[] ColorCodes = new string[]
                 {
                     "Minecraft Color Codes",
@@ -355,6 +364,79 @@ namespace Bot
                     "Online Skin Editor",
                     "Éditeur de peau en ligne",
                     "Online Skin Editor"
+                };
+
+                public string[] Bot_Desc = new string[]
+                {
+                    "If you have any issue, suggestions or language translations please contact me",
+                    "Si vous avez un problème, des suggestions ou des traductions linguistiques, contactez-moi",
+                    "Si tiene algún problema, sugerencias o traducciones de idiomas, póngase en contacto conmigo"
+                };
+                public string[] Bot_Footer = new string[]
+                {
+                    "Bot owner commands do not count to the command count above also some of them are secret ones you have to find",
+                    "Les commandes du propriétaire du robot ne comptent pas sur le compte de commande ci-dessus, mais certains d'entre eux sont secrets que vous devez trouver",
+                    "Bot comandos de propietario no cuentan para el comando de contar por encima también algunos de ellos son secretos que tiene que encontrar"
+                };
+                public string[] Info = new string[]
+                {
+                    "Info",
+                    "Info",
+                    "Información"
+                };
+                public string[] Stats = new string[]
+                {
+                    "Stats",
+                    "Stats",
+                    "Estadísticas"
+                };
+                public string[] Links = new string[]
+                {
+                    "Links",
+                    "Des liens",
+                    "Campo de golf"
+                };
+                public string[] Bot_BotOwner = new string[]
+                {
+                    "Bot Owner",
+                    "Propriétaire du robot",
+                    "Bot Owner"
+                };
+                public string[] Language = new string[]
+                {
+                    "Language",
+                    "La langue",
+                    "Idioma"
+                };
+                public string[] Library = new string[]
+                {
+                    "Library",
+                    "Bibliothèque",
+                    "Biblioteca"
+                };
+                public string[] Guilds = new string[]
+                {
+                    "Guilds",
+                    "Guildes",
+                    "Gremios"
+                };
+                public string[] Uptime = new string[]
+                {
+                    "Uptime",
+                    "Temps de disponibilité",
+                    "Tiempo de actividad"
+                };
+                public string[] BotInvite = new string[]
+                {
+                    "Bot Invite",
+                    "Invité Bot",
+                    "Bot Invita"
+                };
+                public string[] Website = new string[]
+                {
+                    "Website",
+                    "Site Internet",
+                    "Sitio web"
                 };
             }
             public class Music
