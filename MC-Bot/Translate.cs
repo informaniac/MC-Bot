@@ -23,6 +23,7 @@ namespace Bot
                         "[ mc/uuid (Player) ]( Player UUID )",
                         "[ mc/ping (IP) ]( Ping a server )",
                         "[ mc/list ]( List guild MC servers )",
+                        "[ mc/wiki ]( Wiki for Items/Mobs/Enchants/Potions )",
                         "[ mc/info ]( MC sales info )",
                         "[ mc/skin (Player) ]( Player skin )",
                         "[ mc/names (Player) ]( MC account name history )",
@@ -43,6 +44,7 @@ namespace Bot
                         "[ mc/uuid (Joueur) ]( Joueur UUID )",
                         "[ mc/ping (IP) ]( Faire un ping sur un serveur )",
                         "[ mc/list ]( Liste des serveurs MC de la guilde )",
+                        "[ mc/wiki ]( Wiki for Items/Mobs/Enchants/Potions )",
                         "[ mc/info ]( Informations sur les ventes MC )",
                         "[ mc/skin (Joueur) ]( Skin du joueur )",
                         "[ mc/names (Joueur) ]( Historique des nom de compte MC )",
@@ -63,6 +65,7 @@ namespace Bot
                         "[ mc/uuid (Player) ]( Jugador UUID )",
                         "[ mc/ping (IP) ]( Hacer ping a un servidor )",
                         "[ mc/list ]( Lista de servidores de MC del clan )",
+                        "[ mc/wiki ]( Wiki de Artículos/Mobs/Enchants/Pociones )",
                         "[ mc/info ]( Información de ventas MC )",
                         "[ mc/skin (Player) ]( Piel del jugador )",
                         "[ mc/names (Player) ]( Historia del nombre de cuenta de MC )",
@@ -112,6 +115,21 @@ namespace Bot
                     "Cette guilde n'est pas enregistrée en tant que communauté contactez le propriétaire de la guilde pour la mettre en place",
                     "Este gremio no está registrado como una comunidad en contacto con el propietario del gremio para configurarlo"
                 };
+
+                public string[] Text = new string[]
+                {
+                    "Text",
+                    "Texte",
+                    "Texto"
+                };
+
+                public string[] Hi = new string[]
+                {
+                    "Hi",
+                    "salut",
+                    "Hola"
+                };
+
                 public string[] MultiMC = new string[]
                 {
                     "MultiMC allows you to manage and launch multiple versions with easy forge/mods installation",
@@ -120,9 +138,15 @@ namespace Bot
                 };
                 public string[] GetAchievementError = new string[]
                 {
-                    "Text cannot be more than 20 letters/numbers",
-                    "Le texte ne peut pas dépasser 20 lettres/nombres",
-                    "El texto no puede tener más de 20 letras / números"
+                    "Text cannot be more than 22 letters/numbers",
+                    "Le texte ne peut pas dépasser 22 lettres/nombres",
+                    "El texto no puede tener más de 22 letras / números"
+                };
+                public string[] Player = new string[]
+                {
+                    "Player",
+                    "Joueur",
+                    "Jugador"
                 };
                 public string[] PlayerNotFound = new string[]
                 {
@@ -178,6 +202,7 @@ namespace Bot
                     "(Joueur) | head | cube | full | steal",
                     "(Jugador) | cabeza | cubo | completo | robar"
                 };
+
                 public string[] MinecraftSales = new string[]
                 {
                     "Minecraft Account Sales",
@@ -443,6 +468,7 @@ namespace Bot
             {
 
             }
+
             public class Hidden
             {
                 public string[] Wallpaper = new string[]

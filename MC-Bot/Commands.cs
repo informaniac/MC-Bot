@@ -7,21 +7,16 @@ using MojangSharp.Responses;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using static MojangSharp.Endpoints.Statistics;
 using static MojangSharp.Responses.NameHistoryResponse;
 using System.Net.NetworkInformation;
 using Bot.Functions;
 using Bot.Utils;
-using System.Net;
 using System.IO;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Discord.Addons.InteractiveCommands;
-using jsimple.util.function;
 using Bot.Services;
-using System.Text.RegularExpressions;
 using Discord.WebSocket;
 
 namespace Bot.Commands
@@ -59,7 +54,7 @@ namespace Bot.Commands
                         Color = _Utils_Discord.GetRoleColor(Context.Channel as ITextChannel)
                     };
                     IGuildUser Owner = await Context.Guild.GetOwnerAsync();
-                    NewGuildEmbed.AddField("Language", $"<@{Owner.Id}> Please User" + Environment.NewLine + "`mc/lang 0` English **Default**" + Environment.NewLine + "`mc/lang 1` français", true);
+                    NewGuildEmbed.AddField("Language", $"<@{Owner.Id}> Please User" + Environment.NewLine + "`mc/lang 0` English **Default**" + Environment.NewLine + "`mc/lang 1` français" + Environment.NewLine + "`mc/lang 2` Español", true);
                     NewGuildEmbed.AddField("Commands", "`mc/help` Commands" + Environment.NewLine + "`mc/admin` Guild Admin" + Environment.NewLine + "`mc/ping` Ping A Server" + Environment.NewLine + "`mc/invite` Bot Invite", true);
                     await ReplyAsync("", false, NewGuildEmbed.Build());
                     _Task.NewGuild(Context.Guild.Id);
@@ -81,12 +76,7 @@ namespace Bot.Commands
                         NewsText = reader.ReadLine();
                     }
                 }
-                List<string> WikiCommands = new List<string>();
 
-                foreach (var i in _Commands.Commands.Where(x => x.Module.Name == "Wiki"))
-                {
-                    WikiCommands.Add($"{i.Remarks}");
-                }
                 string CommunityName = "";
                 string CommunityDesc = "";
                 string CommunityLink = "";
@@ -129,7 +119,6 @@ namespace Bot.Commands
                         embed.AddField($"{_TransMain.ThisCommunity[LangInt]} - {CommunityName}", $"{_TransMain.Servers[LangInt]} {Servers} [Website]({CommunityLink})" + Environment.NewLine + CommunityDesc);
                     }
                 }
-                embed.AddField("Wiki", string.Join(" | ", WikiCommands));
                 embed.AddField(_TransMain.Commands[LangInt], "```md" + Environment.NewLine + string.Join(Environment.NewLine, _TransMain.HelpCommands[LangInt]) + "```");
                 embed.AddField(_TransMain.HelpLinks[LangInt], $"[MultiMC](https://multimc.org/) {_TransMain.MultiMC[LangInt]}" + Environment.NewLine + "[Ftb Legacy](http://ftb.cursecdn.com/FTB2/launcher/FTB_Launcher.exe) | [Technic Launcher](https://www.technicpack.net/download) | [AT Launcher](https://www.atlauncher.com/downloads)");
                 if (Action == "update" && Context.User.Id == 190590364871032834)
@@ -157,6 +146,7 @@ namespace Bot.Commands
             {
                 file.WriteLine(Text);
             }
+            await ReplyAsync("News has been set");
         }
 
         [Command("colors"), Alias("color")]
@@ -171,7 +161,7 @@ namespace Bot.Commands
             var embed = new EmbedBuilder()
             {
                 Title = _TransMain.ColorCodes[LangInt],
-                ImageUrl = "https://lolis.ml/img-1o4ubn88Z474.png"
+                ImageUrl = "https://i.imgur.com/IqWbUoT.png"
             };
             await ReplyAsync("", false, embed.Build());
         }
@@ -472,7 +462,7 @@ namespace Bot.Commands
         }
 
         [Command("skin")]
-        public async Task SkinArg(string Arg = null, [Remainder] string Player = "")
+        public async Task SkinArg(string Arg = "", [Remainder]string Player = "")
         {
             _Task.GetGuild(Context.Guild, out _Guild Guild, out int LangInt);
             if (Context.Guild != null & Guild == null)
@@ -480,7 +470,7 @@ namespace Bot.Commands
                 await ReplyAsync("Please use mc/help");
                 return;
             }
-            if (Arg == null)
+            if (Arg == "")
             {
                 await Context.Channel.SendMessageAsync($"mc/skin (Arg) {_TransMain.SkinArgs[LangInt]} | `mc/skin Notch` or `mc/skin cube Notch`");
                 return;
@@ -500,13 +490,13 @@ namespace Bot.Commands
             switch (Arg.ToLower())
             {
                 case "head":
-                    Url = "https://visage.surgeplay.com/face/100/" + Player;
+                    Url = "https://visage.surgeplay.com/face/100/" + Player + ".png";
                     break;
                 case "cube":
-                    Url = "https://visage.surgeplay.com/head/100/" + Player;
+                    Url = "https://visage.surgeplay.com/head/100/" + Player + ".png";
                     break;
                 case "full":
-                    Url = "https://visage.surgeplay.com/full/200/" + Player;
+                    Url = "https://visage.surgeplay.com/full/200/" + Player + ".png";
                     break;
                 case "steal":
                     Url = "steal";
@@ -524,8 +514,8 @@ namespace Bot.Commands
             await ReplyAsync("", false, embed.Build());
         }
 
-        [Command("names")]
-        public async Task Names([Remainder]string Name)
+        [Command("name"), Alias("names")]
+        public async Task Names([Remainder]string Player = "")
         {
             _Task.GetGuild(Context.Guild, out _Guild Guild, out int LangInt);
             if (Context.Guild != null & Guild == null)
@@ -533,7 +523,12 @@ namespace Bot.Commands
                 await ReplyAsync("Please use mc/help");
                 return;
             }
-            UuidAtTimeResponse uuid = new UuidAtTime(Name, DateTime.Now).PerformRequest().Result;
+            if (Player == "")
+            {
+                await Context.Channel.SendMessageAsync($"mc/names ({_TransMain.Player[LangInt]}) | `mc/names Notch`");
+                return;
+            }
+            UuidAtTimeResponse uuid = new UuidAtTime(Player, DateTime.Now).PerformRequest().Result;
             if (uuid.IsSuccess)
             {
                 NameHistoryResponse names = new NameHistory(uuid.Uuid.Value).PerformRequest().Result;
@@ -542,7 +537,7 @@ namespace Bot.Commands
                     List<string> Names = new List<string>();
                     if (names.NameHistory.Count == 1)
                     {
-                        await ReplyAsync(_TransMain.UsernamesOnlyOne[LangInt].Replace("{0}", $"`{Name}`"));
+                        await ReplyAsync(_TransMain.UsernamesOnlyOne[LangInt].Replace("{0}", $"`{Player}`"));
                         return;
                     }
                     foreach (NameHistoryEntry entry in names.NameHistory)
@@ -566,7 +561,7 @@ namespace Bot.Commands
             }
             else
             {
-                await ReplyAsync(_TransMain.PlayerNotFoundNames[LangInt].Replace("{0}", $"`{Name}`"));
+                await ReplyAsync(_TransMain.PlayerNotFoundNames[LangInt].Replace("{0}", $"`{Player}`"));
             }
         }
 
@@ -623,7 +618,7 @@ namespace Bot.Commands
         }
 
         [Command("get")]
-        public async Task Get([Remainder]string Text)
+        public async Task Get([Remainder]string Text = "")
         {
             _Task.GetGuild(Context.Guild, out _Guild Guild, out int LangInt);
             if (Context.Guild != null & Guild == null)
@@ -631,13 +626,18 @@ namespace Bot.Commands
                 await ReplyAsync("Please use mc/help");
                 return;
             }
-            if (Text.Length > 20)
+            if (Text == "")
+            {
+                await ReplyAsync($"mc/get ({_TransMain.Text[LangInt]}) | `mc/get {_TransMain.Hi[LangInt]}`");
+                return;
+            }
+            if (Text.Length > 22)
             {
                 await ReplyAsync(_TransMain.GetAchievementError[LangInt]);
                 return;
             }
-            Random RNG = new Random();
-            int Number = RNG.Next(1, 39);
+            Random.Org.Random Rng = new Random.Org.Random();
+            int Number = Rng.Next(1, 39);
             UriBuilder uriBuilder = new UriBuilder("https://www.minecraftskinstealer.com/achievement/a.php?i=" + Number.ToString() + "&h=Achievement+Get!&t=" + Text.Replace(" ", "+"));
             var embed = new EmbedBuilder()
             {
@@ -665,12 +665,17 @@ namespace Bot.Commands
         }
 
         [Command("minime")]
-        public async Task Minime(string Player)
+        public async Task Minime([Remainder]string Player = "")
         {
             _Task.GetGuild(Context.Guild, out _Guild Guild, out int LangInt);
             if (Context.Guild != null & Guild == null)
             {
                 await ReplyAsync("Please use mc/help");
+                return;
+            }
+            if (Player == "")
+            {
+                await Context.Channel.SendMessageAsync($"mc/minime ({_TransMain.Player[LangInt]}) | `mc/minime Notch`");
                 return;
             }
             UuidAtTimeResponse uuid = new UuidAtTime(Player, DateTime.Now).PerformRequest().Result;
@@ -1353,8 +1358,19 @@ namespace Bot.Commands
 
     public class Wiki : ModuleBase
     {
-        [Command("item"), Remarks("mc/item")]
-        [Alias("block")]
+        [Command("wiki")]
+        public async Task WikiHelp()
+        {
+            var embed = new EmbedBuilder()
+            {
+                Title = "Wiki Commands",
+                Description = "[Wiki Website](https://minecraft.gamepedia.com/Minecraft_Wiki)" + Environment.NewLine + "```md" + Environment.NewLine + "[ mc/item (Name/ID) ]( Block/Item info )" + Environment.NewLine + "[ mc/item 35:5 ]( Block/Item info )" + Environment.NewLine + "[ mc/mob (Name) ]( Mob/Entity info )" + Environment.NewLine + "[ mc/potion (Name) ]( Potion recipe )" + Environment.NewLine + "[ mc/enchant (Name) ]( Enchant info )```",
+                Color = _Utils_Discord.GetRoleColor(Context.Channel)
+            };
+            await ReplyAsync("", false, embed.Build());
+        }
+
+        [Command("item"), Remarks("mc/item"), Alias("block", "items", "blocks")]
         public async Task Items(string ID = "0", string Meta = "0")
         {
             if (_Config.MCItems.Count == 0)
@@ -1418,7 +1434,7 @@ namespace Bot.Commands
             var embed = new EmbedBuilder()
             {
                 Description = $"{Item.ID}:{Item.Meta} | {Item.Name}",
-                ThumbnailUrl = "https://lolis.ml/mcitems/" + ID + "-" + Meta + ".png",
+                ThumbnailUrl = "https://blazeweb.ml/lolis/mcitems/" + ID + "-" + Meta + ".png",
                 Color = _Utils_Discord.GetRoleColor(Context.Channel as ITextChannel),
                 Footer = new EmbedFooterBuilder()
                 { Text = $"/give {Context.User.Username} {Item.Text}" }
@@ -1426,8 +1442,7 @@ namespace Bot.Commands
             await ReplyAsync("", false, embed.Build());
         }
 
-        [Command("mob"), Remarks("mc/mob")]
-        [Alias("mobs")]
+        [Command("mob"), Remarks("mc/mob"), Alias("mobs", "entity", "entitys")]
         public async Task Mob([Remainder]string Name = "")
         {
             if (Name != "")
@@ -1632,7 +1647,7 @@ namespace Bot.Commands
             }
         }
 
-        [Command("enchant"), Remarks("mc/enchant")]
+        [Command("enchant"), Remarks("mc/enchant"), Alias("enchants")]
         public async Task Enchant([Remainder]string Name = "")
         {
             if (Name == "")
@@ -1663,12 +1678,7 @@ namespace Bot.Commands
                 await ReplyAsync("", false, embed.Build());
             }
         }
-
-        [Command("biome"), Remarks("~~mc/biome~~")]
-        public async Task Biome()
-        {
-            await ReplyAsync("Command coming soon please wait");
-        }
+        
     }
 
     public class Quiz : InteractiveModuleBase
@@ -1678,8 +1688,8 @@ namespace Bot.Commands
         {
             if (Accept == "start")
             {
-                var Ran = new Random((int)DateTime.Now.Ticks);
-                int Num = Ran.Next(1, _Config.MCQuiz.Count);
+                Random.Org.Random Rng = new Random.Org.Random();
+                int Num = Rng.Next(1, _Config.MCQuiz.Count);
                 _Quiz Quiz = _Config.MCQuiz[Num - 1];
                 string User = $"{Context.User.Username}";
                 var qembed = new EmbedBuilder()

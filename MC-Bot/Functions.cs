@@ -248,6 +248,10 @@ namespace Bot.Classes
     {
         None, Sword, Helmet, Boot, Bow, FishingRod
     }
+    public enum _OreTier
+    {
+        Wood, Stone, Iron
+    }
     public class _Enchant
     {
         public string Name;
@@ -276,7 +280,12 @@ namespace Bot.Classes
                 }
         }
     }
-    
+    public class _Ore
+    {
+        public string Name;
+        public _OreTier Tier;
+        public string Icon;
+    }
     public enum _PotionBase
     {
         Base1, Base2, Base3
