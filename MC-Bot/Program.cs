@@ -690,6 +690,7 @@ namespace Bot
             _Log.Bot("CONNECTED");
             return Task.CompletedTask;
         }
+
         private Task Disconnected(Exception ex)
         {
             if (DevMode == true)
@@ -1732,25 +1733,29 @@ namespace Bot.Utils
         public static Color GetRoleColor(IChannel Channel)
         {
             Color RoleColor = new Discord.Color(30, 50, 200);
-            if (Channel is ITextChannel Chan)
+            try
             {
-                _Bot.GuildCache.TryGetValue(Chan.Guild.Id, out _CacheItem Cache);
-                if (Cache.Bot != null && Cache.Bot.GuildPermissions.EmbedLinks || Cache.Bot.GetPermissions(Chan).EmbedLinks)
+                if (Channel is ITextChannel Chan)
                 {
-                    if (Cache.Guild.Roles.Count() > 1 && Cache.Bot.RoleIds.Count() > 1)
+                    _Bot.GuildCache.TryGetValue(Chan.Guild.Id, out _CacheItem Cache);
+                    if (Cache.Bot != null && Cache.Bot.GuildPermissions.EmbedLinks || Cache.Bot.GetPermissions(Chan).EmbedLinks)
                     {
-                        foreach (var i in Cache.Bot.Guild.Roles.Where(x => x.Id != Chan.Guild.EveryoneRole.Id && Cache.Bot.RoleIds.Contains(x.Id)).OrderByDescending(x => x.Position))
+                        if (Cache.Guild.Roles.Count() > 1 && Cache.Bot.RoleIds.Count() > 1)
                         {
-                            if (i.Color.R != 0 && i.Color.G != 0 && i.Color.B != 0)
+                            foreach (var i in Cache.Bot.Guild.Roles.Where(x => x.Id != Chan.Guild.EveryoneRole.Id && Cache.Bot.RoleIds.Contains(x.Id)).OrderByDescending(x => x.Position))
                             {
-                                RoleColor = i.Color;
-                                break;
+                                if (i.Color.R != 0 && i.Color.G != 0 && i.Color.B != 0)
+                                {
+                                    RoleColor = i.Color;
+                                    break;
+                                }
                             }
-                        }
 
+                        }
                     }
                 }
             }
+            catch { }
             return RoleColor;
         }
 

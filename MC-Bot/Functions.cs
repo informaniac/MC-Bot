@@ -47,26 +47,10 @@ namespace Bot.Functions
         /// <summary>
         /// Set ID to 0 for no guild
         /// </summary>
-        public static void GetGuild(IGuild ID, out _Guild Guild, out int LangInt)
+        public static void GetGuild(IGuild ID, out _Guild Guild)
         {
-            if (ID != null)
-            {
+            Guild = null;
                 Guild = _Config.MCGuilds.Find(x => x.ID == ID.Id);
-                if (Guild == null)
-                {
-                    Guild = null;
-                    LangInt = 0;
-                }
-                else
-                {
-                    LangInt = (int)Guild.Language;
-                }
-            }
-            else
-            {
-                Guild = null;
-                LangInt = 0;
-            }
         }
 
         public static void LoadGuilds()
@@ -365,7 +349,7 @@ namespace Bot.Classes
     }
     public enum _Language
     {
-        English = 0, French = 1, Spanish = 2
+        English = 0, French = 1, Spanish = 2, Russian = 3
     }
     public class _Guild
     {
