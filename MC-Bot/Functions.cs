@@ -1,6 +1,7 @@
 ﻿using Bot.Classes;
 using Bot.Functions;
 using Discord;
+using Discord.Commands;
 using Discord.WebSocket;
 using Newtonsoft.Json;
 using System;
@@ -8,6 +9,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
@@ -16,27 +18,40 @@ namespace Bot.Functions
 {
     public class _Task
     {
-        public static void NewGuild(ulong ID)
+        public static void NewGuild(ulong ID, out _Guild Guild)
         {
-            _Guild NewConfig = new _Guild()
+            Guild = new _Guild()
             {
                 ID = ID, Servers = new List<_Server>(), Website = ""
             };
             using (StreamWriter file = File.CreateText(_Config.BotPath + $"Guilds/{ID}" + ".json"))
             {
                 JsonSerializer serializer = new JsonSerializer();
-                serializer.Serialize(file, NewConfig);
-
+                serializer.Serialize(file, Guild);
             }
-            _Config.MCGuilds.Add(NewConfig);
+            _Config.MCGuilds.Add(Guild);
+        }
+        public static void NewGuild(ulong ID)
+        {
+            _Guild Guild = new _Guild()
+            {
+                ID = ID,
+                Servers = new List<_Server>(),
+                Website = ""
+            };
+            using (StreamWriter file = File.CreateText(_Config.BotPath + $"Guilds/{ID}" + ".json"))
+            {
+                JsonSerializer serializer = new JsonSerializer();
+                serializer.Serialize(file, Guild);
+            }
+            _Config.MCGuilds.Add(Guild);
         }
 
-        public static void SaveGuild(ulong ID)
+        public static void SaveGuild(_Guild Guild)
         {
-            _Guild Guild = _Config.MCGuilds.Find(x => x.ID == ID);
             if (Guild != null)
             {
-                using (StreamWriter file = File.CreateText(_Config.BotPath + $"Guilds/{ID}" + ".json"))
+                using (StreamWriter file = File.CreateText(_Config.BotPath + $"Guilds/{Guild.ID}" + ".json"))
                 {
                     JsonSerializer serializer = new JsonSerializer();
                     serializer.Serialize(file, Guild);
@@ -50,9 +65,15 @@ namespace Bot.Functions
         public static void GetGuild(IGuild ID, out _Guild Guild)
         {
             Guild = null;
+            if (ID != null)
+            {
                 Guild = _Config.MCGuilds.Find(x => x.ID == ID.Id);
+                if (Guild == null)
+                {
+                    NewGuild(ID.Id, out Guild);
+                }
+            }
         }
-
         public static void LoadGuilds()
         {
             foreach(var i in Directory.GetFiles(_Config.BotPath + "Guilds/"))
@@ -349,7 +370,103 @@ namespace Bot.Classes
     }
     public enum _Language
     {
-        English = 0, French = 1, Spanish = 2, Russian = 3
+        English = 0, French = 1, Spanish = 2, Russian = 3, Korean = 4
+    }
+    
+    public class _Ping
+    {
+        public enum _Status
+        {
+            InvalidID, Offline, NoServerProperties, Loading, Online
+        }
+        public bool Success = false;
+        public _Status Error = _Status.InvalidID;
+        public string IP = "";
+        public string Port = "25565";
+        public string Version = "";
+        public string Motd = "";
+        public string Software = "";
+        public Image Icon;
+        public List<string> Players = new List<string>();
+        public int PluginCount = 0;
+        public int CurrentPlayers = 0;
+        public int MaxPlayers = 0;
+        public Color Color = new Color(200, 0, 0);
+
+        public _Ping PingInfo(string _IP, string _Port)
+        {
+            IP = _IP;
+            Port = _Port;
+            
+           
+            dynamic Data = Utils._Utils_Http.GetJsonObject("https://use.gameapis.net/mc/query/info/" + IP + ":" + Port);
+            if (Data.status == false)
+            {
+                _Log.Custom(Data.error);
+                return this;
+            }
+            Success = true;
+            Version = Data.version;
+            CurrentPlayers = Data.players.online;
+            MaxPlayers = Data.players.max;
+            Motd = Data.motds.clean;
+            //Icon = Data.favicon;
+            return this;
+        }
+
+        public _Ping PingFull(string _IP, string _Port)
+        {
+            IP = _IP;
+            Port = _Port;
+           
+            dynamic Data = Utils._Utils_Http.GetJsonObject("https://use.gameapis.net/mc/query/extensive/" + IP + ":" + Port);
+            if (Data.status == false)
+            {
+                if (Data.error == "Failed to parse server's response")
+                {
+                    Error = _Status.NoServerProperties;
+                }
+                return this;
+            }
+            Success = true;
+            Version = Data.version;
+            CurrentPlayers = Data.players.online;
+            MaxPlayers = Data.players.max;
+            Motd = Data.motds.clean;
+            Icon = Data.favicon;
+            Software = Data.software;
+            foreach(var i in Data.list)
+            {
+                Players.Add(i);
+            }
+            foreach(var i in Data.plugins)
+            {
+                PluginCount++;
+            }
+            return this;
+        }
+
+        public _Ping PingPlayers(string _IP, string _Port)
+        {
+            IP = _IP;
+            Port = _Port;
+           
+            dynamic Data = Utils._Utils_Http.GetJsonObject("https://use.gameapis.net/mc/extensive/info/" + IP + ":" + Port);
+            if (Data.status == false)
+            {
+                if (Data.error == "Failed to parse server's response")
+                {
+                    Error = _Status.NoServerProperties;
+                }
+                return this;
+            }
+            Success = true;
+            foreach (var i in Data.list)
+            {
+                Players.Add(i);
+            }
+            return this;
+        }
     }
     public class _Guild
     {

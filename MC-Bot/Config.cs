@@ -22,29 +22,42 @@ namespace Bot.Services
         public GuildCheck(DiscordSocketClient Client)
         {
             _Client = Client;
-            _Task.LoadGuilds();
             _Client.GuildAvailable += _Client_GuildAvailable;
             _Client.JoinedGuild += _Client_JoinedGuild;
         }
 
-        private Task _Client_JoinedGuild(SocketGuild g)
+        private async Task _Client_JoinedGuild(SocketGuild g)
         {
             if (!_Bot._Blacklist.Check(g.Id))
             {
-                var Guild = _Config.MCGuilds.Find(x => x.ID == g.Id);
+                _Guild Guild = _Config.MCGuilds.Find(x => x.ID == g.Id);
                 if (Guild == null)
                 {
                     _Task.NewGuild(g.Id);
+                    if (_Config.DevMode == false)
+                    {
+                        var embed = new EmbedBuilder()
+                        {
+                            Title = ":wave: Hi im Minecraft Bot",
+                            Description = "Im packed full of Minecraft commands and special features such as player skins, name history, quiz and some other secret commands." + Environment.NewLine + "Type **mc/help** for a list of commands",
+                            Footer = new EmbedFooterBuilder()
+                            {
+                                Text = "If you have any issues please contact xXBuilderBXx#9113"
+                            },
+                            Color = new Color(0, 200, 0)
+                        };
+                        embed.AddField("Language", $"<@{g.Owner.Id}> Use `mc/lang` to change the language ```md" + Environment.NewLine + "< English | Français | Español | русский >```", true);
+                        await g.DefaultChannel.SendMessageAsync("", false, embed.Build());
+                    }
                 }
             }
-            return Task.CompletedTask;
         }
 
         private Task _Client_GuildAvailable(SocketGuild g)
         {
             if (!_Bot._Blacklist.Check(g.Id))
             {
-                var Guild = _Config.MCGuilds.Find(x => x.ID == g.Id);
+                _Guild Guild = _Config.MCGuilds.Find(x => x.ID == g.Id);
                 if (Guild == null)
                 {
                     _Task.NewGuild(g.Id);
@@ -84,17 +97,16 @@ namespace Bot
 
         public static IServiceProvider AddServices(_Bot ThisBot, DiscordSocketClient Client, CommandService CommandService)
         {
+            _Task.LoadGuilds();
             AddMobs();
             AddQuiz();
             AddPotions();
             AddEnchants();
-            _Task.LoadGuilds();
             return new ServiceCollection()
                 .AddSingleton(Client)
                 .AddSingleton<_Bot>(ThisBot)
-                .AddSingleton(CommandService)
                 .AddSingleton(new GuildCheck(Client))
-                .AddSingleton(new MusicService(Client))
+                .AddSingleton(CommandService)
                 .AddSingleton<CommandHandler>(new CommandHandler(ThisBot, Client))
                 .BuildServiceProvider();
             

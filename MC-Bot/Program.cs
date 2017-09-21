@@ -841,6 +841,7 @@ namespace Bot.Services
                 }
                 else
                 {
+                    
                     _Log.CommandError(result.ErrorReason, Context);
                     if (result.ErrorReason.Contains("Bot requires guild permission") || result.ErrorReason.Contains("User requires guild permission") || result.ErrorReason.Contains("Bot requires channel permission") || result.ErrorReason.Contains("User requires channel permission"))
                     {
@@ -848,7 +849,6 @@ namespace Bot.Services
                     }
                     else if (result.ErrorReason == "Invalid context for command; accepted contexts: Guild")
                     {
-
                         await Context.Channel.SendMessageAsync("You need to use this command in a guild channel");
                     }
                     else if (result.ErrorReason == "Invalid context for command; accepted contexts: DM")

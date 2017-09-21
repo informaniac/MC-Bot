@@ -21,7 +21,14 @@ using Discord.WebSocket;
 
 namespace Bot.Commands
 {
-
+    public class Throw
+    {
+        public static async Task Data(ICommandContext Context)
+        {
+            await Context.Channel.SendMessageAsync("Use `mc/help`");
+            throw new Exception("");
+        }
+    }
     public class Main : ModuleBase
     {
         public _Trans.Main _TransMain = new _Trans.Main();
@@ -33,32 +40,13 @@ namespace Bot.Commands
             _Client = Client;
             _Commands = Commands;
         }
+
         public string NewsText = "";
 
-        [Command("help"), Alias("commands")]
+        [Command("help"), Alias("commands"), RequireBotPermission(GuildPermission.EmbedLinks)]
         public async Task Help(string Action = "")
         {
-            
                 _Task.GetGuild(Context.Guild, out _Guild Guild);
-            if (Context.Guild != null && Guild == null)
-                {
-                    var NewGuildEmbed = new EmbedBuilder()
-                    {
-                        Title = ":wave: Hi im Minecraft Bot",
-                        Description = "Im packed full of Minecraft commands and special features such as player skins, name history, quiz and some other secret commands",
-                        Footer = new EmbedFooterBuilder()
-                        {
-                            Text = "If you have any issues please contact xXBuilderBXx#9113"
-                        },
-                        Color = _Utils_Discord.GetRoleColor(Context.Channel as ITextChannel)
-                    };
-                    IGuildUser Owner = await Context.Guild.GetOwnerAsync();
-                    NewGuildEmbed.AddField("Language", $"<@{Owner.Id}> Please User" + Environment.NewLine + "`mc/lang 0` English **Default**" + Environment.NewLine + "`mc/lang 1` français" + Environment.NewLine + "`mc/lang 2` Español", true);
-                    await ReplyAsync("", false, NewGuildEmbed.Build());
-                    _Task.NewGuild(Context.Guild.Id);
-                await Context.Channel.SendMessageAsync("Use **mc/help** again to view the full commands list");
-                    return;
-                }
                 if (Context.Guild != null)
                 {
                     IGuildUser GU = await Context.Guild.GetUserAsync(Context.Client.CurrentUser.Id);
@@ -114,11 +102,6 @@ namespace Bot.Commands
         public async Task Colors()
         {
             _Task.GetGuild(Context.Guild, out _Guild Guild);
-            if (Context.Guild != null & Guild == null)
-            {
-                await ReplyAsync("Please use mc/help");
-                return;
-            }
             var embed = new EmbedBuilder()
             {
                 Title = _TransMain.ColorCodes.Get(Guild),
@@ -128,14 +111,9 @@ namespace Bot.Commands
         }
 
         [Command("uuid")]
-        public async Task Uuid([Remainder]string Player)
+        public async Task Uuid(string Player)
         {
             _Task.GetGuild(Context.Guild, out _Guild Guild);
-            if (Context.Guild != null & Guild == null)
-            {
-                await ReplyAsync("Please use mc/help");
-                return;
-            }
             UuidAtTimeResponse uuid = new UuidAtTime(Player, DateTime.Now).PerformRequest().Result;
             if (uuid.IsSuccess)
             {
@@ -157,37 +135,7 @@ namespace Bot.Commands
         [Command("ping"), Priority(0)]
         public async Task Ping(string IP = "", ushort Port = 25565)
         {
-
-           //dynamic SI = Utils._Utils_Http.GetJsonObject("https://use.gameapis.net/mc/query/extensive/mc.supersky.org.ua:25565");
-            //int Count = 0;
-            //List<string> Players = new List<string>();
-            //foreach(var i in SI.list)
-            //{
-           //     Players.Add(Convert.ToString(i));
-           // }
-           // foreach(var i in SI.plugins)
-           // {
-            //    Count++;
-           // }
-            //var test = new EmbedBuilder()
-            //{
-              //  Title = $"[{SI.version}] test.ip:25565 ({SI.game_type}",
-              //  Description = $"Players: {SI.players.online}/{SI.players.max} | Plugins: {Count}" + Environment.NewLine + string.Join(" | ", Players),
-              //  Color = _Utils_Discord.GetRoleColor(Context.Channel),
-              //  Footer = new EmbedFooterBuilder()
-              //  {
-              //      Text = $"Software: {SI.software} | MOTD: {SI.motds.clean}"
-              //  }
-           // };
-            //await ReplyAsync("", false, test.Build());
-            //return;
-
             _Task.GetGuild(Context.Guild, out _Guild Guild);
-            if (Context.Guild != null & Guild == null)
-            {
-                await ReplyAsync("Please use mc/help");
-                return;
-            }
             if (IP == "" || IP.Contains("("))
             {
                 await ReplyAsync($"{_TransMain.Error_EnterIP.Get(Guild)} | `mc/ping my.server.net` | `mc/ping other.server.net:25566` | `mc/ping this.server.net 25567`");
@@ -371,21 +319,10 @@ namespace Bot.Commands
             });
         }
 
-        [Command("list")]
-        [Alias("servers")]
+        [Command("list"),Alias("servers"), RequireContext(ContextType.Guild)]
         public async Task List()
         {
             _Task.GetGuild(Context.Guild, out _Guild Guild);
-            if (Context.Guild != null & Guild == null)
-            {
-                await ReplyAsync("Please use mc/help");
-                return;
-            }
-            if (Context.Guild == null)
-            {
-                await ReplyAsync("This command can only be used in a guild");
-                return;
-            }
             if (Guild.Servers.Count == 0)
             {
                 await ReplyAsync($"{_TransMain.List_NoServers.Get(Guild)} :(" + Environment.NewLine + $"{_TransMain.List_GuildAdmin.Get(Guild)} `mc/admin`");
@@ -418,11 +355,6 @@ namespace Bot.Commands
         public async Task Info()
         {
             _Task.GetGuild(Context.Guild, out _Guild Guild);
-            if (Context.Guild != null & Guild == null)
-            {
-                await ReplyAsync("Please use mc/help");
-                return;
-            }
             StatisticsResponse stats = await new Statistics(Item.MinecraftAccountsSold).PerformRequest();
             if (stats.IsSuccess)
             {
@@ -449,14 +381,9 @@ namespace Bot.Commands
         }
 
         [Command("skin")]
-        public async Task SkinArg(string Arg = "", [Remainder]string Player = "")
+        public async Task SkinArg(string Arg = "", string Player = "")
         {
             _Task.GetGuild(Context.Guild, out _Guild Guild);
-            if (Context.Guild != null & Guild == null)
-            {
-                await ReplyAsync("Please use mc/help");
-                return;
-            }
             if (Arg == "")
             {
                 await Context.Channel.SendMessageAsync($"mc/skin (Arg) {_TransMain.Skin_Args.Get(Guild)} | `mc/skin Notch` or `mc/skin cube Notch`");
@@ -502,14 +429,9 @@ namespace Bot.Commands
         }
 
         [Command("name"), Alias("names")]
-        public async Task Names([Remainder]string Player = "")
+        public async Task Names(string Player = "")
         {
             _Task.GetGuild(Context.Guild, out _Guild Guild);
-            if (Context.Guild != null & Guild == null)
-            {
-                await ReplyAsync("Please use mc/help");
-                return;
-            }
             if (Player == "")
             {
                 await Context.Channel.SendMessageAsync($"mc/names ({_TransMain.Player.Get(Guild)}) | `mc/names Notch`");
@@ -556,11 +478,6 @@ namespace Bot.Commands
         public async Task Status()
         {
             _Task.GetGuild(Context.Guild, out _Guild Guild);
-            if (Context.Guild != null & Guild == null)
-            {
-                await ReplyAsync("Please use mc/help");
-                return;
-            }
             ApiStatusResponse status = new ApiStatus().PerformRequest().Result;
             if (status.IsSuccess)
             {
@@ -590,11 +507,6 @@ namespace Bot.Commands
         public async Task Music()
         {
             _Task.GetGuild(Context.Guild, out _Guild Guild);
-            if (Context.Guild != null & Guild == null)
-            {
-                await ReplyAsync("Please use mc/help");
-                return;
-            }
             var embed = new EmbedBuilder()
             {
             };
@@ -608,11 +520,6 @@ namespace Bot.Commands
         public async Task Playing()
         {
             _Task.GetGuild(Context.Guild, out _Guild Guild);
-            if (Context.Guild != null & Guild == null)
-            {
-                await ReplyAsync("Please use mc/help");
-                return;
-            }
             int CountOther = 0;
             int Count1710 = 0;
             int Count18 = 0;
@@ -672,11 +579,6 @@ namespace Bot.Commands
         public async Task Get([Remainder]string Text = "")
         {
             _Task.GetGuild(Context.Guild, out _Guild Guild);
-            if (Context.Guild != null & Guild == null)
-            {
-                await ReplyAsync("Please use mc/help");
-                return;
-            }
             if (Text == "")
             {
                 await ReplyAsync($"mc/get ({_TransMain.Text.Get(Guild)}) | `mc/get {_TransMain.Hi.Get(Guild)}`");
@@ -712,11 +614,6 @@ namespace Bot.Commands
         public async Task Misc()
         {
             _Task.GetGuild(Context.Guild, out _Guild Guild);
-            if (Context.Guild != null & Guild == null)
-            {
-                await ReplyAsync("Please use mc/help");
-                return;
-            }
             var embed = new EmbedBuilder()
             {
                 Color = _Utils_Discord.GetRoleColor(Context.Channel as ITextChannel),
@@ -726,14 +623,9 @@ namespace Bot.Commands
         }
 
         [Command("minime")]
-        public async Task Minime([Remainder]string Player = "")
+        public async Task Minime(string Player = "")
         {
             _Task.GetGuild(Context.Guild, out _Guild Guild);
-            if (Context.Guild != null & Guild == null)
-            {
-                await ReplyAsync("Please use mc/help");
-                return;
-            }
             if (Player == "")
             {
                 await Context.Channel.SendMessageAsync($"mc/minime ({_TransMain.Player.Get(Guild)}) | `mc/minime Notch`");
@@ -803,131 +695,6 @@ namespace Bot.Commands
             await ReplyAsync("", false, embed.Build());
         }
     }
-    public class Music : ModuleBase
-    {
-        private MusicService _MusicService;
-        public Music(MusicService MusicService)
-        {
-            _MusicService = MusicService;
-        }
-        [Command("music play")]
-        public async Task MusicPlay([Remainder]string Song)
-        {
-            if (Context.User.Id != 190590364871032834)
-            {
-                return;
-            }
-            IGuildUser GU = (IGuildUser)Context.User;
-            if (GU.VoiceChannel == null)
-            {
-                await ReplyAsync("You are not in a voice channel");
-                return;
-            }
-            MusicService._MusicPlayer MP = _MusicService.GetMusicPlayer(Context.Guild);
-
-
-            string SongPath = "";
-            switch (Song)
-            {
-                case "1":
-                    SongPath = "C:/music1.mp3";
-                    break;
-                case "2":
-                    SongPath = "C:/music2.mp3";
-                    break;
-                case "3":
-                    SongPath = "C:/music3.mp3";
-                    break;
-                default:
-                    await ReplyAsync("You need to choose a song ID > mc/music");
-                    return;
-            }
-            if (MP._BotUser.VoiceChannel == null)
-            {
-                await MP.PlayMusic(SongPath, GU.VoiceChannel, false);
-            }
-            else
-            {
-                if (MP._BotUser.VoiceChannel.Id == GU.VoiceChannel.Id)
-                {
-                    MP._AudioClient = await GU.VoiceChannel.ConnectAsync();
-                    await MP.PlayMusic(SongPath, GU.VoiceChannel, false);
-                }
-                else
-                {
-                    IEnumerable<IGuildUser> Users = await MP._BotUser.VoiceChannel.GetUsersAsync().Flatten();
-                    if (Users.Where(x => !x.IsBot).Count() == 1)
-                    {
-                        if (Users.First().Id == Context.User.Id)
-                        {
-                            await MP.PlayMusic(SongPath, GU.VoiceChannel, true);
-                        }
-                        else
-                        {
-                            await ReplyAsync("Cannot switch channels while someone is listening to music");
-                        }
-                    }
-                    else if (Users.Where(x => !x.IsBot).Count() > 0)
-                    {
-                        await ReplyAsync("Cannot switch channels while someone is listening to music");
-                    }
-                    else
-                    {
-                        await MP.PlayMusic(SongPath, GU.VoiceChannel, true);
-                    }
-                }
-            }
-        }
-
-        [Command("music stop")]
-        public async Task MusicStop()
-        {
-            if (Context.User.Id != 190590364871032834)
-            {
-                return;
-            }
-            IGuildUser GU = (IGuildUser)Context.User;
-            if (GU.VoiceChannel == null)
-            {
-                await ReplyAsync("You are not in a voice channel");
-                return;
-            }
-            MusicService._MusicPlayer MP = _MusicService.GetMusicPlayer(Context.Guild);
-            if (MP._BotUser.VoiceChannel == null)
-            {
-                await ReplyAsync("I am not in a voice channel");
-                return;
-            }
-            MP._Process.Close();
-        }
-
-        [Command("music leave")]
-        public async Task MusicLeave()
-        {
-            if (Context.User.Id != 190590364871032834)
-            {
-                return;
-            }
-            MusicService._MusicPlayer MP = _MusicService.GetMusicPlayer(Context.Guild);
-            if (MP._BotUser.VoiceChannel == null)
-            {
-                await ReplyAsync("I am not in a voice channel");
-            }
-            else
-            {
-                if (MP._AudioClient == null)
-                {
-                    var AC = await MP._BotUser.VoiceChannel.ConnectAsync();
-                    await AC.StopAsync();
-                }
-                else
-                {
-                    MP.Stop(true);
-                }
-            }
-        }
-
-    }
 
     public class Hidden : ModuleBase
     {
@@ -937,11 +704,6 @@ namespace Bot.Commands
         public async Task Classic()
         {
             _Task.GetGuild(Context.Guild, out _Guild Guild);
-            if (Context.Guild != null & Guild == null)
-            {
-                await ReplyAsync("Please use mc/help");
-                return;
-            }
             var embed = new EmbedBuilder()
             {
                 Title = "Minecraft Classic",
@@ -965,11 +727,6 @@ namespace Bot.Commands
         public async Task Forge()
         {
             _Task.GetGuild(Context.Guild, out _Guild Guild);
-            if (Context.Guild != null & Guild == null)
-            {
-                await ReplyAsync("Please use mc/help");
-                return;
-            }
             var embed = new EmbedBuilder()
             {
                 Description = _TransHidden.Forgecraft.Get(Guild) + Environment.NewLine +
@@ -987,11 +744,6 @@ namespace Bot.Commands
         public async Task ForgecraftWallpaper()
         {
             _Task.GetGuild(Context.Guild, out _Guild Guild);
-            if (Context.Guild != null & Guild == null)
-            {
-                await ReplyAsync("Please use mc/help");
-                return;
-            }
             var embed = new EmbedBuilder()
             {
                 Author = new EmbedAuthorBuilder()
@@ -1013,11 +765,6 @@ namespace Bot.Commands
         public async Task Bukkit()
         {
             _Task.GetGuild(Context.Guild, out _Guild Guild);
-            if (Context.Guild != null & Guild == null)
-            {
-                await ReplyAsync("Please use mc/help");
-                return;
-            }
             var embed = new EmbedBuilder()
             {
                 Color = _Utils_Discord.GetRoleColor(Context.Channel as ITextChannel),
@@ -1034,11 +781,6 @@ namespace Bot.Commands
         public async Task DW()
         {
             _Task.GetGuild(Context.Guild, out _Guild Guild);
-            if (Context.Guild != null & Guild == null)
-            {
-                await ReplyAsync("Please use mc/help");
-                return;
-            }
             var embed = new EmbedBuilder()
             {
                 Color = _Utils_Discord.GetRoleColor(Context.Channel as ITextChannel),
@@ -1055,11 +797,6 @@ namespace Bot.Commands
         public async Task Herobrine()
         {
             _Task.GetGuild(Context.Guild, out _Guild Guild);
-            if (Context.Guild != null & Guild == null)
-            {
-                await ReplyAsync("Please use mc/help");
-                return;
-            }
             var embedh = new EmbedBuilder()
             {
                 Title = "Herobrine",
@@ -1078,11 +815,6 @@ namespace Bot.Commands
         public async Task Entity303()
         {
             _Task.GetGuild(Context.Guild, out _Guild Guild);
-            if (Context.Guild != null & Guild == null)
-            {
-                await ReplyAsync("Please use mc/help");
-                return;
-            }
             var embedh = new EmbedBuilder()
             {
                 Title = "Entity 303",
@@ -1101,11 +833,6 @@ namespace Bot.Commands
         public async Task IS()
         {
             _Task.GetGuild(Context.Guild, out _Guild Guild);
-            if (Context.Guild != null & Guild == null)
-            {
-                await ReplyAsync("Please use mc/help");
-                return;
-            }
             var embed = new EmbedBuilder()
             {
                 Color = _Utils_Discord.GetRoleColor(Context.Channel as ITextChannel),
@@ -1122,11 +849,6 @@ namespace Bot.Commands
         public async Task Notch()
         {
             _Task.GetGuild(Context.Guild, out _Guild Guild);
-            if (Context.Guild != null & Guild == null)
-            {
-                await ReplyAsync("Please use mc/help");
-                return;
-            }
             var embed = new EmbedBuilder()
             {
                 Description = $"{_TransHidden.Notch.Get(Guild)} [Wiki](https://en.wikipedia.org/wiki/Markus_Persson)",
@@ -1144,20 +866,10 @@ namespace Bot.Commands
     {
         public _Trans.Admin _TransAdmin = new _Trans.Admin();
 
-        [Command("admin")]
+        [Command("admin"), RequireContext(ContextType.Guild)]
         public async Task Admin()
         {
-            if (Context.Guild == null)
-            {
-                await ReplyAsync("<:error:350172479936921611> Guild command only");
-                return;
-            }
             _Task.GetGuild(Context.Guild, out _Guild Guild);
-            if (Context.Guild != null & Guild == null)
-            {
-                await ReplyAsync("Please use mc/help");
-                return;
-            }
             IGuildUser GU = await Context.Guild.GetUserAsync(Context.User.Id);
             if (!GU.GuildPermissions.Administrator)
             {
@@ -1177,20 +889,10 @@ namespace Bot.Commands
             await ReplyAsync("", false, embed.Build());
         }
 
-        [Command("addserver")]
+        [Command("addserver"), RequireContext(ContextType.Guild)]
         public async Task Addserver(string Tag = "", string IP = "", [Remainder]string Name = "")
         {
-            if (Context.Guild == null)
-            {
-                await ReplyAsync("<:error:350172479936921611> Guild command only");
-                return;
-            }
             _Task.GetGuild(Context.Guild, out _Guild Guild);
-            if (Context.Guild != null & Guild == null)
-            {
-                await ReplyAsync("Please use mc/help");
-                return;
-            }
             IGuildUser GU = await Context.Guild.GetUserAsync(Context.User.Id);
             if (!GU.GuildPermissions.Administrator)
             {
@@ -1226,25 +928,15 @@ namespace Bot.Commands
                 Port = Port
             };
             Guild.Servers.Add(NewServer);
-            _Task.SaveGuild(Context.Guild.Id);
+            _Task.SaveGuild(Guild);
             await ReplyAsync($"{_TransAdmin.AddServer_Added.Get(Guild)} {Name} {_TransAdmin.AddServer_AddedList.Get(Guild)} | `mc/list`");
 
         }
 
-        [Command("delserver")]
+        [Command("delserver"), RequireContext(ContextType.Guild)]
         public async Task Delserver(string Tag = "")
         {
-            if (Context.Guild == null)
-            {
-                await ReplyAsync("<:error:350172479936921611> Guild command only");
-                return;
-            }
             _Task.GetGuild(Context.Guild, out _Guild Guild);
-            if (Context.Guild != null & Guild == null)
-            {
-                await ReplyAsync("Please use mc/help");
-                return;
-            }
             IGuildUser GU = await Context.Guild.GetUserAsync(Context.User.Id);
             if (!GU.GuildPermissions.Administrator)
             {
@@ -1264,19 +956,14 @@ namespace Bot.Commands
                 return;
             }
             Guild.Servers.Remove(Server);
-            _Task.SaveGuild(Context.Guild.Id);
+            _Task.SaveGuild(Guild);
             await ReplyAsync($"{_TransAdmin.DelServer_Deleted.Get(Guild)} {Server.Name} {_TransAdmin.DelServer_List.Get(Guild)} | `mc/list`");
 
         }
 
-        [Command("lang")]
+        [Command("lang"), RequireContext(ContextType.Guild)]
         public async Task Language(int ID = -1)
         {
-            if (Context.Guild == null)
-            {
-                await ReplyAsync("<:error:350172479936921611> Guild command only");
-                return;
-            }
             _Task.GetGuild(Context.Guild, out _Guild Guild);
             IGuildUser GU = await Context.Guild.GetUserAsync(Context.User.Id);
             if (Context.User.Id != 190590364871032834)
@@ -1292,7 +979,7 @@ namespace Bot.Commands
                 var embed = new EmbedBuilder()
                 {
                     Title = _TransAdmin.ChangeLang.Get(Guild),
-                    Description = "```md" + Environment.NewLine + "<0 English> mc/lang 0" + Environment.NewLine + "<1 français> mc/lang 1" + Environment.NewLine + "<2 Español> mc/lang 2```",
+                    Description = "```md" + Environment.NewLine + "<0 English> mc/lang 0" + Environment.NewLine + "<1 français> mc/lang 1" + Environment.NewLine + "<2 Español> mc/lang 2" + Environment.NewLine + "<3 русский> mc/lang 3```",
                     Color = _Utils_Discord.GetRoleColor(Context.Channel as ITextChannel),
                     Footer = new EmbedFooterBuilder()
                     {
@@ -1307,18 +994,23 @@ namespace Bot.Commands
                 {
                     case 0:
                         Guild.Language = _Language.English;
-                        await ReplyAsync("Guild language set to english");
-                        _Task.SaveGuild(Context.Guild.Id);
+                        await ReplyAsync("Community language set to english");
+                        _Task.SaveGuild(Guild);
                         break;
                     case 1:
                         Guild.Language = _Language.French;
-                        await ReplyAsync("Langue de la guilde réglée en français");
-                        _Task.SaveGuild(Context.Guild.Id);
+                        await ReplyAsync("Langue de la communauté définie en français");
+                        _Task.SaveGuild(Guild);
                         break;
                     case 2:
                         Guild.Language = _Language.Spanish;
-                        await ReplyAsync("Idioma del gremio ajustado al español");
-                        _Task.SaveGuild(Context.Guild.Id);
+                        await ReplyAsync("Langue de la communauté définie en espagnol");
+                        _Task.SaveGuild(Guild);
+                        break;
+                    case 3:
+                        Guild.Language = _Language.Russian;
+                        await ReplyAsync("Язык общения на русском языке");
+                        _Task.SaveGuild(Guild);
                         break;
                 }
             }
@@ -1658,8 +1350,6 @@ namespace Bot.Commands
         {
             if (Accept == "start")
             {
-                try
-                {
                     Random.Org.Random Rng = new Random.Org.Random();
                     int Num = Rng.Next(1, _Config.MCQuiz.Count);
                     _Quiz Quiz = _Config.MCQuiz[Num - 1];
@@ -1718,12 +1408,6 @@ namespace Bot.Commands
                         }
 
                     }
-                }
-                catch
-                {
-                    _Task.GetGuild(Context.Guild, out _Guild Guild);
-                    await ReplyAsync($"`{_TransMain.Error_Api.Get(Guild)}`");
-                }
             }
             else
             {
