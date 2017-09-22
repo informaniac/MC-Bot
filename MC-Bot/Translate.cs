@@ -14,10 +14,27 @@ namespace Bot
         /// </summary>
         public class TString
         {
+            /// <summary>
+            /// English language
+            /// </summary>
             public string EN = "";
+            /// <summary>
+            /// French language
+            /// </summary>
             public string FR = "";
+            /// <summary>
+            /// Spanish language
+            /// </summary>
             public string SP = "";
+            /// <summary>
+            /// Russian language
+            /// </summary>
             public string RU = "";
+            /// <summary>
+            /// Get the language translation
+            /// </summary>
+            /// <param name="Guild"></param>
+            /// <returns></returns>
             public string Get(_Guild Guild)
             {
                 if (Guild == null)
@@ -61,12 +78,10 @@ namespace Bot
                         "[ mc/ping (IP) ]( Ping a server )",
                         "[ mc/list ]( List guild MC servers )",
                         "[ mc/wiki ]( Wiki for Items/Mobs/Enchants/Potions )",
-                        "[ mc/info ]( MC sales info )",
                         "[ mc/skin (Player) ]( Player skin )",
                         "[ mc/names (Player) ]( MC account name history )",
                         "[ mc/status ]( Mojang status )",
                         "[ mc/get (Text) ]( Get an achievement )",
-                        "[ mc/skinedit ]( Online skin editor )",
                         "[ mc/minime (Player) ]( Minify player skin )",
                         "[ mc/playing ]( People playing Minecraft )",
                         "[ mc/admin ]( Guild admin commands )",
@@ -82,13 +97,10 @@ namespace Bot
                         "[ mc/ping (IP) ]( Faire un ping sur un serveur )",
                         "[ mc/list ]( Liste des serveurs MC de la guilde )",
                         "[ mc/wiki ]( Wiki for Items/Mobs/Enchants/Potions )",
-                        "[ mc/info ]( Informations sur les ventes MC )",
                         "[ mc/skin (Joueur) ]( Skin du joueur )",
                         "[ mc/names (Joueur) ]( Historique des nom de compte MC )",
                         "[ mc/status ]( Status des serveur de Mojange )",
-                        //"[ mc/music ]( Jouer de la musique )",
                         "[ mc/get (Texte) ]( Obtenir une réussite )",
-                        "[ mc/skinedit ]( Éditeur de skin en ligne )",
                         "[ mc/minime (Joueur) ]( Minimiser la skin du joueur )",
                         "[ mc/playing ]( Les gens qui jouent à Minecraft )",
                         "[ mc/admin ]( Commandes d'administration de la guilde )",
@@ -101,18 +113,15 @@ namespace Bot
                         "[ mc/bot ]( Bot Invitación/Información/Estadísticas/Campo de golf )",
                         "[ mc/quiz ]( Minecraft quiz :D )",
                         "[ mc/colors ]( MC color codes )",
-                        "[ mc/uuid (Player) ]( Jugador UUID )",
+                        "[ mc/uuid (Jugador) ]( Jugador UUID )",
                         "[ mc/ping (IP) ]( Hacer ping a un servidor )",
                         "[ mc/list ]( Lista de servidores de MC del clan )",
                         "[ mc/wiki ]( Wiki de Artículos/Mobs/Enchants/Pociones )",
-                        "[ mc/info ]( Información de ventas MC )",
-                        "[ mc/skin (Player) ]( Piel del jugador )",
-                        "[ mc/names (Player) ]( Historia del nombre de cuenta de MC )",
+                        "[ mc/skin (Jugador) ]( Piel del jugador )",
+                        "[ mc/names (Jugador) ]( Historia del nombre de cuenta de MC )",
                         "[ mc/status ]( Estado de Mojang )",
-                        //"[ mc/music ]( Play some music )",
-                        "[ mc/get (Text) ]( Obtener un logro )",
-                        "[ mc/skinedit ]( Editor de piel en línea )",
-                        "[ mc/minime (Player) ]( Minify la piel del reproductor )",
+                        "[ mc/get (Texto) ]( Obtener un logro )",
+                        "[ mc/minime (Jugador) ]( Minify la piel del reproductor )",
                         "[ mc/playing ]( Les gens qui jouent à Minecraft )",
                         "[ mc/admin ]( Guild comandos de administración )",
                         "[ mc/invite ]( Obtener la invitación bot )"
@@ -128,26 +137,16 @@ namespace Bot
                         "[ mc/ping (IP) ]( Пинг сервера )",
                         "[ mc/list ]( Список серверов )",
                         "[ mc/wiki ]( Вики: информация о мобах/предметах/зачарованиях и т.д. )",
-                        "[ mc/info ]( Информация о продажах Minecraft )",
                         "[ mc/skin (игрок) ]( Скин игрока )",
                         "[ mc/names (игрок) ]( История имён аккаунта )",
                         "[ mc/status ]( Статус Mojang )",
                         "[ mc/get (текст) ]( Генератор достижений )",
-                        "[ mc/skinedit ]( Онлайн редактор скинов )",
                         "[ mc/minime (игрок) ]( Минимизировать скин игрока )",
                         "[ mc/playing ]( Сколько людей играют в Minecraft на данный момент )",
                         "[ mc/admin ]( Команды администраторов сервера )",
                         "[ mc/invite ]( Ссылка на добавление бота на свой сервер )"
                     }
 
-            };
-
-            public TString Test = new TString()
-            {
-                EN = "English",
-                FR = "French",
-                SP = "Spanish",
-                RU = "Russian"
             };
 
             public TString Error_NoEmbedPerms = new TString()
@@ -592,8 +591,116 @@ namespace Bot
                 RU = "Список серверов"
             };
             #endregion
-        }
 
+            public TString Info = new TString()
+            {
+                EN = "Info",
+                FR = "Info",
+                SP = "Información",
+                RU = "Информация"
+            };
+            public TString Unknown = new TString()
+            {
+                EN = "Unknown",
+                FR = "Inconnu",
+                SP = "Desconocido",
+                RU = "неизвестный"
+            };
+            public TString Health = new TString()
+            {
+                EN = "Health",
+                FR = "Santé",
+                SP = "Salud",
+                RU = "Здоровье"
+            };
+            public TString Height = new TString()
+            {
+                EN = "Height",
+                FR = "la taille",
+                SP = "Altura",
+                RU = "Высота"
+            };
+            public TString Width = new TString()
+            {
+                EN = "Width",
+                FR = "Largeur",
+                SP = "Anchura",
+                RU = "Ширина"
+            };
+            public TString Type = new TString()
+            {
+                EN = "Type",
+                FR = "Type",
+                SP = "Tipo",
+                RU = "Тип"
+            };
+            public TString Version = new TString()
+            {
+                EN = "Version",
+                FR = "Version",
+                SP = "Versión",
+                RU = "Версия"
+            };
+            public TString Attack = new TString()
+            {
+                EN = "Attack",
+                FR = "Attaque",
+                SP = "Ataque",
+                RU = "Атака"
+            };
+            public TString Easy = new TString()
+            {
+                EN = "Easy",
+                FR = "Facile",
+                SP = "Fácil",
+                RU = "Легко"
+            };
+            public TString Normal = new TString()
+            {
+                EN = "Normal",
+                FR = "Normal",
+                SP = "Normal",
+                RU = "Нормальный"
+            };
+            public TString Hard = new TString()
+            {
+                EN = "Hard",
+                FR = "Difficile",
+                SP = "Difícil",
+                RU = "Жесткий"
+            };
+        }
+       public class Wiki
+        {
+            public TString Error_UnknownItemID = new TString()
+            {
+                EN = "Cannot find item name or ID",
+                FR = "Impossible de trouver le nom de l'élément ou l'ID",
+                SP = "No se puede encontrar el nombre o el ID del elemento",
+                RU = "Не удается найти имя или идентификатор элемента"
+            };
+            public TString Error_UnknownMob = new TString()
+            {
+                EN = "Cannot find mob name",
+                FR = "Vous ne pouvez pas trouver le nom de la foule",
+                SP = "No se puede encontrar el nombre de la mafia",
+                RU = "Не удалось найти имя моба"
+            };
+            public TString blocks = new TString()
+            {
+                EN = "blocks",
+                FR = "blocs",
+                SP = "bloques",
+                RU = "блоки"
+            };
+            public TString Fist_Attack = new TString()
+            {
+                EN = "Fist Attack",
+                FR = "Attaque de poing",
+                SP = "Ataque de puño",
+                RU = "Кулачная атака"
+            };
+        }
         public class Hidden
         {
             public TString Wallpaper = new TString()

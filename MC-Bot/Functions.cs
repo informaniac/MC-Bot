@@ -370,7 +370,7 @@ namespace Bot.Classes
     }
     public enum _Language
     {
-        English = 0, French = 1, Spanish = 2, Russian = 3, Korean = 4
+        English = 0, French = 1, Spanish = 2, Russian = 3
     }
     
     public class _Ping

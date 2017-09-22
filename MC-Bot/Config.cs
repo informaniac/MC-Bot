@@ -6,6 +6,7 @@ using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -102,6 +103,7 @@ namespace Bot
             AddQuiz();
             AddPotions();
             AddEnchants();
+            AddItems();
             return new ServiceCollection()
                 .AddSingleton(Client)
                 .AddSingleton<_Bot>(ThisBot)
@@ -110,6 +112,47 @@ namespace Bot
                 .AddSingleton<CommandHandler>(new CommandHandler(ThisBot, Client))
                 .BuildServiceProvider();
             
+        }
+        private static void AddItems()
+        {
+            using (StreamReader reader = new StreamReader(_Config.BotPath + "Items.json"))
+            {
+                string json = reader.ReadToEnd();
+                JArray a = JArray.Parse(json);
+                foreach (JObject o in a.Children<JObject>())
+                {
+                    string GetID = "";
+                    string GetMeta = "";
+                    string GetName = "";
+                    string GetText = "";
+                    foreach (JProperty p in o.Properties())
+                    {
+                        if (p.Name == "type")
+                        {
+                            GetID = (string)p.Value;
+                        }
+                        if (p.Name == "meta")
+                        {
+                            GetMeta = (string)p.Value;
+                        }
+                        if (p.Name == "name")
+                        {
+                            GetName = (string)p.Value;
+                        }
+                        if (p.Name == "text_type")
+                        {
+                            GetText = (string)p.Value;
+                        }
+                    }
+                    _Config.MCItems.Add(new _Item()
+                    {
+                        ID = GetID,
+                        Meta = GetMeta,
+                        Name = GetName,
+                        Text = GetText
+                    });
+                }
+            }
         }
         private static void AddEnchants()
         {
@@ -235,6 +278,12 @@ namespace Bot
             MCQuiz.Add(new _Quiz() { Question = "What dimension is The End called", Answer = "sky", Note = "Press F3 and the dimension for The End is called Sky" });
             MCQuiz.Add(new _Quiz() { Question = "Can skeletons see through glass", Answer = "no", Note = "Skeletons cannot see through glass like zombies and spiders can" });
             MCQuiz.Add(new _Quiz() { Question = "What was Minecraft originally called", Answer = "cavegame", Note = "Notch the creator almost called Minecraft Cavegame" });
+            MCQuiz.Add(new _Quiz() { Question = "Which version was world borders added", Answer = "1.8", Note = "World borders were officially added in 1.8 aside from plugins" });
+            MCQuiz.Add(new _Quiz() { Question = "Which mob drops string", Answer = "spider", Note = "Spiders can drop string and spider eyes" });
+            MCQuiz.Add(new _Quiz() { Question = "What is the snow biome called", Answer = "taiga", Note = "The snow biomes are called taiga there is also ice plains" });
+            MCQuiz.Add(new _Quiz() { Question = "What biome does hardened clay generate in", Answer = "mesa", Note = "The mesa is a landscape of red sand and hardened clay hills" });
+            MCQuiz.Add(new _Quiz() { Question = "How many tree types are there", Answer = "4 four", Note = "There are four tree types in the game oak, birch, spruce and jungle" });
+            MCQuiz.Add(new _Quiz() { Question = "What biome can hostile mobs not spawn in", Answer = "mushroom", Note = "Hostile mobs cannot spawn in the mushroom biome or in the caves either" });
         }
     }
 }
