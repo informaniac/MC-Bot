@@ -43,20 +43,21 @@ namespace Bot.Commands
 
         public string NewsText = "";
 
-        [Command("help"), Alias("commands"), RequireBotPermission(GuildPermission.EmbedLinks)]
+        [Command("help"), Alias("commands")]
         public async Task Help(string Action = "")
         {
-                _Task.GetGuild(Context.Guild, out _Guild Guild);
-                if (Context.Guild != null)
+            
+            _Task.GetGuild(Context.Guild, out _Guild Guild);
+            if (Context.Guild != null)
+            {
+                IGuildUser GU = await Context.Guild.GetUserAsync(Context.Client.CurrentUser.Id);
+                if (!GU.GuildPermissions.EmbedLinks && !GU.GetPermissions(Context.Channel as ITextChannel).EmbedLinks)
                 {
-                    IGuildUser GU = await Context.Guild.GetUserAsync(Context.Client.CurrentUser.Id);
-                    if (!GU.GuildPermissions.EmbedLinks || !GU.GetPermissions(Context.Channel as ITextChannel).EmbedLinks)
-                    {
-                        await ReplyAsync("```python" + Environment.NewLine + $"{_TransMain.Error_NoEmbedPerms.Get(Guild)}```");
-                        return;
-                    }
+                    await ReplyAsync("```python" + Environment.NewLine + $"{_TransMain.Error_NoEmbedPerms.Get(Guild)}```");
+                    return;
                 }
-                if (NewsText == "" && File.Exists(_Config.BotPath + "News.txt"))
+            }
+            if (NewsText == "" && File.Exists(_Config.BotPath + "News.txt"))
                 {
                     using (StreamReader reader = new StreamReader(_Config.BotPath + "News.txt"))
                     {
@@ -102,7 +103,16 @@ namespace Bot.Commands
         [Command("colors"), Alias("color")]
         public async Task Colors()
         {
-            _Task.GetGuild(Context.Guild, out _Guild Guild);
+_Task.GetGuild(Context.Guild, out _Guild Guild);
+            if (Context.Guild != null)
+            {
+                IGuildUser GU = await Context.Guild.GetUserAsync(Context.Client.CurrentUser.Id);
+                if (!GU.GuildPermissions.EmbedLinks && !GU.GetPermissions(Context.Channel as ITextChannel).EmbedLinks)
+                {
+                    await ReplyAsync("```python" + Environment.NewLine + $"{_TransMain.Error_NoEmbedPerms.Get(Guild)}```");
+                    return;
+                }
+            }
             var embed = new EmbedBuilder()
             {
                 Title = _TransMain.ColorCodes.Get(Guild),
@@ -114,7 +124,16 @@ namespace Bot.Commands
         [Command("uuid")]
         public async Task Uuid(string Player)
         {
-            _Task.GetGuild(Context.Guild, out _Guild Guild);
+_Task.GetGuild(Context.Guild, out _Guild Guild);
+            if (Context.Guild != null)
+            {
+                IGuildUser GU = await Context.Guild.GetUserAsync(Context.Client.CurrentUser.Id);
+                if (!GU.GuildPermissions.EmbedLinks && !GU.GetPermissions(Context.Channel as ITextChannel).EmbedLinks)
+                {
+                    await ReplyAsync("```python" + Environment.NewLine + $"{_TransMain.Error_NoEmbedPerms.Get(Guild)}```");
+                    return;
+                }
+            }
             UuidAtTimeResponse uuid = new UuidAtTime(Player, DateTime.Now).PerformRequest().Result;
             if (uuid.IsSuccess)
             {
@@ -136,7 +155,17 @@ namespace Bot.Commands
         [Command("ping"), Priority(0)]
         public async Task Ping(string IP = "", ushort Port = 25565)
         {
-            _Task.GetGuild(Context.Guild, out _Guild Guild);
+_Task.GetGuild(Context.Guild, out _Guild Guild);
+            if (Context.Guild != null)
+            {
+                IGuildUser GU = await Context.Guild.GetUserAsync(Context.Client.CurrentUser.Id);
+                if (!GU.GuildPermissions.EmbedLinks && !GU.GetPermissions(Context.Channel as ITextChannel).EmbedLinks)
+                {
+                    await ReplyAsync("```python" + Environment.NewLine + $"{_TransMain.Error_NoEmbedPerms.Get(Guild)}```");
+                    return;
+                }
+            }
+            
             if (IP == "" || IP.Contains("("))
             {
                 await ReplyAsync($"{_TransMain.Error_EnterIP.Get(Guild)} | `mc/ping my.server.net` | `mc/ping other.server.net:25566` | `mc/ping this.server.net 25567`");
@@ -326,7 +355,17 @@ namespace Bot.Commands
         [Command("list"),Alias("servers"), RequireContext(ContextType.Guild)]
         public async Task List()
         {
-            _Task.GetGuild(Context.Guild, out _Guild Guild);
+_Task.GetGuild(Context.Guild, out _Guild Guild);
+            if (Context.Guild != null)
+            {
+                IGuildUser GU = await Context.Guild.GetUserAsync(Context.Client.CurrentUser.Id);
+                if (!GU.GuildPermissions.EmbedLinks && !GU.GetPermissions(Context.Channel as ITextChannel).EmbedLinks)
+                {
+                    await ReplyAsync("```python" + Environment.NewLine + $"{_TransMain.Error_NoEmbedPerms.Get(Guild)}```");
+                    return;
+                }
+            }
+            
             if (Guild.Servers.Count == 0)
             {
                 await ReplyAsync($"{_TransMain.List_NoServers.Get(Guild)} :(" + Environment.NewLine + $"{_TransMain.List_GuildAdmin.Get(Guild)} `mc/admin`");
@@ -358,7 +397,17 @@ namespace Bot.Commands
         [Command("info")]
         public async Task Info()
         {
-            _Task.GetGuild(Context.Guild, out _Guild Guild);
+_Task.GetGuild(Context.Guild, out _Guild Guild);
+            if (Context.Guild != null)
+            {
+                IGuildUser GU = await Context.Guild.GetUserAsync(Context.Client.CurrentUser.Id);
+                if (!GU.GuildPermissions.EmbedLinks && !GU.GetPermissions(Context.Channel as ITextChannel).EmbedLinks)
+                {
+                    await ReplyAsync("```python" + Environment.NewLine + $"{_TransMain.Error_NoEmbedPerms.Get(Guild)}```");
+                    return;
+                }
+            }
+            
             StatisticsResponse stats = await new Statistics(Item.MinecraftAccountsSold).PerformRequest();
             if (stats.IsSuccess)
             {
@@ -394,6 +443,16 @@ namespace Bot.Commands
         public async Task SkinArg(string Arg = "", string Player = "")
         {
             _Task.GetGuild(Context.Guild, out _Guild Guild);
+            if (Context.Guild != null)
+            {
+                IGuildUser GU = await Context.Guild.GetUserAsync(Context.Client.CurrentUser.Id);
+                if (!GU.GuildPermissions.EmbedLinks && !GU.GetPermissions(Context.Channel as ITextChannel).EmbedLinks)
+                {
+                    await ReplyAsync("```python" + Environment.NewLine + $"{_TransMain.Error_NoEmbedPerms.Get(Guild)}```");
+                    return;
+                }
+            }
+            
             if (Arg == "")
             {
                 await Context.Channel.SendMessageAsync($"mc/skin (Arg) {_TransMain.Skin_Args.Get(Guild)} | `mc/skin Notch` or `mc/skin cube Notch`");
@@ -441,7 +500,17 @@ namespace Bot.Commands
         [Command("name"), Alias("names")]
         public async Task Names(string Player = "")
         {
-            _Task.GetGuild(Context.Guild, out _Guild Guild);
+_Task.GetGuild(Context.Guild, out _Guild Guild);
+            if (Context.Guild != null)
+            {
+                IGuildUser GU = await Context.Guild.GetUserAsync(Context.Client.CurrentUser.Id);
+                if (!GU.GuildPermissions.EmbedLinks && !GU.GetPermissions(Context.Channel as ITextChannel).EmbedLinks)
+                {
+                    await ReplyAsync("```python" + Environment.NewLine + $"{_TransMain.Error_NoEmbedPerms.Get(Guild)}```");
+                    return;
+                }
+            }
+            
             if (Player == "")
             {
                 await Context.Channel.SendMessageAsync($"mc/names ({_TransMain.Player.Get(Guild)}) | `mc/names Notch`");
@@ -487,7 +556,17 @@ namespace Bot.Commands
         [Command("status")]
         public async Task Status()
         {
-            _Task.GetGuild(Context.Guild, out _Guild Guild);
+_Task.GetGuild(Context.Guild, out _Guild Guild);
+            if (Context.Guild != null)
+            {
+                IGuildUser GU = await Context.Guild.GetUserAsync(Context.Client.CurrentUser.Id);
+                if (!GU.GuildPermissions.EmbedLinks && !GU.GetPermissions(Context.Channel as ITextChannel).EmbedLinks)
+                {
+                    await ReplyAsync("```python" + Environment.NewLine + $"{_TransMain.Error_NoEmbedPerms.Get(Guild)}```");
+                    return;
+                }
+            }
+            
             ApiStatusResponse status = new ApiStatus().PerformRequest().Result;
             if (status.IsSuccess)
             {
@@ -516,7 +595,17 @@ namespace Bot.Commands
         [Command("playing")]
         public async Task Playing()
         {
-            _Task.GetGuild(Context.Guild, out _Guild Guild);
+_Task.GetGuild(Context.Guild, out _Guild Guild);
+            if (Context.Guild != null)
+            {
+                IGuildUser GU = await Context.Guild.GetUserAsync(Context.Client.CurrentUser.Id);
+                if (!GU.GuildPermissions.EmbedLinks && !GU.GetPermissions(Context.Channel as ITextChannel).EmbedLinks)
+                {
+                    await ReplyAsync("```python" + Environment.NewLine + $"{_TransMain.Error_NoEmbedPerms.Get(Guild)}```");
+                    return;
+                }
+            }
+            
             int CountOther = 0;
             int Count1710 = 0;
             int Count18 = 0;
@@ -575,7 +664,17 @@ namespace Bot.Commands
         [Command("get")]
         public async Task Get([Remainder]string Text = "")
         {
-            _Task.GetGuild(Context.Guild, out _Guild Guild);
+_Task.GetGuild(Context.Guild, out _Guild Guild);
+            if (Context.Guild != null)
+            {
+                IGuildUser GU = await Context.Guild.GetUserAsync(Context.Client.CurrentUser.Id);
+                if (!GU.GuildPermissions.EmbedLinks && !GU.GetPermissions(Context.Channel as ITextChannel).EmbedLinks)
+                {
+                    await ReplyAsync("```python" + Environment.NewLine + $"{_TransMain.Error_NoEmbedPerms.Get(Guild)}```");
+                    return;
+                }
+            }
+            
             if (Text == "")
             {
                 await ReplyAsync($"mc/get ({_TransMain.Text.Get(Guild)}) | `mc/get {_TransMain.Hi.Get(Guild)}`");
@@ -610,7 +709,17 @@ namespace Bot.Commands
         [Command("minime")]
         public async Task Minime(string Player = "")
         {
-            _Task.GetGuild(Context.Guild, out _Guild Guild);
+_Task.GetGuild(Context.Guild, out _Guild Guild);
+            if (Context.Guild != null)
+            {
+                IGuildUser GU = await Context.Guild.GetUserAsync(Context.Client.CurrentUser.Id);
+                if (!GU.GuildPermissions.EmbedLinks && !GU.GetPermissions(Context.Channel as ITextChannel).EmbedLinks)
+                {
+                    await ReplyAsync("```python" + Environment.NewLine + $"{_TransMain.Error_NoEmbedPerms.Get(Guild)}```");
+                    return;
+                }
+            }
+            
             if (Player == "")
             {
                 await Context.Channel.SendMessageAsync($"mc/minime ({_TransMain.Player.Get(Guild)}) | `mc/minime Notch`");
@@ -635,17 +744,21 @@ namespace Bot.Commands
         [Command("bot")]
         public async Task Bot()
         {
-            int FrenchCount = 0;
-            int SpanishCount = 0;
-            _Task.GetGuild(Context.Guild, out _Guild Guild);
-            foreach(var i in _Config.MCGuilds.Where(x => x.Language == _Language.French))
+_Task.GetGuild(Context.Guild, out _Guild Guild);
+            if (Context.Guild != null)
             {
-                FrenchCount++;
+                IGuildUser GU = await Context.Guild.GetUserAsync(Context.Client.CurrentUser.Id);
+                if (!GU.GuildPermissions.EmbedLinks && !GU.GetPermissions(Context.Channel as ITextChannel).EmbedLinks)
+                {
+                    await ReplyAsync("```python" + Environment.NewLine + $"{_TransMain.Error_NoEmbedPerms.Get(Guild)}```");
+                    return;
+                }
             }
-            foreach (var i in _Config.MCGuilds.Where(x => x.Language == _Language.Spanish))
-            {
-                SpanishCount++;
-            }
+            int FrenchCount = _Config.MCGuilds.Where(x => x.Language == _Language.French).Count();
+            int SpanishCount = _Config.MCGuilds.Where(x => x.Language == _Language.Spanish).Count();
+            int RussianCount = _Config.MCGuilds.Where(x => x.Language == _Language.Russian).Count();
+            int PortugesCount = _Config.MCGuilds.Where(x => x.Language == _Language.Portuguese).Count();
+            
             int Count = 0;
             foreach(var i in _Commands.Commands.Where(x => x.Module.Name != "o" && x.Module.Name != "whitelist" && x.Module.Name != "blacklist" && x.Module.Name != "Music"))
             {
@@ -675,7 +788,7 @@ namespace Bot.Commands
                 Color = _Utils_Discord.GetRoleColor(Context.Channel)
             };
             embed.AddField($"<:info:350172480645758976> Info", $"**{_TransMain.Bot_Owner.Get(Guild)}**" + Environment.NewLine + "xXBuilderBXx#9113" + Environment.NewLine + "<@190590364871032834>" + Environment.NewLine + Environment.NewLine + $"**{_TransMain.Language.Get(Guild)}:** C#" + Environment.NewLine + $"**{_TransMain.Bot_Lib.Get(Guild)}:** {_Config.Library}", true);
-            embed.AddField($"<:stats:350172481157464065> {_TransMain.Stats.Get(Guild)}", $"**{_TransMain.Guilds.Get(Guild)}:** {_Client.Guilds.Count()}" + Environment.NewLine + $"**{_TransMain.Commands.Get(Guild)}:** {Count}" + Environment.NewLine + $"**{_TransMain.Uptime.Get(Guild)}:** {Uptime}" + Environment.NewLine + Environment.NewLine + $"**français:** {FrenchCount}" + Environment.NewLine + $"**Español:** {SpanishCount}", true);
+            embed.AddField($"<:stats:350172481157464065> {_TransMain.Stats.Get(Guild)}", $"**{_TransMain.Guilds.Get(Guild)}:** {_Client.Guilds.Count()}" + Environment.NewLine + $"**{_TransMain.Commands.Get(Guild)}:** {Count}" + Environment.NewLine + $"**{_TransMain.Uptime.Get(Guild)}:** {Uptime}" + Environment.NewLine + Environment.NewLine + $"**français:** {FrenchCount}" + Environment.NewLine + $"**Español:** {SpanishCount}" + Environment.NewLine + $"**русский:** {RussianCount}" + Environment.NewLine + $"**Português:** {PortugesCount}", true);
             embed.AddField($"<:world:350172484038950912> {_TransMain.Links.Get(Guild)}", $"[{_TransMain.Bot_Invite.Get(Guild)}](https://discordapp.com/oauth2/authorize?&client_id=" + Context.Client.CurrentUser.Id + "&scope=bot&permissions=0)" + Environment.NewLine + $"[Website](https://blazeweb.ml)" + Environment.NewLine + "[Github](https://github.com/xXBuilderBXx/MC-Bot)" + Environment.NewLine + Environment.NewLine + $"**{_TransMain.Bot_ListGuilds.Get(Guild)}**" + Environment.NewLine + "[Dbots](https://bots.discord.pw/bots/346346285953056770)" + Environment.NewLine + "[DBL](https://discordbots.org/bot/346346285953056770)" + Environment.NewLine + "[Novo](https://novo.archbox.pro/)", true);
             await ReplyAsync("", false, embed.Build());
         }
@@ -850,13 +963,24 @@ namespace Bot.Commands
     public class GuildAdmin : ModuleBase
     {
         public _Trans.Admin _TransAdmin = new _Trans.Admin();
+        public _Trans.Main _TransMain = new _Trans.Main();
 
         [Command("admin"), RequireContext(ContextType.Guild)]
         public async Task Admin()
         {
-            _Task.GetGuild(Context.Guild, out _Guild Guild);
-            IGuildUser GU = await Context.Guild.GetUserAsync(Context.User.Id);
-            if (!GU.GuildPermissions.Administrator)
+_Task.GetGuild(Context.Guild, out _Guild Guild);
+            if (Context.Guild != null)
+            {
+                IGuildUser GU = await Context.Guild.GetUserAsync(Context.Client.CurrentUser.Id);
+                if (!GU.GuildPermissions.EmbedLinks && !GU.GetPermissions(Context.Channel as ITextChannel).EmbedLinks)
+                {
+                    await ReplyAsync("```python" + Environment.NewLine + $"{_TransMain.Error_NoEmbedPerms.Get(Guild)}```");
+                    return;
+                }
+            }
+            
+            IGuildUser GUU = await Context.Guild.GetUserAsync(Context.User.Id);
+            if (!GUU.GuildPermissions.Administrator)
             {
                 await ReplyAsync($"<:error:350172479936921611> {_TransAdmin.AdminOnly.Get(Guild)}");
                 return;
@@ -877,9 +1001,19 @@ namespace Bot.Commands
         [Command("addserver"), RequireContext(ContextType.Guild)]
         public async Task Addserver(string Tag = "", string IP = "", [Remainder]string Name = "")
         {
-            _Task.GetGuild(Context.Guild, out _Guild Guild);
-            IGuildUser GU = await Context.Guild.GetUserAsync(Context.User.Id);
-            if (!GU.GuildPermissions.Administrator)
+_Task.GetGuild(Context.Guild, out _Guild Guild);
+            if (Context.Guild != null)
+            {
+                IGuildUser GU = await Context.Guild.GetUserAsync(Context.Client.CurrentUser.Id);
+                if (!GU.GuildPermissions.EmbedLinks && !GU.GetPermissions(Context.Channel as ITextChannel).EmbedLinks)
+                {
+                    await ReplyAsync("```python" + Environment.NewLine + $"{_TransMain.Error_NoEmbedPerms.Get(Guild)}```");
+                    return;
+                }
+            }
+            
+            IGuildUser GUU = await Context.Guild.GetUserAsync(Context.User.Id);
+            if (!GUU.GuildPermissions.Administrator)
             {
                 await ReplyAsync($"<:error:350172479936921611> {_TransAdmin.AdminOnly.Get(Guild)}");
                 return;
@@ -921,9 +1055,19 @@ namespace Bot.Commands
         [Command("delserver"), RequireContext(ContextType.Guild)]
         public async Task Delserver(string Tag = "")
         {
-            _Task.GetGuild(Context.Guild, out _Guild Guild);
-            IGuildUser GU = await Context.Guild.GetUserAsync(Context.User.Id);
-            if (!GU.GuildPermissions.Administrator)
+_Task.GetGuild(Context.Guild, out _Guild Guild);
+            if (Context.Guild != null)
+            {
+                IGuildUser GU = await Context.Guild.GetUserAsync(Context.Client.CurrentUser.Id);
+                if (!GU.GuildPermissions.EmbedLinks && !GU.GetPermissions(Context.Channel as ITextChannel).EmbedLinks)
+                {
+                    await ReplyAsync("```python" + Environment.NewLine + $"{_TransMain.Error_NoEmbedPerms.Get(Guild)}```");
+                    return;
+                }
+            }
+            
+            IGuildUser GUU = await Context.Guild.GetUserAsync(Context.User.Id);
+            if (!GUU.GuildPermissions.Administrator)
             {
                 await ReplyAsync($"<:error:350172479936921611> {_TransAdmin.AdminOnly.Get(Guild)}");
                 return;
@@ -950,10 +1094,20 @@ namespace Bot.Commands
         public async Task Language(int ID = -1)
         {
             _Task.GetGuild(Context.Guild, out _Guild Guild);
-            IGuildUser GU = await Context.Guild.GetUserAsync(Context.User.Id);
+            if (Context.Guild != null)
+            {
+                IGuildUser GU = await Context.Guild.GetUserAsync(Context.Client.CurrentUser.Id);
+                if (!GU.GuildPermissions.EmbedLinks && !GU.GetPermissions(Context.Channel as ITextChannel).EmbedLinks)
+                {
+                    await ReplyAsync("```python" + Environment.NewLine + $"{_TransMain.Error_NoEmbedPerms.Get(Guild)}```");
+                    return;
+                }
+            }
+            
+            IGuildUser GUU = await Context.Guild.GetUserAsync(Context.User.Id);
             if (Context.User.Id != 190590364871032834)
             {
-                if (!GU.GuildPermissions.Administrator)
+                if (!GUU.GuildPermissions.Administrator)
                 {
                     await ReplyAsync($"<:error:350172479936921611> {_TransAdmin.AdminOnly.Get(Guild)}");
                     return;
@@ -964,13 +1118,14 @@ namespace Bot.Commands
                 var embed = new EmbedBuilder()
                 {
                     Title = _TransAdmin.ChangeLang.Get(Guild),
-                    Description = "```md" + Environment.NewLine + "<0 English> mc/lang 0" + Environment.NewLine + "<1 français> mc/lang 1" + Environment.NewLine + "<2 Español> mc/lang 2" + Environment.NewLine + "<3 русский> mc/lang 3```",
+                    Description = "```md" + Environment.NewLine + "<0 English> mc/lang 0" + Environment.NewLine + "<1 français> mc/lang 1" + Environment.NewLine + "<2 Español> mc/lang 2" + Environment.NewLine + "<3 русский> mc/lang 3" + Environment.NewLine + "<4 Português> mc/lang 4```",
                     Color = _Utils_Discord.GetRoleColor(Context.Channel as ITextChannel),
                     Footer = new EmbedFooterBuilder()
                     {
                         Text = $"{_TransAdmin.LanguageTranslate.Get(Guild)} xXBuilderBXx#9113"
                     }
                 };
+                embed.AddField("Translation Help", "русский | Mineblaze#6804 - <@240841342723424256>" + Environment.NewLine + "Português | yBaang_#3224 <@319171978881925121>");
                 await ReplyAsync("", false, embed.Build());
             }
             else
@@ -995,6 +1150,11 @@ namespace Bot.Commands
                     case 3:
                         Guild.Language = _Language.Russian;
                         await ReplyAsync("Язык общения на русском языке");
+                        _Task.SaveGuild(Guild);
+                        break;
+                    case 4:
+                        Guild.Language = _Language.Portuguese;
+                        await ReplyAsync("Idioma da comunidade definido para o português");
                         _Task.SaveGuild(Guild);
                         break;
                 }
