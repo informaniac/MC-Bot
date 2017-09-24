@@ -31,7 +31,7 @@ namespace Bot.Services
         {
             if (!_Bot._Blacklist.Check(g.Id))
             {
-                _Guild Guild = _Config.MCGuilds.Find(x => x.ID == g.Id);
+                _Config.MCGuilds.TryGetValue(g.Id, out _Guild Guild);
                 if (Guild == null)
                 {
                     _Task.NewGuild(g.Id);
@@ -47,7 +47,7 @@ namespace Bot.Services
                             },
                             Color = new Color(0, 200, 0)
                         };
-                        embed.AddField("Language", $"<@{g.Owner.Id}> Use `mc/lang` to change the language ```md" + Environment.NewLine + "< English | Français | Español | русский | Português >```", true);
+                        embed.AddField("Language", $"<@{g.Owner.Id}> Use `mc/lang` to change the language ```md" + Environment.NewLine + "< English | Français | Español | Pусский | Português >```", true);
                         await g.DefaultChannel.SendMessageAsync("", false, embed.Build());
                     }
                 }
@@ -58,7 +58,7 @@ namespace Bot.Services
         {
             if (!_Bot._Blacklist.Check(g.Id))
             {
-                _Guild Guild = _Config.MCGuilds.Find(x => x.ID == g.Id);
+                _Config.MCGuilds.TryGetValue(g.Id, out _Guild Guild);
                 if (Guild == null)
                 {
                     _Task.NewGuild(g.Id);
@@ -83,7 +83,7 @@ namespace Bot
         public static string Library = ".net V2-00828";
         public static bool DevMode = true;
         public static Class Tokens = new Class();
-        public static List<_Guild> MCGuilds = new List<_Guild>();
+        public static Dictionary<ulong, _Guild> MCGuilds = new Dictionary<ulong, _Guild>();
         public static List<_Item> MCItems = new List<_Item>();
         public static List<_Mob> MCMobs = new List<_Mob>();
         public static List<_Quiz> MCQuiz = new List<_Quiz>();

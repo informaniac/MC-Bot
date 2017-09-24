@@ -29,8 +29,9 @@ namespace Bot.Functions
                 JsonSerializer serializer = new JsonSerializer();
                 serializer.Serialize(file, Guild);
             }
-            _Config.MCGuilds.Add(Guild);
+            _Config.MCGuilds.Add(ID, Guild);
         }
+
         public static void NewGuild(ulong ID)
         {
             _Guild Guild = new _Guild()
@@ -44,7 +45,7 @@ namespace Bot.Functions
                 JsonSerializer serializer = new JsonSerializer();
                 serializer.Serialize(file, Guild);
             }
-            _Config.MCGuilds.Add(Guild);
+            _Config.MCGuilds.Add(ID, Guild);
         }
 
         public static void SaveGuild(_Guild Guild)
@@ -67,7 +68,7 @@ namespace Bot.Functions
             Guild = null;
             if (ID != null)
             {
-                Guild = _Config.MCGuilds.Find(x => x.ID == ID.Id);
+                _Config.MCGuilds.TryGetValue(ID.Id, out Guild);
                 if (Guild == null)
                 {
                     NewGuild(ID.Id, out Guild);
@@ -81,7 +82,8 @@ namespace Bot.Functions
                 using (StreamReader reader = new StreamReader(i))
                 {
                     JsonSerializer serializer = new JsonSerializer();
-                    _Config.MCGuilds.Add((_Guild)serializer.Deserialize(reader, typeof(_Guild)));
+                    _Guild Item = (_Guild)serializer.Deserialize(reader, typeof(_Guild));
+                    _Config.MCGuilds.Add(Item.ID, Item);
                 }
             }
         }

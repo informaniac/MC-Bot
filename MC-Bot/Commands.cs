@@ -75,7 +75,7 @@ namespace Bot.Commands
                     }
                 };
             
-                embed.AddField(_TransMain.Commands.Get(Guild), "```md" + Environment.NewLine + string.Join(Environment.NewLine, _TransMain.HelpCommands[(int)Guild.Language]) + "```");
+                embed.AddField(_TransMain.Commands.Get(Guild), "```md" + Environment.NewLine + string.Join(Environment.NewLine, _TransMain.HelpCommands.ElementAtOrDefault((int)Guild.Language)) + "```");
                 embed.AddField(_TransMain.Links.Get(Guild), $"[MultiMC](https://multimc.org/) {_TransMain.MultiMC.Get(Guild)}" + Environment.NewLine + $"[Minecraft.net](https://minecraft.net) | [Twitter](https://twitter.com/Mojang) | [Curse Forge](https://minecraft.curseforge.com/mc-mods) | [{_TransMain.OnlineSkinEditor.Get(Guild)}](https://www.minecraftskinstealer.com/skineditor.php)" + Environment.NewLine + "[Ftb Legacy](http://ftb.cursecdn.com/FTB2/launcher/FTB_Launcher.exe) | [Technic Launcher](https://www.technicpack.net/download) | [AT Launcher](https://www.atlauncher.com/downloads)");
                 if (Action == "update" && Context.User.Id == 190590364871032834)
                 {
@@ -754,10 +754,10 @@ _Task.GetGuild(Context.Guild, out _Guild Guild);
                     return;
                 }
             }
-            int FrenchCount = _Config.MCGuilds.Where(x => x.Language == _Language.French).Count();
-            int SpanishCount = _Config.MCGuilds.Where(x => x.Language == _Language.Spanish).Count();
-            int RussianCount = _Config.MCGuilds.Where(x => x.Language == _Language.Russian).Count();
-            int PortugesCount = _Config.MCGuilds.Where(x => x.Language == _Language.Portuguese).Count();
+            int FrenchCount = _Config.MCGuilds.Values.Where(x => x.Language == _Language.French).Count();
+            int SpanishCount = _Config.MCGuilds.Values.Where(x => x.Language == _Language.Spanish).Count();
+            int RussianCount = _Config.MCGuilds.Values.Where(x => x.Language == _Language.Russian).Count();
+            int PortugesCount = _Config.MCGuilds.Values.Where(x => x.Language == _Language.Portuguese).Count();
             
             int Count = 0;
             foreach(var i in _Commands.Commands.Where(x => x.Module.Name != "o" && x.Module.Name != "whitelist" && x.Module.Name != "blacklist" && x.Module.Name != "Music"))
@@ -806,6 +806,22 @@ _Task.GetGuild(Context.Guild, out _Guild Guild);
             {
                 Title = "Minecraft Classic",
                 Description = $"{_TransHidden.MinecraftClassic.Get(Guild)} [Wiki](https://minecraft.gamepedia.com/Classic)",
+                Color = _Utils_Discord.GetRoleColor(Context.Channel as ITextChannel),
+                Footer = new EmbedFooterBuilder()
+                {
+                    Text = _TransHidden.FoundSecretCommand.Get(Guild)
+                }
+            };
+            await ReplyAsync("", false, embed.Build());
+        }
+
+        [Command("dab")]
+        public async Task Dab()
+        {
+            _Task.GetGuild(Context.Guild, out _Guild Guild);
+            var embed = new EmbedBuilder()
+            {
+                ImageUrl = "https://media-curse.cursecdn.com/attachments/thumbnails/236/440/190/130/dd63904725da76213d1878fb1cc6daaf.jpeg",
                 Color = _Utils_Discord.GetRoleColor(Context.Channel as ITextChannel),
                 Footer = new EmbedFooterBuilder()
                 {
@@ -989,7 +1005,7 @@ _Task.GetGuild(Context.Guild, out _Guild Guild);
             var embed = new EmbedBuilder()
             {
                 Title = _TransAdmin.AdminCommands.Get(Guild),
-                Description = "```md" + Environment.NewLine + $"{string.Join(Environment.NewLine, _TransAdmin.Commands[(int)Guild.Language])}" + Environment.NewLine + $"< {_TransAdmin.UseList.Get(Guild)} >```",
+                Description = "```md" + Environment.NewLine + $"{string.Join(Environment.NewLine, _TransAdmin.Commands.ElementAtOrDefault((int)Guild.Language))}" + Environment.NewLine + $"< {_TransAdmin.UseList.Get(Guild)} >```",
                 Color = _Utils_Discord.GetRoleColor(Context.Channel as ITextChannel),
                 Footer = new EmbedFooterBuilder()
                 { Text = "" }
@@ -1118,14 +1134,14 @@ _Task.GetGuild(Context.Guild, out _Guild Guild);
                 var embed = new EmbedBuilder()
                 {
                     Title = _TransAdmin.ChangeLang.Get(Guild),
-                    Description = "```md" + Environment.NewLine + "<0 English> mc/lang 0" + Environment.NewLine + "<1 français> mc/lang 1" + Environment.NewLine + "<2 Español> mc/lang 2" + Environment.NewLine + "<3 русский> mc/lang 3" + Environment.NewLine + "<4 Português> mc/lang 4```",
+                    Description = "```md" + Environment.NewLine + "<0 English> mc/lang 0" + Environment.NewLine + "<1 Français> mc/lang 1" + Environment.NewLine + "<2 Español> mc/lang 2" + Environment.NewLine + "<3 Pусский> mc/lang 3" + Environment.NewLine + "<4 Português> mc/lang 4```",
                     Color = _Utils_Discord.GetRoleColor(Context.Channel as ITextChannel),
                     Footer = new EmbedFooterBuilder()
                     {
                         Text = $"{_TransAdmin.LanguageTranslate.Get(Guild)} xXBuilderBXx#9113"
                     }
                 };
-                embed.AddField("Translation Help", "русский | Mineblaze#6804 - <@240841342723424256>" + Environment.NewLine + "Português | yBaang_#3224 <@319171978881925121>");
+                embed.AddField("Translation Help", "Pусский | Mineblaze#6804 - <@240841342723424256>" + Environment.NewLine + "Português | yBaang_#3224 <@319171978881925121>");
                 await ReplyAsync("", false, embed.Build());
             }
             else
@@ -1134,27 +1150,27 @@ _Task.GetGuild(Context.Guild, out _Guild Guild);
                 {
                     case 0:
                         Guild.Language = _Language.English;
-                        await ReplyAsync("Community language set to english");
+                        await ReplyAsync("Community language set to English");
                         _Task.SaveGuild(Guild);
                         break;
                     case 1:
                         Guild.Language = _Language.French;
-                        await ReplyAsync("Langue de la communauté définie en français");
+                        await ReplyAsync("Langue de la communauté définie en Français");
                         _Task.SaveGuild(Guild);
                         break;
                     case 2:
                         Guild.Language = _Language.Spanish;
-                        await ReplyAsync("Langue de la communauté définie en espagnol");
+                        await ReplyAsync("Langue de la communauté définie en Espagnol");
                         _Task.SaveGuild(Guild);
                         break;
                     case 3:
                         Guild.Language = _Language.Russian;
-                        await ReplyAsync("Язык общения на русском языке");
+                        await ReplyAsync("Язык общения на Pусском языке");
                         _Task.SaveGuild(Guild);
                         break;
                     case 4:
                         Guild.Language = _Language.Portuguese;
-                        await ReplyAsync("Idioma da comunidade definido para o português");
+                        await ReplyAsync("Idioma da comunidade definido para o Português");
                         _Task.SaveGuild(Guild);
                         break;
                 }
@@ -1182,6 +1198,7 @@ _Task.GetGuild(Context.Guild, out _Guild Guild);
         [Command("item"), Alias("block", "items", "blocks")]
         public async Task Items(string ID = "", string Meta = "0")
         {
+            HashSet<_Item> Items = new HashSet<_Item>();
             _Task.GetGuild(Context.Guild, out _Guild Guild);
             if (ID == "")
             {

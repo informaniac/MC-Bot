@@ -72,7 +72,7 @@ namespace Bot
 
         public class Main
         {
-            public List<string[]> HelpCommands = new List<string[]>()
+            public HashSet<string[]> HelpCommands = new HashSet<string[]>()
                 {
                     // English
                     new string[]
@@ -912,7 +912,7 @@ namespace Bot
 
         public class Admin
         {
-            public List<string[]> Commands = new List<string[]>()
+            public HashSet<string[]> Commands = new HashSet<string[]>()
                 {
                     // English
                     new string[]
