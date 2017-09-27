@@ -18,6 +18,7 @@ using Newtonsoft.Json.Linq;
 using Discord.Addons.InteractiveCommands;
 using Bot.Services;
 using Discord.WebSocket;
+using System.Text;
 
 namespace Bot.Commands
 {
@@ -29,14 +30,23 @@ namespace Bot.Commands
             throw new Exception("");
         }
     }
+    public static class _Extend
+    {
+        public static void Tomorrow(this MojangSharp.Error date)
+        {
+           
+        }
+    }
     public class Main : ModuleBase
     {
         public _Trans.Main _TransMain = new _Trans.Main();
 
         private CommandService _Commands;
+        private _Bot _Bot;
         private DiscordSocketClient _Client;
-        public Main(DiscordSocketClient Client, CommandService Commands)
+        public Main(DiscordSocketClient Client, CommandService Commands, _Bot Bot)
         {
+            _Bot = Bot;
             _Client = Client;
             _Commands = Commands;
         }
@@ -48,15 +58,7 @@ namespace Bot.Commands
         {
             
             _Task.GetGuild(Context.Guild, out _Guild Guild);
-            if (Context.Guild != null)
-            {
-                IGuildUser GU = await Context.Guild.GetUserAsync(Context.Client.CurrentUser.Id);
-                if (!GU.GuildPermissions.EmbedLinks && !GU.GetPermissions(Context.Channel as ITextChannel).EmbedLinks)
-                {
-                    await ReplyAsync("```python" + Environment.NewLine + $"{_TransMain.Error_NoEmbedPerms.Get(Guild)}```");
-                    return;
-                }
-            }
+            _Task.HasEmbedPerms(Context, Guild, true);
             if (NewsText == "" && File.Exists(_Config.BotPath + "News.txt"))
                 {
                     using (StreamReader reader = new StreamReader(_Config.BotPath + "News.txt"))
@@ -97,26 +99,18 @@ namespace Bot.Commands
             {
                 file.WriteLine(Text);
             }
-            await ReplyAsync("News has been set");
+            await ReplyAsync("`News has been set`");
         }
 
         [Command("colors"), Alias("color")]
         public async Task Colors()
         {
 _Task.GetGuild(Context.Guild, out _Guild Guild);
-            if (Context.Guild != null)
-            {
-                IGuildUser GU = await Context.Guild.GetUserAsync(Context.Client.CurrentUser.Id);
-                if (!GU.GuildPermissions.EmbedLinks && !GU.GetPermissions(Context.Channel as ITextChannel).EmbedLinks)
-                {
-                    await ReplyAsync("```python" + Environment.NewLine + $"{_TransMain.Error_NoEmbedPerms.Get(Guild)}```");
-                    return;
-                }
-            }
+            _Task.HasEmbedPerms(Context, Guild, true);
             var embed = new EmbedBuilder()
             {
                 Title = _TransMain.ColorCodes.Get(Guild),
-                ImageUrl = "https://i.imgur.com/IqWbUoT.png"
+                ImageUrl = "https://i.imgur.com/rCkdYZT.png"
             };
             await ReplyAsync("", false, embed.Build());
         }
@@ -124,19 +118,21 @@ _Task.GetGuild(Context.Guild, out _Guild Guild);
         [Command("uuid")]
         public async Task Uuid(string Player)
         {
-_Task.GetGuild(Context.Guild, out _Guild Guild);
-            if (Context.Guild != null)
+            _Task.GetGuild(Context.Guild, out _Guild Guild);
+            _Task.HasEmbedPerms(Context, Guild, true);
+            UuidAtTimeResponse uuid = new UuidAtTime(Player, DateTime.Now).PerformRequest().Result;
+            if (!uuid.IsSuccess)
             {
-                IGuildUser GU = await Context.Guild.GetUserAsync(Context.Client.CurrentUser.Id);
-                if (!GU.GuildPermissions.EmbedLinks && !GU.GetPermissions(Context.Channel as ITextChannel).EmbedLinks)
+                if (uuid.Error.ErrorTag == "NoContent")
                 {
-                    await ReplyAsync("```python" + Environment.NewLine + $"{_TransMain.Error_NoEmbedPerms.Get(Guild)}```");
-                    return;
+                    _Log.ThrowError(Context, _TransMain.Error_PlayerNotFound.Get(Guild).Replace("{0}", $"`{Player}`"), "Player not found");
+                    
+                }
+                else
+                {
+                    _Log.ThrowError(Context, $"`{_TransMain.Error_Api.Get(Guild)}`", uuid.Error.ErrorMessage);
                 }
             }
-            UuidAtTimeResponse uuid = new UuidAtTime(Player, DateTime.Now).PerformRequest().Result;
-            if (uuid.IsSuccess)
-            {
                 var embed = new EmbedBuilder()
                 {
                     Title = $"UUID | {Player}",
@@ -144,29 +140,16 @@ _Task.GetGuild(Context.Guild, out _Guild Guild);
                     Description = uuid.Uuid.Value
                 };
                 await ReplyAsync("", false, embed.Build());
-            }
-            else
-            {
-                await ReplyAsync(_TransMain.Error_PlayerNotFound.Get(Guild).Replace("{0}", $"`{Player}`"));
-            }
 
         }
 
         [Command("ping"), Priority(0)]
         public async Task Ping(string IP = "", ushort Port = 25565)
         {
-_Task.GetGuild(Context.Guild, out _Guild Guild);
-            if (Context.Guild != null)
-            {
-                IGuildUser GU = await Context.Guild.GetUserAsync(Context.Client.CurrentUser.Id);
-                if (!GU.GuildPermissions.EmbedLinks && !GU.GetPermissions(Context.Channel as ITextChannel).EmbedLinks)
-                {
-                    await ReplyAsync("```python" + Environment.NewLine + $"{_TransMain.Error_NoEmbedPerms.Get(Guild)}```");
-                    return;
-                }
-            }
-            
-            if (IP == "" || IP.Contains("("))
+            _Task.GetGuild(Context.Guild, out _Guild Guild);
+            _Task.HasEmbedPerms(Context, Guild, true);
+
+            if (IP == "" || IP.StartsWith("("))
             {
                 await ReplyAsync($"{_TransMain.Error_EnterIP.Get(Guild)} | `mc/ping my.server.net` | `mc/ping other.server.net:25566` | `mc/ping this.server.net 25567`");
                 return;
@@ -202,42 +185,23 @@ _Task.GetGuild(Context.Guild, out _Guild Guild);
                 Port = Convert.ToUInt16(GetPort.Last());
 
             }
-            if (Context.Guild != null)
+            if (Context.Guild != null && !IP.Contains("."))
             {
-                if (!IP.Contains("."))
+                _Server Server = Guild.Servers.Find(x => x.Tag.ToLower() == IP.ToLower());
+                if (Server != null)
                 {
-                    if (Guild != null)
-                    {
-                        _Server Server = Guild.Servers.Find(x => x.Tag.ToLower() == IP.ToLower());
-                        if (Server != null)
-                        {
-                            IP = Server.Ip; Port = Server.Port;
-                        }
-                        else
-                        {
-                            var ValidEmbed = new EmbedBuilder()
-                            {
-                                Description = $"<:error:350172479936921611> {_TransMain.Error_IPInvalid.Get(Guild)}",
-                                Color = new Color(200, 0, 0)
-                            };
-                            await ReplyAsync("", false, ValidEmbed.Build());
-                            return;
-                        }
-                    }
+                    IP = Server.Ip; Port = Server.Port;
                 }
             }
-            else
+            if (!IP.Contains("."))
             {
-                if (!IP.Contains("."))
+                var ValidEmbed = new EmbedBuilder()
                 {
-                    var ValidEmbed = new EmbedBuilder()
-                    {
-                        Description = $"<:error:350172479936921611> {_TransMain.Error_IPInvalid.Get(Guild)}",
-                        Color = new Color(200, 0, 0)
-                    };
-                    await ReplyAsync("", false, ValidEmbed.Build());
-                    return;
-                }
+                    Description = $"<:error:350172479936921611> {_TransMain.Error_IPInvalid.Get(Guild)}",
+                    Color = new Color(200, 0, 0)
+                };
+                await ReplyAsync("", false, ValidEmbed.Build());
+                return;
             }
             if (Context.User.Id != 190590364871032834)
             {
@@ -309,11 +273,7 @@ _Task.GetGuild(Context.Guild, out _Guild Guild);
                         {
                             Title = $"[{Ping.Version}] {IP}:{Port}",
                             Description = _TransMain.Ping_ServerLoading.Get(Guild),
-                            Color = new Color(0, 191, 255),
-                            Footer = new EmbedFooterBuilder()
-                            {
-                                Text = "This command will be improved alot soon"
-                            }
+                            Color = new Color(0, 191, 255)
                         };
                         await Info.DeleteAsync();
                         await ReplyAsync("", false, embed.Build());
@@ -331,10 +291,6 @@ _Task.GetGuild(Context.Guild, out _Guild Guild);
                             },
                             ThumbnailUrl = "https://api.minetools.eu/favicon/" + IP + "/" + Port
                         };
-                        if (Ping.Version.Contains("BungeeCord"))
-                        {
-                            //embed.WithDescription(embed.Description + Environment.NewLine + _TransMain.BungeeCord[LangInt]);
-                        }
                         await Info.DeleteAsync();
                         await ReplyAsync("", false, embed.Build());
                     }
@@ -352,44 +308,210 @@ _Task.GetGuild(Context.Guild, out _Guild Guild);
             });
         }
 
+        [Command("ping full"), Priority(1)]
+        public async Task PingFull(string IP = "", ushort Port = 25565)
+        {
+            _Task.GetGuild(Context.Guild, out _Guild Guild);
+            _Task.HasEmbedPerms(Context, Guild, true);
+
+            if (IP == "" || IP.StartsWith("("))
+            {
+                await ReplyAsync($"{_TransMain.Error_EnterIP.Get(Guild)} | `mc/ping my.server.net` | `mc/ping other.server.net:25566` | `mc/ping this.server.net 25567`");
+                return;
+            }
+            switch (IP)
+            {
+                case "127.0.0.1":
+                    await ReplyAsync(_TransMain.Error_IPMain.Get(Guild));
+                    return;
+                case "192.168.0.1":
+                    await ReplyAsync(_TransMain.Error_IPRouter.Get(Guild));
+                    return;
+                case "0.0.0.0":
+                    await ReplyAsync(_TransMain.Error_IPZero.Get(Guild));
+                    return;
+                case "google.com":
+                    await ReplyAsync(_TransMain.Error_IPGoogle.Get(Guild));
+                    return;
+                case "youtube.com":
+                    await ReplyAsync(_TransMain.Error_IPYoutube.Get(Guild));
+                    return;
+                case "blazeweb.ml":
+                    await ReplyAsync(_TransMain.Error_IPMyWeb.Get(Guild));
+                    return;
+                case "mc.hypixel.net":
+                    await ReplyAsync(_TransMain.Error_IPBlocked.Get(Guild));
+                    return;
+            }
+            if (IP.Contains(":"))
+            {
+                string[] GetPort = IP.Split(':');
+                IP = GetPort.First();
+                Port = Convert.ToUInt16(GetPort.Last());
+
+            }
+            if (Context.Guild != null && !IP.Contains("."))
+            {
+                _Server Server = Guild.Servers.Find(x => x.Tag.ToLower() == IP.ToLower());
+                if (Server != null)
+                {
+                    IP = Server.Ip; Port = Server.Port;
+                }
+            }
+            if (!IP.Contains("."))
+            {
+                var ValidEmbed = new EmbedBuilder()
+                {
+                    Description = $"<:error:350172479936921611> {_TransMain.Error_IPInvalid.Get(Guild)}",
+                    Color = new Color(200, 0, 0)
+                };
+                await ReplyAsync("", false, ValidEmbed.Build());
+                return;
+            }
+            if (Context.User.Id != 190590364871032834)
+            {
+                _Config.PingCooldown.TryGetValue(Context.User.Id, out Cooldown Cooldown);
+                if (Cooldown == null)
+                {
+                    _Config.PingCooldown.Add(Context.User.Id, new Cooldown() { Count = 0, Date = DateTime.Now });
+                    _Config.PingCooldown.TryGetValue(Context.User.Id, out Cooldown);
+                }
+                if (Cooldown.Count == 3)
+                {
+                    if (DateTime.Now.Hour == Cooldown.Date.Hour)
+                    {
+                        if ((DateTime.Now - Cooldown.Date).TotalMinutes > 1)
+                        {
+                            Cooldown.Date = DateTime.Now;
+                            Cooldown.Count = 1;
+                        }
+                        else
+                        {
+                            await ReplyAsync(_TransMain.Error_Cooldown.Get(Guild));
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        Cooldown.Date = DateTime.Now;
+                        Cooldown.Count = 1;
+                    }
+                }
+                else
+                {
+                    Cooldown.Date = DateTime.Now;
+                    Cooldown.Count++;
+                }
+            }
+            var ErrorEmbed = new EmbedBuilder()
+            {
+                Description = $"<:error:350172479936921611> {_TransMain.Error_IPInvalid.Get(Guild)}",
+                Color = new Color(200, 0, 0)
+            };
+            await Task.Run(async () =>
+             {
+                 string ThisIP = IP;
+                 if (Port != 25565)
+                 {
+                     ThisIP = $"{IP}:{Port}";
+                 }
+                 IUserMessage Wait = await ReplyAsync($"{_TransMain.Ping_PleaseWait.Get(Guild)} `{ThisIP}`");
+                 try
+                 {
+                     Ping PingTest = new Ping();
+                     PingReply PingReply = PingTest.Send(IP, 3000);
+                     if (PingReply.Status != IPStatus.Success)
+                     {
+                         await Wait.DeleteAsync();
+                         await ReplyAsync("", false, ErrorEmbed.Build());
+                         return;
+                     }
+
+                 }
+                 catch(PingException)
+                 {
+                     await Wait.DeleteAsync();
+                     await ReplyAsync("", false, ErrorEmbed.Build());
+                     return;
+                 }
+                 var Req = _Utils_Http.GetJsonObject("https://use.gameapis.net/mc/query/extensive/" + $"{IP}:{Port}");
+                 if (Req.status == false)
+                 {
+                    await Wait.DeleteAsync();
+                     if (Req.error == "Invalid port | lt")
+                     {
+                         _Log.ThrowError(Context, "`Server port not supported`", "Server port unsupported");
+                     }
+                     else if (Req.error == "Failed to parse server's response")
+                     {
+                         _Log.ThrowError(Context, $"`{_TransMain.Error_EnableQuery.Get(Guild)}`", "enable-query not set");
+                     }
+                     else
+                     {
+                         _Log.ThrowError(Context, $"`{_TransMain.Error_Api.Get(Guild)}`", Req.error);
+                     }
+                 }
+                 HashSet<string> Players = new HashSet<string>();
+                 int Plugins = 0;
+                 foreach(var i in Req.list)
+                 {
+                     Players.Add(i);
+                 }
+                 string PlayerList = "No Players :(";
+                 if (Players.Count != 0)
+                 {
+                     PlayerList = string.Join(" | ", Players);
+                 }
+                 foreach(var i in Req.plugins)
+                 {
+                     Plugins++;
+                 }
+                 
+                 var embed = new EmbedBuilder()
+                 {
+                     Title = $"[{Req.version}] {ThisIP}",
+                     Color = new Color(0, 200, 0),
+                     ThumbnailUrl = "https://api.minetools.eu/favicon/" + IP + "/" + Port,
+                     Description = $"**Players:** {Req.players.online}/{Req.players.max} - {Req.motds.clean}",
+                     Footer = new EmbedFooterBuilder()
+                     {
+                         Text = "Software: " + Req.software
+                     }
+                 };
+                 embed.AddField(_TransMain.Players.Get(Guild), Players);
+                 await ReplyAsync("", false, embed.Build());
+                 await Wait.DeleteAsync();
+             });
+        }
+
+
         [Command("list"),Alias("servers"), RequireContext(ContextType.Guild)]
         public async Task List()
         {
-_Task.GetGuild(Context.Guild, out _Guild Guild);
-            if (Context.Guild != null)
-            {
-                IGuildUser GU = await Context.Guild.GetUserAsync(Context.Client.CurrentUser.Id);
-                if (!GU.GuildPermissions.EmbedLinks && !GU.GetPermissions(Context.Channel as ITextChannel).EmbedLinks)
-                {
-                    await ReplyAsync("```python" + Environment.NewLine + $"{_TransMain.Error_NoEmbedPerms.Get(Guild)}```");
-                    return;
-                }
-            }
-            
-            if (Guild.Servers.Count == 0)
-            {
-                await ReplyAsync($"{_TransMain.List_NoServers.Get(Guild)} :(" + Environment.NewLine + $"{_TransMain.List_GuildAdmin.Get(Guild)} `mc/admin`");
-                return;
-            }
-            List<string> Servers = new List<string>();
+            _Task.GetGuild(Context.Guild, out _Guild Guild);
+            _Task.HasEmbedPerms(Context, Guild, true);
+
+            if (Guild.Servers.Count == 0) _Log.ThrowError(Context, $"{_TransMain.List_NoServers.Get(Guild)} :(" + Environment.NewLine + $"{_TransMain.List_GuildAdmin.Get(Guild)} `mc/admin`", "No Servers On List");
+            HashSet<string> Servers = new HashSet<string>();
             foreach (var i in Guild.Servers)
             {
-                Servers.Add($"<{i.Tag} {i.Ip} = {i.Name}>");
+                Servers.Add($"<{i.Tag} {i.Ip}> {i.Name}");
             }
             string Name = Context.Guild.Name;
-            if (Guild.CommunityName != "")
-            {
-                Name = Guild.CommunityName;
-            }
+
             var embed = new EmbedBuilder()
             {
                 Author = new EmbedAuthorBuilder()
                 {
-                    Name = $"{Name} {_TransMain.Servers.Get(Guild)}",
+                    Name = $"{Context.Guild.Name} {_TransMain.Servers.Get(Guild)}",
                     IconUrl = Context.Guild.IconUrl
                 },
                 Color = _Utils_Discord.GetRoleColor(Context.Channel as ITextChannel),
-                Description = "```md" + Environment.NewLine + string.Join(Environment.NewLine, Servers) + "```"
+                Description = "```md" + Environment.NewLine + string.Join(Environment.NewLine, Servers) + "```",
+                Footer = new EmbedFooterBuilder()
+                {
+                    Text = $"mc/ping {Guild.Servers[0].Tag}"
+                }
             };
             await ReplyAsync("", false, embed.Build());
         }
@@ -398,19 +520,10 @@ _Task.GetGuild(Context.Guild, out _Guild Guild);
         public async Task Info()
         {
 _Task.GetGuild(Context.Guild, out _Guild Guild);
-            if (Context.Guild != null)
-            {
-                IGuildUser GU = await Context.Guild.GetUserAsync(Context.Client.CurrentUser.Id);
-                if (!GU.GuildPermissions.EmbedLinks && !GU.GetPermissions(Context.Channel as ITextChannel).EmbedLinks)
-                {
-                    await ReplyAsync("```python" + Environment.NewLine + $"{_TransMain.Error_NoEmbedPerms.Get(Guild)}```");
-                    return;
-                }
-            }
-            
+            _Task.HasEmbedPerms(Context, Guild, true);
+
             StatisticsResponse stats = await new Statistics(Item.MinecraftAccountsSold).PerformRequest();
-            if (stats.IsSuccess)
-            {
+            if (!stats.IsSuccess) _Log.ThrowError(Context, $"`{_TransMain.Error_Api.Get(Guild)}`", stats.Error.ErrorMessage);
                 var embed = new EmbedBuilder()
                 {
                     Author = new EmbedAuthorBuilder()
@@ -426,11 +539,6 @@ _Task.GetGuild(Context.Guild, out _Guild Guild);
                     }
                 };
                 await ReplyAsync("", false, embed.Build());
-            }
-            else
-            {
-                await ReplyAsync(_TransMain.Error_Api.Get(Guild));
-            }
         }
 
         [Command("version")]
@@ -443,16 +551,8 @@ _Task.GetGuild(Context.Guild, out _Guild Guild);
         public async Task SkinArg(string Arg = "", string Player = "")
         {
             _Task.GetGuild(Context.Guild, out _Guild Guild);
-            if (Context.Guild != null)
-            {
-                IGuildUser GU = await Context.Guild.GetUserAsync(Context.Client.CurrentUser.Id);
-                if (!GU.GuildPermissions.EmbedLinks && !GU.GetPermissions(Context.Channel as ITextChannel).EmbedLinks)
-                {
-                    await ReplyAsync("```python" + Environment.NewLine + $"{_TransMain.Error_NoEmbedPerms.Get(Guild)}```");
-                    return;
-                }
-            }
-            
+            _Task.HasEmbedPerms(Context, Guild, true);
+
             if (Arg == "")
             {
                 await Context.Channel.SendMessageAsync($"mc/skin (Arg) {_TransMain.Skin_Args.Get(Guild)} | `mc/skin Notch` or `mc/skin cube Notch`");
@@ -466,8 +566,15 @@ _Task.GetGuild(Context.Guild, out _Guild Guild);
             UuidAtTimeResponse uuid = new UuidAtTime(Player, DateTime.Now).PerformRequest().Result;
             if (!uuid.IsSuccess)
             {
-                await ReplyAsync(_TransMain.Error_PlayerNotFound.Get(Guild).Replace("{0}", $"`{Player}`"));
-                return;
+                if (uuid.Error.ErrorTag == "NoContent")
+                {
+                    _Log.ThrowError(Context, _TransMain.Error_PlayerNotFound.Get(Guild).Replace("{0}", $"`{Player}`"), "Player not found");
+
+                }
+                else
+                {
+                    _Log.ThrowError(Context, $"`{_TransMain.Error_Api.Get(Guild)}`", uuid.Error.ErrorMessage);
+                }
             }
             string Url = "";
             switch (Arg.ToLower())
@@ -501,25 +608,28 @@ _Task.GetGuild(Context.Guild, out _Guild Guild);
         public async Task Names(string Player = "")
         {
 _Task.GetGuild(Context.Guild, out _Guild Guild);
-            if (Context.Guild != null)
-            {
-                IGuildUser GU = await Context.Guild.GetUserAsync(Context.Client.CurrentUser.Id);
-                if (!GU.GuildPermissions.EmbedLinks && !GU.GetPermissions(Context.Channel as ITextChannel).EmbedLinks)
-                {
-                    await ReplyAsync("```python" + Environment.NewLine + $"{_TransMain.Error_NoEmbedPerms.Get(Guild)}```");
-                    return;
-                }
-            }
-            
+            _Task.HasEmbedPerms(Context, Guild, true);
+
             if (Player == "")
             {
                 await Context.Channel.SendMessageAsync($"mc/names ({_TransMain.Player.Get(Guild)}) | `mc/names Notch`");
                 return;
             }
+            
             UuidAtTimeResponse uuid = new UuidAtTime(Player, DateTime.Now).PerformRequest().Result;
-            if (uuid.IsSuccess)
+            if (!uuid.IsSuccess)
             {
-                NameHistoryResponse names = new NameHistory(uuid.Uuid.Value).PerformRequest().Result;
+                if (uuid.Error.ErrorTag == "NoContent")
+                {
+                    _Log.ThrowError(Context, _TransMain.Error_PlayerNotFound.Get(Guild).Replace("{0}", $"`{Player}`"), "Player not found");
+
+                }
+                else
+                {
+                    _Log.ThrowError(Context, $"`{_TransMain.Error_Api.Get(Guild)}`", uuid.Error.ErrorMessage);
+                }
+            }
+            NameHistoryResponse names = new NameHistory(uuid.Uuid.Value).PerformRequest().Result;
                 if (names.IsSuccess)
                 {
                     List<string> Names = new List<string>();
@@ -542,34 +652,17 @@ _Task.GetGuild(Context.Guild, out _Guild Guild);
 
                     await ReplyAsync("```" + Environment.NewLine + string.Join(Environment.NewLine, Names) + "```");
                 }
-                else
-                {
-                    await ReplyAsync(_TransMain.Error_Api.Get(Guild));
-                }
-            }
-            else
-            {
-                await ReplyAsync(_TransMain.Name_PlayerNotFoundNames.Get(Guild).Replace("{0}", $"`{Player}`"));
-            }
         }
 
         [Command("status")]
         public async Task Status()
         {
 _Task.GetGuild(Context.Guild, out _Guild Guild);
-            if (Context.Guild != null)
-            {
-                IGuildUser GU = await Context.Guild.GetUserAsync(Context.Client.CurrentUser.Id);
-                if (!GU.GuildPermissions.EmbedLinks && !GU.GetPermissions(Context.Channel as ITextChannel).EmbedLinks)
-                {
-                    await ReplyAsync("```python" + Environment.NewLine + $"{_TransMain.Error_NoEmbedPerms.Get(Guild)}```");
-                    return;
-                }
-            }
-            
+            _Task.HasEmbedPerms(Context, Guild, true);
+
             ApiStatusResponse status = new ApiStatus().PerformRequest().Result;
-            if (status.IsSuccess)
-            {
+            if (!status.IsSuccess) _Log.ThrowError(Context, $"`{_TransMain.Error_Api.Get(Guild)}`", "API error");
+            
                 var embed = new EmbedBuilder()
                 {
                     Title = _TransMain.Status_Mojang.Get(Guild),
@@ -585,27 +678,14 @@ _Task.GetGuild(Context.Guild, out _Guild Guild);
                     embed.Color = new Color(255, 165, 0);
                 }
                 await ReplyAsync("", false, embed.Build());
-            }
-            else
-            {
-                await ReplyAsync(_TransMain.Error_Api.Get(Guild));
-            }
         }
 
         [Command("playing")]
         public async Task Playing()
         {
 _Task.GetGuild(Context.Guild, out _Guild Guild);
-            if (Context.Guild != null)
-            {
-                IGuildUser GU = await Context.Guild.GetUserAsync(Context.Client.CurrentUser.Id);
-                if (!GU.GuildPermissions.EmbedLinks && !GU.GetPermissions(Context.Channel as ITextChannel).EmbedLinks)
-                {
-                    await ReplyAsync("```python" + Environment.NewLine + $"{_TransMain.Error_NoEmbedPerms.Get(Guild)}```");
-                    return;
-                }
-            }
-            
+            _Task.HasEmbedPerms(Context, Guild, true);
+
             int CountOther = 0;
             int Count1710 = 0;
             int Count18 = 0;
@@ -665,16 +745,8 @@ _Task.GetGuild(Context.Guild, out _Guild Guild);
         public async Task Get([Remainder]string Text = "")
         {
 _Task.GetGuild(Context.Guild, out _Guild Guild);
-            if (Context.Guild != null)
-            {
-                IGuildUser GU = await Context.Guild.GetUserAsync(Context.Client.CurrentUser.Id);
-                if (!GU.GuildPermissions.EmbedLinks && !GU.GetPermissions(Context.Channel as ITextChannel).EmbedLinks)
-                {
-                    await ReplyAsync("```python" + Environment.NewLine + $"{_TransMain.Error_NoEmbedPerms.Get(Guild)}```");
-                    return;
-                }
-            }
-            
+            _Task.HasEmbedPerms(Context, Guild, true);
+
             if (Text == "")
             {
                 await ReplyAsync($"mc/get ({_TransMain.Text.Get(Guild)}) | `mc/get {_TransMain.Hi.Get(Guild)}`");
@@ -710,50 +782,39 @@ _Task.GetGuild(Context.Guild, out _Guild Guild);
         public async Task Minime(string Player = "")
         {
 _Task.GetGuild(Context.Guild, out _Guild Guild);
-            if (Context.Guild != null)
-            {
-                IGuildUser GU = await Context.Guild.GetUserAsync(Context.Client.CurrentUser.Id);
-                if (!GU.GuildPermissions.EmbedLinks && !GU.GetPermissions(Context.Channel as ITextChannel).EmbedLinks)
-                {
-                    await ReplyAsync("```python" + Environment.NewLine + $"{_TransMain.Error_NoEmbedPerms.Get(Guild)}```");
-                    return;
-                }
-            }
-            
+            _Task.HasEmbedPerms(Context, Guild, true);
+
             if (Player == "")
             {
                 await Context.Channel.SendMessageAsync($"mc/minime ({_TransMain.Player.Get(Guild)}) | `mc/minime Notch`");
                 return;
             }
             UuidAtTimeResponse uuid = new UuidAtTime(Player, DateTime.Now).PerformRequest().Result;
-            if (uuid.IsSuccess)
+            if (!uuid.IsSuccess)
             {
-                var embed = new EmbedBuilder()
+                if (uuid.Error.ErrorTag == "NoContent")
+                {
+                    _Log.ThrowError(Context, _TransMain.Error_PlayerNotFound.Get(Guild).Replace("{0}", $"`{Player}`"), "Player not found");
+
+                }
+                else
+                {
+                    _Log.ThrowError(Context, $"`{_TransMain.Error_Api.Get(Guild)}`", uuid.Error.ErrorMessage);
+                }
+            }
+            var embed = new EmbedBuilder()
                 {
                     Color = _Utils_Discord.GetRoleColor(Context.Channel as ITextChannel),
                     ImageUrl = "https://avatar.yourminecraftservers.com/avatar/trnsp/not_found/tall/128/" + Player + ".png"
                 };
                 await ReplyAsync("", false, embed.Build());
-            }
-            else
-            {
-                await ReplyAsync(_TransMain.Error_PlayerNotFound.Get(Guild).Replace("{0}", $"`{Player}`"));
-            }
         }
 
         [Command("bot")]
         public async Task Bot()
         {
 _Task.GetGuild(Context.Guild, out _Guild Guild);
-            if (Context.Guild != null)
-            {
-                IGuildUser GU = await Context.Guild.GetUserAsync(Context.Client.CurrentUser.Id);
-                if (!GU.GuildPermissions.EmbedLinks && !GU.GetPermissions(Context.Channel as ITextChannel).EmbedLinks)
-                {
-                    await ReplyAsync("```python" + Environment.NewLine + $"{_TransMain.Error_NoEmbedPerms.Get(Guild)}```");
-                    return;
-                }
-            }
+            _Task.HasEmbedPerms(Context, Guild, true);
             int FrenchCount = _Config.MCGuilds.Values.Where(x => x.Language == _Language.French).Count();
             int SpanishCount = _Config.MCGuilds.Values.Where(x => x.Language == _Language.Spanish).Count();
             int RussianCount = _Config.MCGuilds.Values.Where(x => x.Language == _Language.Russian).Count();
@@ -765,17 +826,17 @@ _Task.GetGuild(Context.Guild, out _Guild Guild);
                 Count++;
             }
             string Uptime = "";
-            if (_Config.Uptime.Elapsed.Hours == 0)
+            if (_Bot.Uptime.Elapsed.Hours == 0)
             {
-                Uptime = $"{_Config.Uptime.Elapsed.Minutes}m {_Config.Uptime.Elapsed.Seconds}s";
+                Uptime = $"{_Bot.Uptime.Elapsed.Minutes}m {_Bot.Uptime.Elapsed.Seconds}s";
             }
-            else if (_Config.Uptime.Elapsed.Days == 0)
+            else if (_Bot.Uptime.Elapsed.Days == 0)
             {
-                Uptime = $"{_Config.Uptime.Elapsed.Hours}h {_Config.Uptime.Elapsed.Minutes}m";
+                Uptime = $"{_Bot.Uptime.Elapsed.Hours}h {_Bot.Uptime.Elapsed.Minutes}m";
             }
             else
             {
-                Uptime = $"{_Config.Uptime.Elapsed.Days}d {_Config.Uptime.Elapsed.Hours}h";
+                Uptime = $"{_Bot.Uptime.Elapsed.Days}d {_Bot.Uptime.Elapsed.Hours}h";
             }
             var embed = new EmbedBuilder()
             {
@@ -788,7 +849,7 @@ _Task.GetGuild(Context.Guild, out _Guild Guild);
                 Color = _Utils_Discord.GetRoleColor(Context.Channel)
             };
             embed.AddField($"<:info:350172480645758976> Info", $"**{_TransMain.Bot_Owner.Get(Guild)}**" + Environment.NewLine + "xXBuilderBXx#9113" + Environment.NewLine + "<@190590364871032834>" + Environment.NewLine + Environment.NewLine + $"**{_TransMain.Language.Get(Guild)}:** C#" + Environment.NewLine + $"**{_TransMain.Bot_Lib.Get(Guild)}:** {_Config.Library}", true);
-            embed.AddField($"<:stats:350172481157464065> {_TransMain.Stats.Get(Guild)}", $"**{_TransMain.Guilds.Get(Guild)}:** {_Client.Guilds.Count()}" + Environment.NewLine + $"**{_TransMain.Commands.Get(Guild)}:** {Count}" + Environment.NewLine + $"**{_TransMain.Uptime.Get(Guild)}:** {Uptime}" + Environment.NewLine + Environment.NewLine + $"**français:** {FrenchCount}" + Environment.NewLine + $"**Español:** {SpanishCount}" + Environment.NewLine + $"**русский:** {RussianCount}" + Environment.NewLine + $"**Português:** {PortugesCount}", true);
+            embed.AddField($"<:stats:350172481157464065> {_TransMain.Stats.Get(Guild)}", $"**{_TransMain.Guilds.Get(Guild)}:** {_Client.Guilds.Count()}" + Environment.NewLine + $"**{_TransMain.Commands.Get(Guild)}:** {Count}" + Environment.NewLine + $"**{_TransMain.Uptime.Get(Guild)}:** {Uptime}" + Environment.NewLine + Environment.NewLine + $"**Français:** {FrenchCount}" + Environment.NewLine + $"**Español:** {SpanishCount}" + Environment.NewLine + $"**Pусский:** {RussianCount}" + Environment.NewLine + $"**Português:** {PortugesCount}", true);
             embed.AddField($"<:world:350172484038950912> {_TransMain.Links.Get(Guild)}", $"[{_TransMain.Bot_Invite.Get(Guild)}](https://discordapp.com/oauth2/authorize?&client_id=" + Context.Client.CurrentUser.Id + "&scope=bot&permissions=0)" + Environment.NewLine + $"[Website](https://blazeweb.ml)" + Environment.NewLine + "[Github](https://github.com/xXBuilderBXx/MC-Bot)" + Environment.NewLine + Environment.NewLine + $"**{_TransMain.Bot_ListGuilds.Get(Guild)}**" + Environment.NewLine + "[Dbots](https://bots.discord.pw/bots/346346285953056770)" + Environment.NewLine + "[DBL](https://discordbots.org/bot/346346285953056770)" + Environment.NewLine + "[Novo](https://novo.archbox.pro/)", true);
             await ReplyAsync("", false, embed.Build());
         }
@@ -802,6 +863,7 @@ _Task.GetGuild(Context.Guild, out _Guild Guild);
         public async Task Classic()
         {
             _Task.GetGuild(Context.Guild, out _Guild Guild);
+            _Task.HasEmbedPerms(Context, Guild, true);
             var embed = new EmbedBuilder()
             {
                 Title = "Minecraft Classic",
@@ -819,6 +881,7 @@ _Task.GetGuild(Context.Guild, out _Guild Guild);
         public async Task Dab()
         {
             _Task.GetGuild(Context.Guild, out _Guild Guild);
+            _Task.HasEmbedPerms(Context, Guild, true);
             var embed = new EmbedBuilder()
             {
                 ImageUrl = "https://media-curse.cursecdn.com/attachments/thumbnails/236/440/190/130/dd63904725da76213d1878fb1cc6daaf.jpeg",
@@ -841,6 +904,7 @@ _Task.GetGuild(Context.Guild, out _Guild Guild);
         public async Task Forge()
         {
             _Task.GetGuild(Context.Guild, out _Guild Guild);
+            _Task.HasEmbedPerms(Context, Guild, true);
             var embed = new EmbedBuilder()
             {
                 Description = _TransHidden.Forgecraft.Get(Guild) + Environment.NewLine +
@@ -858,6 +922,7 @@ _Task.GetGuild(Context.Guild, out _Guild Guild);
         public async Task ForgecraftWallpaper()
         {
             _Task.GetGuild(Context.Guild, out _Guild Guild);
+            _Task.HasEmbedPerms(Context, Guild, true);
             var embed = new EmbedBuilder()
             {
                 Author = new EmbedAuthorBuilder()
@@ -879,6 +944,7 @@ _Task.GetGuild(Context.Guild, out _Guild Guild);
         public async Task Bukkit()
         {
             _Task.GetGuild(Context.Guild, out _Guild Guild);
+            _Task.HasEmbedPerms(Context, Guild, true);
             var embed = new EmbedBuilder()
             {
                 Color = _Utils_Discord.GetRoleColor(Context.Channel as ITextChannel),
@@ -895,6 +961,7 @@ _Task.GetGuild(Context.Guild, out _Guild Guild);
         public async Task DW()
         {
             _Task.GetGuild(Context.Guild, out _Guild Guild);
+            _Task.HasEmbedPerms(Context, Guild, true);
             var embed = new EmbedBuilder()
             {
                 Color = _Utils_Discord.GetRoleColor(Context.Channel as ITextChannel),
@@ -911,6 +978,7 @@ _Task.GetGuild(Context.Guild, out _Guild Guild);
         public async Task Herobrine()
         {
             _Task.GetGuild(Context.Guild, out _Guild Guild);
+            _Task.HasEmbedPerms(Context, Guild, true);
             var embedh = new EmbedBuilder()
             {
                 Title = "Herobrine",
@@ -929,6 +997,7 @@ _Task.GetGuild(Context.Guild, out _Guild Guild);
         public async Task Entity303()
         {
             _Task.GetGuild(Context.Guild, out _Guild Guild);
+            _Task.HasEmbedPerms(Context, Guild, true);
             var embedh = new EmbedBuilder()
             {
                 Title = "Entity 303",
@@ -947,6 +1016,7 @@ _Task.GetGuild(Context.Guild, out _Guild Guild);
         public async Task IS()
         {
             _Task.GetGuild(Context.Guild, out _Guild Guild);
+            _Task.HasEmbedPerms(Context, Guild, true);
             var embed = new EmbedBuilder()
             {
                 Color = _Utils_Discord.GetRoleColor(Context.Channel as ITextChannel),
@@ -963,6 +1033,7 @@ _Task.GetGuild(Context.Guild, out _Guild Guild);
         public async Task Notch()
         {
             _Task.GetGuild(Context.Guild, out _Guild Guild);
+            _Task.HasEmbedPerms(Context, Guild, true);
             var embed = new EmbedBuilder()
             {
                 Description = $"{_TransHidden.Notch.Get(Guild)} [Wiki](https://en.wikipedia.org/wiki/Markus_Persson)",
@@ -985,22 +1056,11 @@ _Task.GetGuild(Context.Guild, out _Guild Guild);
         public async Task Admin()
         {
 _Task.GetGuild(Context.Guild, out _Guild Guild);
-            if (Context.Guild != null)
-            {
-                IGuildUser GU = await Context.Guild.GetUserAsync(Context.Client.CurrentUser.Id);
-                if (!GU.GuildPermissions.EmbedLinks && !GU.GetPermissions(Context.Channel as ITextChannel).EmbedLinks)
-                {
-                    await ReplyAsync("```python" + Environment.NewLine + $"{_TransMain.Error_NoEmbedPerms.Get(Guild)}```");
-                    return;
-                }
-            }
-            
+            _Task.HasEmbedPerms(Context, Guild, true);
+
             IGuildUser GUU = await Context.Guild.GetUserAsync(Context.User.Id);
-            if (!GUU.GuildPermissions.Administrator)
-            {
-                await ReplyAsync($"<:error:350172479936921611> {_TransAdmin.AdminOnly.Get(Guild)}");
-                return;
-            }
+            
+                if (Context.User.Id != 190590364871032834 && !GUU.GuildPermissions.Administrator) _Log.ThrowError(Context, $"<:error:350172479936921611> {_TransAdmin.AdminOnly.Get(Guild)}", "Not a guild administrator");
 
             var embed = new EmbedBuilder()
             {
@@ -1018,22 +1078,10 @@ _Task.GetGuild(Context.Guild, out _Guild Guild);
         public async Task Addserver(string Tag = "", string IP = "", [Remainder]string Name = "")
         {
 _Task.GetGuild(Context.Guild, out _Guild Guild);
-            if (Context.Guild != null)
-            {
-                IGuildUser GU = await Context.Guild.GetUserAsync(Context.Client.CurrentUser.Id);
-                if (!GU.GuildPermissions.EmbedLinks && !GU.GetPermissions(Context.Channel as ITextChannel).EmbedLinks)
-                {
-                    await ReplyAsync("```python" + Environment.NewLine + $"{_TransMain.Error_NoEmbedPerms.Get(Guild)}```");
-                    return;
-                }
-            }
-            
+            _Task.HasEmbedPerms(Context, Guild, true);
+
             IGuildUser GUU = await Context.Guild.GetUserAsync(Context.User.Id);
-            if (!GUU.GuildPermissions.Administrator)
-            {
-                await ReplyAsync($"<:error:350172479936921611> {_TransAdmin.AdminOnly.Get(Guild)}");
-                return;
-            }
+            if (Context.User.Id != 190590364871032834 && !GUU.GuildPermissions.Administrator) _Log.ThrowError(Context, $"<:error:350172479936921611> {_TransAdmin.AdminOnly.Get(Guild)}", "Not a guild administrator");
 
             if (Tag == "" || IP == "" || Name == "")
             {
@@ -1072,22 +1120,10 @@ _Task.GetGuild(Context.Guild, out _Guild Guild);
         public async Task Delserver(string Tag = "")
         {
 _Task.GetGuild(Context.Guild, out _Guild Guild);
-            if (Context.Guild != null)
-            {
-                IGuildUser GU = await Context.Guild.GetUserAsync(Context.Client.CurrentUser.Id);
-                if (!GU.GuildPermissions.EmbedLinks && !GU.GetPermissions(Context.Channel as ITextChannel).EmbedLinks)
-                {
-                    await ReplyAsync("```python" + Environment.NewLine + $"{_TransMain.Error_NoEmbedPerms.Get(Guild)}```");
-                    return;
-                }
-            }
-            
+            _Task.HasEmbedPerms(Context, Guild, true);
+
             IGuildUser GUU = await Context.Guild.GetUserAsync(Context.User.Id);
-            if (!GUU.GuildPermissions.Administrator)
-            {
-                await ReplyAsync($"<:error:350172479936921611> {_TransAdmin.AdminOnly.Get(Guild)}");
-                return;
-            }
+            if (Context.User.Id != 190590364871032834 && !GUU.GuildPermissions.Administrator) _Log.ThrowError(Context, $"<:error:350172479936921611> {_TransAdmin.AdminOnly.Get(Guild)}", "Not a guild administrator");
 
             if (Tag == "")
             {
@@ -1110,25 +1146,10 @@ _Task.GetGuild(Context.Guild, out _Guild Guild);
         public async Task Language(int ID = -1)
         {
             _Task.GetGuild(Context.Guild, out _Guild Guild);
-            if (Context.Guild != null)
-            {
-                IGuildUser GU = await Context.Guild.GetUserAsync(Context.Client.CurrentUser.Id);
-                if (!GU.GuildPermissions.EmbedLinks && !GU.GetPermissions(Context.Channel as ITextChannel).EmbedLinks)
-                {
-                    await ReplyAsync("```python" + Environment.NewLine + $"{_TransMain.Error_NoEmbedPerms.Get(Guild)}```");
-                    return;
-                }
-            }
-            
+            _Task.HasEmbedPerms(Context, Guild, true);
+
             IGuildUser GUU = await Context.Guild.GetUserAsync(Context.User.Id);
-            if (Context.User.Id != 190590364871032834)
-            {
-                if (!GUU.GuildPermissions.Administrator)
-                {
-                    await ReplyAsync($"<:error:350172479936921611> {_TransAdmin.AdminOnly.Get(Guild)}");
-                    return;
-                }
-            }
+            if (Context.User.Id != 190590364871032834 && !GUU.GuildPermissions.Administrator) _Log.ThrowError(Context, $"<:error:350172479936921611> {_TransAdmin.AdminOnly.Get(Guild)}", "Not a guild administrator");
             if (ID == -1)
             {
                 var embed = new EmbedBuilder()
@@ -1186,6 +1207,7 @@ _Task.GetGuild(Context.Guild, out _Guild Guild);
         [Command("wiki")]
         public async Task WikiHelp()
         {
+            _Task.HasEmbedPerms(Context, null, true);
             var embed = new EmbedBuilder()
             {
                 Title = "Wiki Commands",
@@ -1198,8 +1220,9 @@ _Task.GetGuild(Context.Guild, out _Guild Guild);
         [Command("item"), Alias("block", "items", "blocks")]
         public async Task Items(string ID = "", string Meta = "0")
         {
-            HashSet<_Item> Items = new HashSet<_Item>();
             _Task.GetGuild(Context.Guild, out _Guild Guild);
+            _Task.HasEmbedPerms(Context, null, true);
+             HashSet<_Item> Items = new HashSet<_Item>();
             if (ID == "")
             {
                 await ReplyAsync("Use `mc/item 46` | `mc/item red wool`");
@@ -1222,11 +1245,7 @@ _Task.GetGuild(Context.Guild, out _Guild Guild);
                 }
                 Item = _Config.MCItems.Find(x => x.Name.ToLower() == Name.ToLower());
             }
-            if (Item == null)
-            {
-                await ReplyAsync($"`{_TransWiki.Error_UnknownItemID.Get(Guild)}`");
-                return;
-            }
+            if (Item == null) _Log.ThrowError(Context, $"`{_TransWiki.Error_UnknownItemID.Get(Guild)}`", "Item not found");
             var embed = new EmbedBuilder()
             {
                 Title = $"{Item.ID}:{Item.Meta} | {Item.Name}",
@@ -1246,89 +1265,8 @@ _Task.GetGuild(Context.Guild, out _Guild Guild);
         public async Task Mob([Remainder]string Name = "")
         {
             _Task.GetGuild(Context.Guild, out _Guild Guild);
-            if (Name != "")
-            {
-                if (Name.ToLower() == "herobrine")
-                {
-                    var embedh = new EmbedBuilder()
-                    {
-                        Title = "Herobrine",
-                        Description = $"[Wiki](http://minecraftcreepypasta.wikia.com/wiki/Herobrine) {_TransHidden.Herobrine}",
-                        ThumbnailUrl = "https://lh3.googleusercontent.com/AQ5S9Xj1z6LBbNis2BdUHM-mQbDrkvbrrlx5rTIxCPc-SwdITwjkJP370gZxNpjG92ND8wImuMuLyKnKi7te7w",
-                        Footer = new EmbedFooterBuilder()
-                        {
-                            Text = _TransHidden.FoundSecretCommand.Get(Guild)
-                        },
-                        Color = _Utils_Discord.GetRoleColor(Context.Channel as ITextChannel)
-                    };
-                    await ReplyAsync("", false, embedh.Build());
-                    return;
-                }
-                if (Name.ToLower() == "entity303" || Name.ToLower() == "entity 303")
-                {
-                    var embedh = new EmbedBuilder()
-                    {
-                        Title = "Entity 303",
-                        Description = $"[Wiki](http://minecraftcreepypasta.wikia.com/wiki/Entity_303) {_TransHidden.Entity303}",
-                        ThumbnailUrl = "https://vignette3.wikia.nocookie.net/minecraftcreepypasta/images/4/49/Entity_303.png",
-                        Footer = new EmbedFooterBuilder()
-                        {
-                            Text = _TransHidden.FoundSecretCommand.Get(Guild)
-                        },
-                        Color = _Utils_Discord.GetRoleColor(Context.Channel as ITextChannel)
-                    };
-                    await ReplyAsync("", false, embedh.Build());
-                    return;
-                }
-                _Mob Mob = _Config.MCMobs.Find(x => x.Name.ToLower() == Name.ToLower().Replace(" ", ""));
-                if (Mob != null)
-                {
-                    var embed = new EmbedBuilder()
-                    {
-                        Title = $"[{Mob.ID}] {Mob.Name}",
-                        Description = $"[Wiki]({Mob.WikiLink}) {Mob.Note}",
-                        ThumbnailUrl = Mob.PicUrl,
-                        Color = _Utils_Discord.GetRoleColor(Context.Channel as ITextChannel)
-                    };
-                    if (Mob.Type == _MobType.Secret)
-                    {
-                        embed.WithFooter(new EmbedFooterBuilder() { Text = _TransHidden.FoundSecretCommand.Get(Guild) });
-                    }
-                    string Height = Mob.Height + $" {_TransWiki.blocks.Get(Guild)}";
-                    string Width = Mob.Width + $" {_TransWiki.blocks.Get(Guild)}";
-                    if (Mob.Height == "Rip")
-                    {
-                        Height = _TransMain.Unknown.Get(Guild);
-                    }
-                    if (Mob.Width == "Rip")
-                    {
-                        Width = _TransMain.Unknown.Get(Guild);
-                    }
-                    if (Mob.AttackEasy == "")
-                    {
-
-                        string PlayerText = "";
-                        if (Mob.Name.ToLower() == _TransMain.Player.Get(Guild).ToLower())
-                        {
-                            embed.WithTitle(_TransMain.Player.Get(Guild));
-                            PlayerText = Environment.NewLine + $"**{_TransWiki.Fist_Attack.Get(Guild)}:** 0.5 :heart:";
-                        }
-                        embed.AddField(_TransMain.Stats.Get(Guild), $"**{_TransMain.Health.Get(Guild)}:** {Mob.Health} :heart:" + Environment.NewLine + $"**{_TransMain.Type.Get(Guild)}:** {Mob.Type}" + PlayerText, true);
-                        embed.AddField(_TransMain.Info.Get(Guild), $"**{_TransMain.Height.Get(Guild)}:** {Height}" + Environment.NewLine + $"**{_TransMain.Width.Get(Guild)}:** {Width}" + Environment.NewLine + $"**{_TransMain.Version.Get(Guild)}:** {Mob.Version}", true);
-                    }
-                    else
-                    {
-                        embed.AddField(_TransMain.Stats.Get(Guild), $"**{_TransMain.Health.Get(Guild)}:** {Mob.Health} :heart:" + Environment.NewLine + $"**{_TransMain.Attack.Get(Guild)}** :crossed_swords:" + Environment.NewLine + $"**{_TransMain.Easy.Get(Guild)}:** {Mob.AttackEasy}" + Environment.NewLine + $"**{_TransMain.Normal.Get(Guild)}:** {Mob.AttackNormal}" + Environment.NewLine + $"**{_TransMain.Hard.Get(Guild)}:** {Mob.AttackHard}", true);
-                        embed.AddField(_TransMain.Info.Get(Guild), $"**{_TransMain.Height.Get(Guild)}:** {Height}" + Environment.NewLine + $"**{_TransMain.Width.Get(Guild)}:** {Width}" + Environment.NewLine + $"**{_TransMain.Version.Get(Guild)}:** {Mob.Version}" + Environment.NewLine + $"**{_TransMain.Type.Get(Guild)}:** {Mob.Type}", true);
-                    }
-                    await ReplyAsync("", false, embed.Build());
-                }
-                else
-                {
-                    await ReplyAsync($"`{_TransWiki.Error_UnknownMob.Get(Guild)}`");
-                }
-            }
-            else
+            _Task.HasEmbedPerms(Context, null, true);
+            if (Name == "")
             {
                 List<string> Passive = new List<string>();
                 List<string> Tameable = new List<string>();
@@ -1374,11 +1312,87 @@ _Task.GetGuild(Context.Guild, out _Guild Guild);
 
                 await ReplyAsync("", false, embed.Build());
             }
+            else
+            {
+                if (Name.ToLower() == "herobrine")
+                {
+                    var embedh = new EmbedBuilder()
+                    {
+                        Title = "Herobrine",
+                        Description = $"[Wiki](http://minecraftcreepypasta.wikia.com/wiki/Herobrine) {_TransHidden.Herobrine}",
+                        ThumbnailUrl = "https://lh3.googleusercontent.com/AQ5S9Xj1z6LBbNis2BdUHM-mQbDrkvbrrlx5rTIxCPc-SwdITwjkJP370gZxNpjG92ND8wImuMuLyKnKi7te7w",
+                        Footer = new EmbedFooterBuilder()
+                        {
+                            Text = _TransHidden.FoundSecretCommand.Get(Guild)
+                        },
+                        Color = _Utils_Discord.GetRoleColor(Context.Channel as ITextChannel)
+                    };
+                    await ReplyAsync("", false, embedh.Build());
+                }else if (Name.ToLower() == "entity303" || Name.ToLower() == "entity 303")
+                {
+                    var embedh = new EmbedBuilder()
+                    {
+                        Title = "Entity 303",
+                        Description = $"[Wiki](http://minecraftcreepypasta.wikia.com/wiki/Entity_303) {_TransHidden.Entity303}",
+                        ThumbnailUrl = "https://vignette3.wikia.nocookie.net/minecraftcreepypasta/images/4/49/Entity_303.png",
+                        Footer = new EmbedFooterBuilder()
+                        {
+                            Text = _TransHidden.FoundSecretCommand.Get(Guild)
+                        },
+                        Color = _Utils_Discord.GetRoleColor(Context.Channel as ITextChannel)
+                    };
+                    await ReplyAsync("", false, embedh.Build());
+                    return;
+                }
+                _Mob Mob = _Config.MCMobs.Find(x => x.Name.ToLower() == Name.ToLower().Replace(" ", ""));
+                if (Mob == null) _Log.ThrowError(Context, $"`{ _TransWiki.Error_UnknownMob.Get(Guild)}`", "Mob not found");
+               
+                    var embed = new EmbedBuilder()
+                    {
+                        Title = $"[{Mob.ID}] {Mob.Name}",
+                        Description = $"[Wiki]({Mob.WikiLink}) {Mob.Note}",
+                        ThumbnailUrl = Mob.PicUrl,
+                        Color = _Utils_Discord.GetRoleColor(Context.Channel as ITextChannel)
+                    };
+                    if (Mob.Type == _MobType.Secret)
+                    {
+                        embed.WithFooter(new EmbedFooterBuilder() { Text = _TransHidden.FoundSecretCommand.Get(Guild) });
+                    }
+                    string Height = Mob.Height + $" {_TransWiki.blocks.Get(Guild)}";
+                    string Width = Mob.Width + $" {_TransWiki.blocks.Get(Guild)}";
+                    if (Mob.Height == "Rip")
+                    {
+                        Height = _TransMain.Unknown.Get(Guild);
+                    }
+                    if (Mob.Width == "Rip")
+                    {
+                        Width = _TransMain.Unknown.Get(Guild);
+                    }
+                    if (Mob.AttackEasy == "")
+                    {
+
+                        string PlayerText = "";
+                        if (Mob.Name.ToLower() == _TransMain.Player.Get(Guild).ToLower())
+                        {
+                            embed.WithTitle(_TransMain.Player.Get(Guild));
+                            PlayerText = Environment.NewLine + $"**{_TransWiki.Fist_Attack.Get(Guild)}:** 0.5 :heart:";
+                        }
+                        embed.AddField(_TransMain.Stats.Get(Guild), $"**{_TransMain.Health.Get(Guild)}:** {Mob.Health} :heart:" + Environment.NewLine + $"**{_TransMain.Type.Get(Guild)}:** {Mob.Type}" + PlayerText, true);
+                        embed.AddField(_TransMain.Info.Get(Guild), $"**{_TransMain.Height.Get(Guild)}:** {Height}" + Environment.NewLine + $"**{_TransMain.Width.Get(Guild)}:** {Width}" + Environment.NewLine + $"**{_TransMain.Version.Get(Guild)}:** {Mob.Version}", true);
+                    }
+                    else
+                    {
+                        embed.AddField(_TransMain.Stats.Get(Guild), $"**{_TransMain.Health.Get(Guild)}:** {Mob.Health} :heart:" + Environment.NewLine + $"**{_TransMain.Attack.Get(Guild)}** :crossed_swords:" + Environment.NewLine + $"**{_TransMain.Easy.Get(Guild)}:** {Mob.AttackEasy}" + Environment.NewLine + $"**{_TransMain.Normal.Get(Guild)}:** {Mob.AttackNormal}" + Environment.NewLine + $"**{_TransMain.Hard.Get(Guild)}:** {Mob.AttackHard}", true);
+                        embed.AddField(_TransMain.Info.Get(Guild), $"**{_TransMain.Height.Get(Guild)}:** {Height}" + Environment.NewLine + $"**{_TransMain.Width.Get(Guild)}:** {Width}" + Environment.NewLine + $"**{_TransMain.Version.Get(Guild)}:** {Mob.Version}" + Environment.NewLine + $"**{_TransMain.Type.Get(Guild)}:** {Mob.Type}", true);
+                    }
+                    await ReplyAsync("", false, embed.Build());
+            }
         }
 
         [Command("potion"), Remarks("mc/potion"), Alias("potions")]
         public async Task Potion([Remainder]string Name = "")
         {
+            _Task.HasEmbedPerms(Context, null, true);
             if (Name == "")
             {
                 var embed = new EmbedBuilder()
@@ -1422,12 +1436,8 @@ _Task.GetGuild(Context.Guild, out _Guild Guild);
             else
             {
                 _Potion Potion = _Config.MCPotions.Find(x => x.Name.ToLower().Replace(" ", "").Contains(Name.ToLower().Replace(" ", "")));
-                if (Potion == null)
-                {
-                    await ReplyAsync("Could not find potion");
-                }
-                else
-                {
+                if (Potion == null) _Log.ThrowError(Context, "`Potion not found`", "Potion not found");
+                
                     var embed = new EmbedBuilder()
                     {
                         Title = $"Potion of {Potion.Name}",
@@ -1444,13 +1454,14 @@ _Task.GetGuild(Context.Guild, out _Guild Guild);
                         embed.AddField("Level 2 - Add glowstone", "```md" + Environment.NewLine + $"<Duration {Potion.Level2.GetDuration()}> <Note {Potion.Level2.Note}>```");
                     }
                     await ReplyAsync("", false, embed.Build());
-                }
+                
             }
         }
 
         [Command("enchant"), Remarks("mc/enchant"), Alias("enchants")]
         public async Task Enchant([Remainder]string Name = "")
         {
+            _Task.HasEmbedPerms(Context, null, true);
             if (Name == "")
             {
                 var embed = new EmbedBuilder()
@@ -1469,6 +1480,7 @@ _Task.GetGuild(Context.Guild, out _Guild Guild);
             else
             {
                 _Enchant Enchant = _Config.MCEnchantments.Find(x => x.Name.ToLower().Replace(" ", "").Contains(Name.ToLower().Replace(" ", "")));
+                if (Enchant == null) _Log.ThrowError(Context, "`Enchant not found`", "Enchant not found");
                 var embed = new EmbedBuilder()
                 {
                     Title = $"[{Enchant.ID}] {Enchant.Name}",
@@ -1488,6 +1500,8 @@ _Task.GetGuild(Context.Guild, out _Guild Guild);
         [Command("quiz")]
         public async Task QuizCom(string Accept = "")
         {
+            _Task.HasEmbedPerms(Context, null, true);
+
             if (Accept == "start")
             {
                     Random.Org.Random Rng = new Random.Org.Random();

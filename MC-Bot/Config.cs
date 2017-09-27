@@ -74,7 +74,6 @@ namespace Bot
     public class _Config
     {
         public static string BotName = "Minecraft";
-        public static Stopwatch Uptime = new Stopwatch();
         public static string Prefix = "mc/";
         public static string DevPrefix = "tmc/";
         public static string Github = "https://github.com/xXBuilderBXx/MC-Bot";
@@ -83,6 +82,7 @@ namespace Bot
         public static string Library = ".net V2-00828";
         public static bool DevMode = true;
         public static Class Tokens = new Class();
+        public static _Trans.Main _TransMain = new _Trans.Main();
         public static Dictionary<ulong, _Guild> MCGuilds = new Dictionary<ulong, _Guild>();
         public static List<_Item> MCItems = new List<_Item>();
         public static List<_Mob> MCMobs = new List<_Mob>();

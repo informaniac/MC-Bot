@@ -15,6 +15,8 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Timers;
 using Bot.Services;
+using Bot.Classes;
+
 namespace Bot
 {
     public class Program
@@ -129,7 +131,6 @@ namespace Bot
                 Console.ForegroundColor = ConsoleColor.White;
             });
         }
-
         /// <summary>
         /// [Joined] Guild + Color Green
         /// </summary>
@@ -199,18 +200,22 @@ namespace Bot
         /// <summary>
         /// Throw a command error exception
         /// </summary>
-        public static void ThrowError(string Message)
+        public static void ThrowError(ICommandContext Context,string Message, string ConsoleMessage)
         {
+            _Log.CommandError(ConsoleMessage, (CommandContext)Context);
             throw new Exception("Custom - " + Message);
         }
     }
     #endregion
-
+    public class _GuildCount
+    {
+        public int server_count = 0;
+    }
     public class _CacheItem
     {
         public IGuild Guild;
         public IGuildUser Bot;
-        public bool HasEmbedPerms(ICommandContext Context, bool AllowError = false)
+        public bool HasEmbedPerms(ICommandContext Context, bool AllowError = false, _Guild MCGuild = null)
         {
             if (Bot.GuildPermissions.EmbedLinks || Bot.GetPermissions(Context.Channel as IGuildChannel).EmbedLinks)
             {
@@ -220,7 +225,14 @@ namespace Bot
             {
                 if (AllowError == true)
                 {
-                    _Log.ThrowError("No Embed Perms");
+                    if (MCGuild == null)
+                    {
+                        _Log.ThrowError(Context, "`No Embed Links Perm`", "No Embed Links Perm");
+                    }
+                    else
+                    {
+                        _Log.ThrowError(Context, "```python" + Environment.NewLine + $"{_Config._TransMain.Error_NoEmbedPerms.Get(MCGuild)}```", "No Embed Links Perms");
+                    }
                 }
                 return false;
             }
@@ -267,7 +279,7 @@ namespace Bot
         public CommandService _Commands;
         public static Dictionary<ulong, _CacheItem> GuildCache = new Dictionary<ulong, _CacheItem>();
         private string Status = "";
-        public ulong WisperGuild = 0;
+        public Stopwatch Uptime = new Stopwatch();
         /// <summary>
         /// Get the bot game message
         /// </summary>
@@ -635,6 +647,8 @@ namespace Bot
         #region ClientEvents
         private async Task JoinedGuild(SocketGuild g)
         {
+            _Utils_Json.WriteJson(new _GuildCount() { server_count = _Client.Guilds.Count }, "GuildCount");
+
             if (!GuildCache.ContainsKey(g.Id))
             {
                 GuildCache.Add(g.Id, new _CacheItem() { Guild = g, Bot = g.GetUser(_Client.CurrentUser.Id) });
@@ -697,6 +711,7 @@ namespace Bot
 
         private async Task LeftGuild(SocketGuild g)
         {
+            _Utils_Json.WriteJson(new _GuildCount() { server_count = _Client.Guilds.Count }, "GuildCount");
             if (GuildCache.Keys.Contains(g.Id))
             {
                 GuildCache.Remove(g.Id);
@@ -717,6 +732,7 @@ namespace Bot
 
         private Task Connected()
         {
+            Uptime.Start();
             if (DevMode == true)
             {
                 Console.Title = $"[DevMode] {_Config.BotName} - Online!";
@@ -731,6 +747,7 @@ namespace Bot
 
         private Task Disconnected(Exception ex)
         {
+            Uptime.Stop();
             if (DevMode == true)
             {
                 Console.Title = $"[DevMode] {_Config.BotName} - Offline!";
@@ -753,12 +770,15 @@ namespace Bot
 
         private async Task ClientReady()
         {
-            _Log.Ok($"Ready in {_Client.Guilds.Count} guilds");
-            Ready = true;
-
-            if (!DevMode)
+            if (!Ready)
             {
-                await _Client.SetGameAsync(GetStatus());
+                Ready = true;
+                _Utils_Json.WriteJson(new _GuildCount() { server_count = _Client.Guilds.Count }, "GuildCount");
+                _Log.Ok($"Ready in {_Client.Guilds.Count} guilds");
+                if (!DevMode)
+                {
+                    await _Client.SetGameAsync(GetStatus());
+                }
             }
         }
 
@@ -767,14 +787,11 @@ namespace Bot
             _CacheItem CI;
             if (!GuildCache.ContainsKey(g.Id))
             {
+
                 GuildCache.Add(g.Id, new _CacheItem() { Guild = g, Bot = g.GetUser(_Client.CurrentUser.Id) });
-                GuildCache.TryGetValue(g.Id, out CI);
             }
-            else
-            {
-                GuildCache.TryGetValue(g.Id, out CI);
-                CI.Bot = g.GetUser(_Client.CurrentUser.Id);
-            }
+            GuildCache.TryGetValue(g.Id, out CI);
+            CI.Bot = g.GetUser(_Client.CurrentUser.Id);
             if (!DevMode)
             {
                 if (_Bot._Whitelist.Check(g.Id)) return;
@@ -874,15 +891,7 @@ namespace Bot.Services
             {
                 if (result.ErrorReason.StartsWith("Custom - "))
                 {
-                    _Log.CommandError(result.ErrorReason.Replace("Custom - ", ""), Context);
-                    if (result.ErrorReason == "Custom - No Embed Perms")
-                    {
-                        await Context.Channel.SendMessageAsync("```python" + Environment.NewLine + $"Bot requires permission \" Embed Links \"```");
-                    }
-                    else
-                    {
-                        await Context.Channel.SendMessageAsync($"`{result.ErrorReason.Replace("Custom - ", "")}`");
-                    }
+                    await Context.Channel.SendMessageAsync(result.ErrorReason.Replace("Custom - ", ""));
                     return;
                 }
                 _Log.CommandError(result.ErrorReason, Context);
@@ -1691,6 +1700,7 @@ namespace Bot.Utils
             return Chan;
         }
     }
+
     public class _Utils_Json
     {
         public static void WriteJson(Object Data, string FileName)

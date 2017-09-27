@@ -87,6 +87,30 @@ namespace Bot.Functions
                 }
             }
         }
+
+        public static bool HasEmbedPerms(ICommandContext Context, _Guild Guild = null, bool Error = false)
+        {
+            if (Context.Guild == null)
+            {
+                return true;
+            }
+            _Bot.GuildCache.TryGetValue(Context.Guild.Id, out _CacheItem CI);
+            if (CI.Bot.GuildPermissions.EmbedLinks || CI.Bot.GetPermissions(Context.Channel as IGuildChannel).EmbedLinks)
+            {
+                return true;
+            }
+            if (Error)
+            {
+                string ErrorText = _Config._TransMain.Error_NoEmbedPerms.EN;
+                if (Guild != null)
+                {
+                    ErrorText = _Config._TransMain.Error_NoEmbedPerms.Get(Guild);
+                }
+                _Log.ThrowError(Context, "```python" + Environment.NewLine + $"{ErrorText}```", "No Embed Links Pemr");
+            }
+            return false;
+        }
+        
     }
 }
 namespace Bot.Apis
