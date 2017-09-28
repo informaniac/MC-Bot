@@ -22,14 +22,10 @@ namespace Bot.Functions
         {
             Guild = new _Guild()
             {
-                ID = ID, Servers = new List<_Server>(), Website = ""
+                ID = ID, Servers = new List<_Server>(), Language = _Language.English
             };
-            using (StreamWriter file = File.CreateText(_Config.BotPath + $"Guilds/{ID}" + ".json"))
-            {
-                JsonSerializer serializer = new JsonSerializer();
-                serializer.Serialize(file, Guild);
-            }
             _Config.MCGuilds.Add(ID, Guild);
+            Guild.Save();
         }
 
         public static void NewGuild(ulong ID)
@@ -38,28 +34,13 @@ namespace Bot.Functions
             {
                 ID = ID,
                 Servers = new List<_Server>(),
-                Website = ""
+                Language = _Language.English
             };
-            using (StreamWriter file = File.CreateText(_Config.BotPath + $"Guilds/{ID}" + ".json"))
-            {
-                JsonSerializer serializer = new JsonSerializer();
-                serializer.Serialize(file, Guild);
-            }
             _Config.MCGuilds.Add(ID, Guild);
+            Guild.Save();
         }
 
-        public static void SaveGuild(_Guild Guild)
-        {
-            if (Guild != null)
-            {
-                using (StreamWriter file = File.CreateText(_Config.BotPath + $"Guilds/{Guild.ID}" + ".json"))
-                {
-                    JsonSerializer serializer = new JsonSerializer();
-                    serializer.Serialize(file, Guild);
-
-                }
-            }
-        }
+       
         /// <summary>
         /// Set ID to 0 for no guild
         /// </summary>
@@ -72,6 +53,10 @@ namespace Bot.Functions
                 if (Guild == null)
                 {
                     NewGuild(ID.Id, out Guild);
+                }
+                if (Guild == null)
+                {
+                    _Log.Error($"NO GUILD DATA {ID.Name} | {ID.Id}");
                 }
             }
         }
@@ -95,6 +80,10 @@ namespace Bot.Functions
                 return true;
             }
             _Bot.GuildCache.TryGetValue(Context.Guild.Id, out _CacheItem CI);
+            if (CI.Bot == null)
+            {
+                CI.Bot = Context.Guild.GetCurrentUserAsync().GetAwaiter().GetResult();
+            }
             if (CI.Bot.GuildPermissions.EmbedLinks || CI.Bot.GetPermissions(Context.Channel as IGuildChannel).EmbedLinks)
             {
                 return true;
@@ -396,7 +385,7 @@ namespace Bot.Classes
     }
     public enum _Language
     {
-        English = 0, French = 1, Spanish = 2, Russian = 3, Portuguese = 4
+        English = 0, French = 1, Spanish = 2, Russian = 3, Portuguese = 4, German = 5
     }
     
     public class _Ping
@@ -497,10 +486,16 @@ namespace Bot.Classes
     public class _Guild
     {
         public ulong ID;
-        public string CommunityName = "";
-        public string CommunityDescription = "";
-        public string Website = "";
         public List<_Server> Servers = new List<_Server>();
         public _Language Language = _Language.English;
+        public void Save()
+        {
+            using (StreamWriter file = File.CreateText(_Config.BotPath + $"Guilds/{ID}" + ".json"))
+            {
+                JsonSerializer serializer = new JsonSerializer();
+                serializer.Serialize(file, this);
+
+            }
+        }
     }
 }

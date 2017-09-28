@@ -47,7 +47,7 @@ namespace Bot.Services
                             },
                             Color = new Color(0, 200, 0)
                         };
-                        embed.AddField("Language", $"<@{g.Owner.Id}> Use `mc/lang` to change the language ```md" + Environment.NewLine + "< English | Français | Español | Pусский | Português >```", true);
+                        embed.AddField("Language", $"<@{g.Owner.Id}> Use `mc/lang` to change the language ```md" + Environment.NewLine + "< English | Français | Español | Pусский | Português | Deutsche >```", true);
                         await g.DefaultChannel.SendMessageAsync("", false, embed.Build());
                     }
                 }

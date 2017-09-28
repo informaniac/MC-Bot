@@ -34,7 +34,7 @@ namespace Bot.Commands
     {
         public static void Tomorrow(this MojangSharp.Error date)
         {
-           
+
         }
     }
     public class Main : ModuleBase
@@ -56,39 +56,39 @@ namespace Bot.Commands
         [Command("help"), Alias("commands")]
         public async Task Help(string Action = "")
         {
-            
+
             _Task.GetGuild(Context.Guild, out _Guild Guild);
             _Task.HasEmbedPerms(Context, Guild, true);
             if (NewsText == "" && File.Exists(_Config.BotPath + "News.txt"))
+            {
+                using (StreamReader reader = new StreamReader(_Config.BotPath + "News.txt"))
                 {
-                    using (StreamReader reader = new StreamReader(_Config.BotPath + "News.txt"))
-                    {
-                        NewsText = reader.ReadLine();
-                    }
+                    NewsText = reader.ReadLine();
                 }
-                var embed = new EmbedBuilder()
+            }
+            var embed = new EmbedBuilder()
+            {
+                Title = $"Bot News > {NewsText}",
+                Description = "",
+                Color = _Utils_Discord.GetRoleColor(Context.Channel as ITextChannel),
+                Footer = new EmbedFooterBuilder()
                 {
-                    Title = $"Bot News > {NewsText}",
-                    Description = "",
-                    Color = _Utils_Discord.GetRoleColor(Context.Channel as ITextChannel),
-                    Footer = new EmbedFooterBuilder()
-                    {
-                        Text = _TransMain.Help_FooterHiddenCommands.Get(Guild)
-                    }
-                };
-            
-                embed.AddField(_TransMain.Commands.Get(Guild), "```md" + Environment.NewLine + string.Join(Environment.NewLine, _TransMain.HelpCommands.ElementAtOrDefault((int)Guild.Language)) + "```");
-                embed.AddField(_TransMain.Links.Get(Guild), $"[MultiMC](https://multimc.org/) {_TransMain.MultiMC.Get(Guild)}" + Environment.NewLine + $"[Minecraft.net](https://minecraft.net) | [Twitter](https://twitter.com/Mojang) | [Curse Forge](https://minecraft.curseforge.com/mc-mods) | [{_TransMain.OnlineSkinEditor.Get(Guild)}](https://www.minecraftskinstealer.com/skineditor.php)" + Environment.NewLine + "[Ftb Legacy](http://ftb.cursecdn.com/FTB2/launcher/FTB_Launcher.exe) | [Technic Launcher](https://www.technicpack.net/download) | [AT Launcher](https://www.atlauncher.com/downloads)");
-                if (Action == "update" && Context.User.Id == 190590364871032834)
-                {
-                    ITextChannel TE = await Context.Guild.GetTextChannelAsync(351033810961301506);
-                    IUserMessage Update = await TE.GetMessageAsync(351404116527808512) as IUserMessage;
-                    await Update.ModifyAsync(x => { x.Embed = embed.Build(); });
+                    Text = _TransMain.Help_FooterHiddenCommands.Get(Guild)
                 }
-                else
-                {
-                    await ReplyAsync("", false, embed.Build());
-                }
+            };
+
+            embed.AddField(_TransMain.Commands.Get(Guild), "```md" + Environment.NewLine + string.Join(Environment.NewLine, _TransMain.HelpCommands.ElementAtOrDefault((int)Guild.Language)) + "```");
+            embed.AddField(_TransMain.Links.Get(Guild), $"[MultiMC](https://multimc.org/) {_TransMain.MultiMC.Get(Guild)}" + Environment.NewLine + $"[Minecraft.net](https://minecraft.net) | [Twitter](https://twitter.com/Mojang) | [Curse Forge](https://minecraft.curseforge.com/mc-mods) | [{_TransMain.OnlineSkinEditor.Get(Guild)}](https://www.minecraftskinstealer.com/skineditor.php)" + Environment.NewLine + "[Ftb Legacy](http://ftb.cursecdn.com/FTB2/launcher/FTB_Launcher.exe) | [Technic Launcher](https://www.technicpack.net/download) | [AT Launcher](https://www.atlauncher.com/downloads)");
+            if (Action == "update" && Context.User.Id == 190590364871032834)
+            {
+                ITextChannel TE = await Context.Guild.GetTextChannelAsync(351033810961301506);
+                IUserMessage Update = await TE.GetMessageAsync(351404116527808512) as IUserMessage;
+                await Update.ModifyAsync(x => { x.Embed = embed.Build(); });
+            }
+            else
+            {
+                await ReplyAsync("", false, embed.Build());
+            }
         }
 
         [Command("setnews"), RequireOwner]
@@ -105,7 +105,7 @@ namespace Bot.Commands
         [Command("colors"), Alias("color")]
         public async Task Colors()
         {
-_Task.GetGuild(Context.Guild, out _Guild Guild);
+            _Task.GetGuild(Context.Guild, out _Guild Guild);
             _Task.HasEmbedPerms(Context, Guild, true);
             var embed = new EmbedBuilder()
             {
@@ -126,20 +126,20 @@ _Task.GetGuild(Context.Guild, out _Guild Guild);
                 if (uuid.Error.ErrorTag == "NoContent")
                 {
                     _Log.ThrowError(Context, _TransMain.Error_PlayerNotFound.Get(Guild).Replace("{0}", $"`{Player}`"), "Player not found");
-                    
+
                 }
                 else
                 {
                     _Log.ThrowError(Context, $"`{_TransMain.Error_Api.Get(Guild)}`", uuid.Error.ErrorMessage);
                 }
             }
-                var embed = new EmbedBuilder()
-                {
-                    Title = $"UUID | {Player}",
-                    Color = _Utils_Discord.GetRoleColor(Context.Channel as ITextChannel),
-                    Description = uuid.Uuid.Value
-                };
-                await ReplyAsync("", false, embed.Build());
+            var embed = new EmbedBuilder()
+            {
+                Title = $"UUID | {Player}",
+                Color = _Utils_Discord.GetRoleColor(Context.Channel as ITextChannel),
+                Description = uuid.Uuid.Value
+            };
+            await ReplyAsync("", false, embed.Build());
 
         }
 
@@ -148,7 +148,6 @@ _Task.GetGuild(Context.Guild, out _Guild Guild);
         {
             _Task.GetGuild(Context.Guild, out _Guild Guild);
             _Task.HasEmbedPerms(Context, Guild, true);
-
             if (IP == "" || IP.StartsWith("("))
             {
                 await ReplyAsync($"{_TransMain.Error_EnterIP.Get(Guild)} | `mc/ping my.server.net` | `mc/ping other.server.net:25566` | `mc/ping this.server.net 25567`");
@@ -428,7 +427,7 @@ _Task.GetGuild(Context.Guild, out _Guild Guild);
                      }
 
                  }
-                 catch(PingException)
+                 catch (PingException)
                  {
                      await Wait.DeleteAsync();
                      await ReplyAsync("", false, ErrorEmbed.Build());
@@ -437,7 +436,7 @@ _Task.GetGuild(Context.Guild, out _Guild Guild);
                  var Req = _Utils_Http.GetJsonObject("https://use.gameapis.net/mc/query/extensive/" + $"{IP}:{Port}");
                  if (Req.status == false)
                  {
-                    await Wait.DeleteAsync();
+                     await Wait.DeleteAsync();
                      if (Req.error == "Invalid port | lt")
                      {
                          _Log.ThrowError(Context, "`Server port not supported`", "Server port unsupported");
@@ -453,7 +452,7 @@ _Task.GetGuild(Context.Guild, out _Guild Guild);
                  }
                  HashSet<string> Players = new HashSet<string>();
                  int Plugins = 0;
-                 foreach(var i in Req.list)
+                 foreach (var i in Req.list)
                  {
                      Players.Add(i);
                  }
@@ -462,11 +461,11 @@ _Task.GetGuild(Context.Guild, out _Guild Guild);
                  {
                      PlayerList = string.Join(" | ", Players);
                  }
-                 foreach(var i in Req.plugins)
+                 foreach (var i in Req.plugins)
                  {
                      Plugins++;
                  }
-                 
+
                  var embed = new EmbedBuilder()
                  {
                      Title = $"[{Req.version}] {ThisIP}",
@@ -485,7 +484,7 @@ _Task.GetGuild(Context.Guild, out _Guild Guild);
         }
 
 
-        [Command("list"),Alias("servers"), RequireContext(ContextType.Guild)]
+        [Command("list"), Alias("servers"), RequireContext(ContextType.Guild)]
         public async Task List()
         {
             _Task.GetGuild(Context.Guild, out _Guild Guild);
@@ -519,26 +518,26 @@ _Task.GetGuild(Context.Guild, out _Guild Guild);
         [Command("info")]
         public async Task Info()
         {
-_Task.GetGuild(Context.Guild, out _Guild Guild);
+            _Task.GetGuild(Context.Guild, out _Guild Guild);
             _Task.HasEmbedPerms(Context, Guild, true);
 
             StatisticsResponse stats = await new Statistics(Item.MinecraftAccountsSold).PerformRequest();
             if (!stats.IsSuccess) _Log.ThrowError(Context, $"`{_TransMain.Error_Api.Get(Guild)}`", stats.Error.ErrorMessage);
-                var embed = new EmbedBuilder()
+            var embed = new EmbedBuilder()
+            {
+                Author = new EmbedAuthorBuilder()
                 {
-                    Author = new EmbedAuthorBuilder()
-                    {
-                        Name = _TransMain.Info_MCSales.Get(Guild),
-                        Url = _TransMain.Info_MCSalesUrl.Get(Guild)
-                    },
-                    Color = _Utils_Discord.GetRoleColor(Context.Channel as ITextChannel),
-                    Description = $"Total: {stats.Total}" + Environment.NewLine + $"24 Hours: {stats.Last24h}" + Environment.NewLine + $"Average Per Second: {stats.SaleVelocity}",
-                    Footer = new EmbedFooterBuilder()
-                    {
-                        Text = _TransMain.Info_SalesError.Get(Guild)
-                    }
-                };
-                await ReplyAsync("", false, embed.Build());
+                    Name = _TransMain.Info_MCSales.Get(Guild),
+                    Url = _TransMain.Info_MCSalesUrl.Get(Guild)
+                },
+                Color = _Utils_Discord.GetRoleColor(Context.Channel as ITextChannel),
+                Description = $"Total: {stats.Total}" + Environment.NewLine + $"24 Hours: {stats.Last24h}" + Environment.NewLine + $"Average Per Second: {stats.SaleVelocity}",
+                Footer = new EmbedFooterBuilder()
+                {
+                    Text = _TransMain.Info_SalesError.Get(Guild)
+                }
+            };
+            await ReplyAsync("", false, embed.Build());
         }
 
         [Command("version")]
@@ -607,7 +606,7 @@ _Task.GetGuild(Context.Guild, out _Guild Guild);
         [Command("name"), Alias("names")]
         public async Task Names(string Player = "")
         {
-_Task.GetGuild(Context.Guild, out _Guild Guild);
+            _Task.GetGuild(Context.Guild, out _Guild Guild);
             _Task.HasEmbedPerms(Context, Guild, true);
 
             if (Player == "")
@@ -615,7 +614,7 @@ _Task.GetGuild(Context.Guild, out _Guild Guild);
                 await Context.Channel.SendMessageAsync($"mc/names ({_TransMain.Player.Get(Guild)}) | `mc/names Notch`");
                 return;
             }
-            
+
             UuidAtTimeResponse uuid = new UuidAtTime(Player, DateTime.Now).PerformRequest().Result;
             if (!uuid.IsSuccess)
             {
@@ -630,60 +629,60 @@ _Task.GetGuild(Context.Guild, out _Guild Guild);
                 }
             }
             NameHistoryResponse names = new NameHistory(uuid.Uuid.Value).PerformRequest().Result;
-                if (names.IsSuccess)
+            if (names.IsSuccess)
+            {
+                List<string> Names = new List<string>();
+                if (names.NameHistory.Count == 1)
                 {
-                    List<string> Names = new List<string>();
-                    if (names.NameHistory.Count == 1)
-                    {
-                        await ReplyAsync(_TransMain.Name_OneOnly.Get(Guild).Replace("{0}", $"`{Player}`"));
-                        return;
-                    }
-                    foreach (NameHistoryEntry entry in names.NameHistory)
-                    {
-                        if (entry.ChangedToAt.HasValue)
-                        {
-                            Names.Add($"[ {entry.Name} ][ {entry.ChangedToAt.Value.Day}/{entry.ChangedToAt.Value.Month}/{entry.ChangedToAt.Value.Year} ]");
-                        }
-                        else
-                        {
-                            Names.Add($"[ {entry.Name} ]( {_TransMain.First.Get(Guild)} )");
-                        }
-                    }
-
-                    await ReplyAsync("```" + Environment.NewLine + string.Join(Environment.NewLine, Names) + "```");
+                    await ReplyAsync(_TransMain.Name_OneOnly.Get(Guild).Replace("{0}", $"`{Player}`"));
+                    return;
                 }
+                foreach (NameHistoryEntry entry in names.NameHistory)
+                {
+                    if (entry.ChangedToAt.HasValue)
+                    {
+                        Names.Add($"[ {entry.Name} ][ {entry.ChangedToAt.Value.Day}/{entry.ChangedToAt.Value.Month}/{entry.ChangedToAt.Value.Year} ]");
+                    }
+                    else
+                    {
+                        Names.Add($"[ {entry.Name} ]( {_TransMain.First.Get(Guild)} )");
+                    }
+                }
+
+                await ReplyAsync("```" + Environment.NewLine + string.Join(Environment.NewLine, Names) + "```");
+            }
         }
 
         [Command("status")]
         public async Task Status()
         {
-_Task.GetGuild(Context.Guild, out _Guild Guild);
+            _Task.GetGuild(Context.Guild, out _Guild Guild);
             _Task.HasEmbedPerms(Context, Guild, true);
 
             ApiStatusResponse status = new ApiStatus().PerformRequest().Result;
             if (!status.IsSuccess) _Log.ThrowError(Context, $"`{_TransMain.Error_Api.Get(Guild)}`", "API error");
-            
-                var embed = new EmbedBuilder()
-                {
-                    Title = _TransMain.Status_Mojang.Get(Guild),
-                    Description = $"Mojang: {status.Mojang}" + Environment.NewLine + $"Minecraft.net: {status.Minecraft}" + Environment.NewLine +
-                    $"{_TransMain.Status_MojangAccounts.Get(Guild)}: {status.MojangAccounts}" + Environment.NewLine + $"Mojang API: {status.MojangApi}" + Environment.NewLine +
-                    $"{_TransMain.Status_MojangAuthServers.Get(Guild)}: {status.MojangAutenticationServers}" + Environment.NewLine + $"{_TransMain.Status_MojangAuthService.Get(Guild)}: {status.MojangAuthenticationService}" + Environment.NewLine +
-                    $"{_TransMain.Status_MojangSessions.Get(Guild)}: {status.MojangSessionsServer}" + Environment.NewLine + $"{_TransMain.Status_MinecraftSessions.Get(Guild)}: {status.Sessions}" + Environment.NewLine +
-                    $"{_TransMain.Status_MinecraftSkins.Get(Guild)}: {status.Skins}" + Environment.NewLine + $"{_TransMain.Status_MinecraftTextures.Get(Guild)}: {status.Textures}",
-                    Color = new Color(0, 200, 0)
-                };
-                if (status.Mojang != ApiStatusResponse.Status.Available || status.Minecraft != ApiStatusResponse.Status.Available || status.MojangAccounts != ApiStatusResponse.Status.Available || status.MojangApi != ApiStatusResponse.Status.Available || status.MojangAutenticationServers != ApiStatusResponse.Status.Available || status.MojangAuthenticationService != ApiStatusResponse.Status.Available || status.MojangSessionsServer != ApiStatusResponse.Status.Available || status.Sessions != ApiStatusResponse.Status.Available || status.Skins != ApiStatusResponse.Status.Available || status.Textures != ApiStatusResponse.Status.Available)
-                {
-                    embed.Color = new Color(255, 165, 0);
-                }
-                await ReplyAsync("", false, embed.Build());
+
+            var embed = new EmbedBuilder()
+            {
+                Title = _TransMain.Status_Mojang.Get(Guild),
+                Description = $"Mojang: {status.Mojang}" + Environment.NewLine + $"Minecraft.net: {status.Minecraft}" + Environment.NewLine +
+                $"{_TransMain.Status_MojangAccounts.Get(Guild)}: {status.MojangAccounts}" + Environment.NewLine + $"Mojang API: {status.MojangApi}" + Environment.NewLine +
+                $"{_TransMain.Status_MojangAuthServers.Get(Guild)}: {status.MojangAutenticationServers}" + Environment.NewLine + $"{_TransMain.Status_MojangAuthService.Get(Guild)}: {status.MojangAuthenticationService}" + Environment.NewLine +
+                $"{_TransMain.Status_MojangSessions.Get(Guild)}: {status.MojangSessionsServer}" + Environment.NewLine + $"{_TransMain.Status_MinecraftSessions.Get(Guild)}: {status.Sessions}" + Environment.NewLine +
+                $"{_TransMain.Status_MinecraftSkins.Get(Guild)}: {status.Skins}" + Environment.NewLine + $"{_TransMain.Status_MinecraftTextures.Get(Guild)}: {status.Textures}",
+                Color = new Color(0, 200, 0)
+            };
+            if (status.Mojang != ApiStatusResponse.Status.Available || status.Minecraft != ApiStatusResponse.Status.Available || status.MojangAccounts != ApiStatusResponse.Status.Available || status.MojangApi != ApiStatusResponse.Status.Available || status.MojangAutenticationServers != ApiStatusResponse.Status.Available || status.MojangAuthenticationService != ApiStatusResponse.Status.Available || status.MojangSessionsServer != ApiStatusResponse.Status.Available || status.Sessions != ApiStatusResponse.Status.Available || status.Skins != ApiStatusResponse.Status.Available || status.Textures != ApiStatusResponse.Status.Available)
+            {
+                embed.Color = new Color(255, 165, 0);
+            }
+            await ReplyAsync("", false, embed.Build());
         }
 
         [Command("playing")]
         public async Task Playing()
         {
-_Task.GetGuild(Context.Guild, out _Guild Guild);
+            _Task.GetGuild(Context.Guild, out _Guild Guild);
             _Task.HasEmbedPerms(Context, Guild, true);
 
             int CountOther = 0;
@@ -693,9 +692,9 @@ _Task.GetGuild(Context.Guild, out _Guild Guild);
             int Count110 = 0;
             int Count111 = 0;
             int Count112 = 0;
-            foreach(var i in _Client.Guilds)
+            foreach (var i in _Client.Guilds)
             {
-                foreach(var u in i.Users)
+                foreach (var u in i.Users)
                 {
                     string Game = u.Game.ToString().ToLower();
                     if (Game.Contains("minecraft"))
@@ -728,7 +727,7 @@ _Task.GetGuild(Context.Guild, out _Guild Guild);
                         {
                             CountOther++;
                         }
-                        
+
                     }
                 }
             }
@@ -744,7 +743,7 @@ _Task.GetGuild(Context.Guild, out _Guild Guild);
         [Command("get")]
         public async Task Get([Remainder]string Text = "")
         {
-_Task.GetGuild(Context.Guild, out _Guild Guild);
+            _Task.GetGuild(Context.Guild, out _Guild Guild);
             _Task.HasEmbedPerms(Context, Guild, true);
 
             if (Text == "")
@@ -781,7 +780,7 @@ _Task.GetGuild(Context.Guild, out _Guild Guild);
         [Command("minime")]
         public async Task Minime(string Player = "")
         {
-_Task.GetGuild(Context.Guild, out _Guild Guild);
+            _Task.GetGuild(Context.Guild, out _Guild Guild);
             _Task.HasEmbedPerms(Context, Guild, true);
 
             if (Player == "")
@@ -803,25 +802,25 @@ _Task.GetGuild(Context.Guild, out _Guild Guild);
                 }
             }
             var embed = new EmbedBuilder()
-                {
-                    Color = _Utils_Discord.GetRoleColor(Context.Channel as ITextChannel),
-                    ImageUrl = "https://avatar.yourminecraftservers.com/avatar/trnsp/not_found/tall/128/" + Player + ".png"
-                };
-                await ReplyAsync("", false, embed.Build());
+            {
+                Color = _Utils_Discord.GetRoleColor(Context.Channel as ITextChannel),
+                ImageUrl = "https://avatar.yourminecraftservers.com/avatar/trnsp/not_found/tall/128/" + Player + ".png"
+            };
+            await ReplyAsync("", false, embed.Build());
         }
 
         [Command("bot")]
         public async Task Bot()
         {
-_Task.GetGuild(Context.Guild, out _Guild Guild);
+            _Task.GetGuild(Context.Guild, out _Guild Guild);
             _Task.HasEmbedPerms(Context, Guild, true);
             int FrenchCount = _Config.MCGuilds.Values.Where(x => x.Language == _Language.French).Count();
             int SpanishCount = _Config.MCGuilds.Values.Where(x => x.Language == _Language.Spanish).Count();
             int RussianCount = _Config.MCGuilds.Values.Where(x => x.Language == _Language.Russian).Count();
             int PortugesCount = _Config.MCGuilds.Values.Where(x => x.Language == _Language.Portuguese).Count();
-            
+            int GermanCount = _Config.MCGuilds.Values.Where(x => x.Language == _Language.German).Count();
             int Count = 0;
-            foreach(var i in _Commands.Commands.Where(x => x.Module.Name != "o" && x.Module.Name != "whitelist" && x.Module.Name != "blacklist" && x.Module.Name != "Music"))
+            foreach (var i in _Commands.Commands.Where(x => x.Module.Name != "o" && x.Module.Name != "whitelist" && x.Module.Name != "blacklist" && x.Module.Name != "Music"))
             {
                 Count++;
             }
@@ -849,7 +848,7 @@ _Task.GetGuild(Context.Guild, out _Guild Guild);
                 Color = _Utils_Discord.GetRoleColor(Context.Channel)
             };
             embed.AddField($"<:info:350172480645758976> Info", $"**{_TransMain.Bot_Owner.Get(Guild)}**" + Environment.NewLine + "xXBuilderBXx#9113" + Environment.NewLine + "<@190590364871032834>" + Environment.NewLine + Environment.NewLine + $"**{_TransMain.Language.Get(Guild)}:** C#" + Environment.NewLine + $"**{_TransMain.Bot_Lib.Get(Guild)}:** {_Config.Library}", true);
-            embed.AddField($"<:stats:350172481157464065> {_TransMain.Stats.Get(Guild)}", $"**{_TransMain.Guilds.Get(Guild)}:** {_Client.Guilds.Count()}" + Environment.NewLine + $"**{_TransMain.Commands.Get(Guild)}:** {Count}" + Environment.NewLine + $"**{_TransMain.Uptime.Get(Guild)}:** {Uptime}" + Environment.NewLine + Environment.NewLine + $"**Français:** {FrenchCount}" + Environment.NewLine + $"**Español:** {SpanishCount}" + Environment.NewLine + $"**Pусский:** {RussianCount}" + Environment.NewLine + $"**Português:** {PortugesCount}", true);
+            embed.AddField($"<:stats:350172481157464065> {_TransMain.Stats.Get(Guild)}", $"**{_TransMain.Guilds.Get(Guild)}:** {_Client.Guilds.Count()}" + Environment.NewLine + $"**{_TransMain.Commands.Get(Guild)}:** {Count}" + Environment.NewLine + $"**{_TransMain.Uptime.Get(Guild)}:** {Uptime}" + Environment.NewLine + Environment.NewLine + $"**Français:** {FrenchCount}" + Environment.NewLine + $"**Español:** {SpanishCount}" + Environment.NewLine + $"**Pусский:** {RussianCount}" + Environment.NewLine + $"**Português:** {PortugesCount}" + Environment.NewLine + $"**Deutsche:** {GermanCount}", true);
             embed.AddField($"<:world:350172484038950912> {_TransMain.Links.Get(Guild)}", $"[{_TransMain.Bot_Invite.Get(Guild)}](https://discordapp.com/oauth2/authorize?&client_id=" + Context.Client.CurrentUser.Id + "&scope=bot&permissions=0)" + Environment.NewLine + $"[Website](https://blazeweb.ml)" + Environment.NewLine + "[Github](https://github.com/xXBuilderBXx/MC-Bot)" + Environment.NewLine + Environment.NewLine + $"**{_TransMain.Bot_ListGuilds.Get(Guild)}**" + Environment.NewLine + "[Dbots](https://bots.discord.pw/bots/346346285953056770)" + Environment.NewLine + "[DBL](https://discordbots.org/bot/346346285953056770)" + Environment.NewLine + "[Novo](https://novo.archbox.pro/)", true);
             await ReplyAsync("", false, embed.Build());
         }
@@ -1055,12 +1054,12 @@ _Task.GetGuild(Context.Guild, out _Guild Guild);
         [Command("admin"), RequireContext(ContextType.Guild)]
         public async Task Admin()
         {
-_Task.GetGuild(Context.Guild, out _Guild Guild);
+            _Task.GetGuild(Context.Guild, out _Guild Guild);
             _Task.HasEmbedPerms(Context, Guild, true);
 
             IGuildUser GUU = await Context.Guild.GetUserAsync(Context.User.Id);
-            
-                if (Context.User.Id != 190590364871032834 && !GUU.GuildPermissions.Administrator) _Log.ThrowError(Context, $"<:error:350172479936921611> {_TransAdmin.AdminOnly.Get(Guild)}", "Not a guild administrator");
+
+            if (Context.User.Id != 190590364871032834 && !GUU.GuildPermissions.Administrator) _Log.ThrowError(Context, $"<:error:350172479936921611> {_TransAdmin.AdminOnly.Get(Guild)}", "Not a guild administrator");
 
             var embed = new EmbedBuilder()
             {
@@ -1077,7 +1076,7 @@ _Task.GetGuild(Context.Guild, out _Guild Guild);
         [Command("addserver"), RequireContext(ContextType.Guild)]
         public async Task Addserver(string Tag = "", string IP = "", [Remainder]string Name = "")
         {
-_Task.GetGuild(Context.Guild, out _Guild Guild);
+            _Task.GetGuild(Context.Guild, out _Guild Guild);
             _Task.HasEmbedPerms(Context, Guild, true);
 
             IGuildUser GUU = await Context.Guild.GetUserAsync(Context.User.Id);
@@ -1111,15 +1110,15 @@ _Task.GetGuild(Context.Guild, out _Guild Guild);
                 Port = Port
             };
             Guild.Servers.Add(NewServer);
-            _Task.SaveGuild(Guild);
-            await ReplyAsync($"{_TransAdmin.AddServer_Added.Get(Guild)} {Name} {_TransAdmin.AddServer_AddedList.Get(Guild)} | `mc/list`");
+            Guild.Save();
+            await ReplyAsync($"{_TransAdmin.AddServer_Added.Get(Guild).Replace("{0}", $"`{Name}`")} | `mc/list`");
 
         }
 
         [Command("delserver"), RequireContext(ContextType.Guild)]
         public async Task Delserver(string Tag = "")
         {
-_Task.GetGuild(Context.Guild, out _Guild Guild);
+            _Task.GetGuild(Context.Guild, out _Guild Guild);
             _Task.HasEmbedPerms(Context, Guild, true);
 
             IGuildUser GUU = await Context.Guild.GetUserAsync(Context.User.Id);
@@ -1137,8 +1136,8 @@ _Task.GetGuild(Context.Guild, out _Guild Guild);
                 return;
             }
             Guild.Servers.Remove(Server);
-            _Task.SaveGuild(Guild);
-            await ReplyAsync($"{_TransAdmin.DelServer_Deleted.Get(Guild)} {Server.Name} {_TransAdmin.DelServer_List.Get(Guild)} | `mc/list`");
+            Guild.Save();
+            await ReplyAsync($"{_TransAdmin.DelServer_Deleted.Get(Guild).Replace("{0}", $"`{Server.Name}`")} | `mc/list`");
 
         }
 
@@ -1155,7 +1154,7 @@ _Task.GetGuild(Context.Guild, out _Guild Guild);
                 var embed = new EmbedBuilder()
                 {
                     Title = _TransAdmin.ChangeLang.Get(Guild),
-                    Description = "```md" + Environment.NewLine + "<0 English> mc/lang 0" + Environment.NewLine + "<1 Français> mc/lang 1" + Environment.NewLine + "<2 Español> mc/lang 2" + Environment.NewLine + "<3 Pусский> mc/lang 3" + Environment.NewLine + "<4 Português> mc/lang 4```",
+                    Description = "```md" + Environment.NewLine + "<0 English> mc/lang 0" + Environment.NewLine + "<1 Français> mc/lang 1" + Environment.NewLine + "<2 Español> mc/lang 2" + Environment.NewLine + "<3 Pусский> mc/lang 3" + Environment.NewLine + "<4 Português> mc/lang 4" + Environment.NewLine + "<5 Deutsche> mc/lang 5```",
                     Color = _Utils_Discord.GetRoleColor(Context.Channel as ITextChannel),
                     Footer = new EmbedFooterBuilder()
                     {
@@ -1171,28 +1170,33 @@ _Task.GetGuild(Context.Guild, out _Guild Guild);
                 {
                     case 0:
                         Guild.Language = _Language.English;
-                        await ReplyAsync("Community language set to English");
-                        _Task.SaveGuild(Guild);
+                        Guild.Save();
+                        await ReplyAsync("`Community language set to English`");
                         break;
                     case 1:
                         Guild.Language = _Language.French;
-                        await ReplyAsync("Langue de la communauté définie en Français");
-                        _Task.SaveGuild(Guild);
+                        Guild.Save();
+                        await ReplyAsync("`Langue de la communauté définie en Français`");
                         break;
                     case 2:
                         Guild.Language = _Language.Spanish;
-                        await ReplyAsync("Langue de la communauté définie en Espagnol");
-                        _Task.SaveGuild(Guild);
+                        Guild.Save();
+                        await ReplyAsync("`Langue de la communauté définie en Espagnol`");
                         break;
                     case 3:
                         Guild.Language = _Language.Russian;
-                        await ReplyAsync("Язык общения на Pусском языке");
-                        _Task.SaveGuild(Guild);
+                        Guild.Save();
+                        await ReplyAsync("`Язык общения на Pусском языке`");
                         break;
                     case 4:
                         Guild.Language = _Language.Portuguese;
-                        await ReplyAsync("Idioma da comunidade definido para o Português");
-                        _Task.SaveGuild(Guild);
+                        Guild.Save();
+                        await ReplyAsync("`Idioma da comunidade definido para o Português`");
+                        break;
+                    case 5:
+                        Guild.Language = _Language.German;
+                        Guild.Save();
+                        await ReplyAsync("`Gemeinschaftssprache auf Deutsch`");
                         break;
                 }
             }
@@ -1205,7 +1209,7 @@ _Task.GetGuild(Context.Guild, out _Guild Guild);
         public _Trans.Hidden _TransHidden = new _Trans.Hidden();
         public _Trans.Wiki _TransWiki = new _Trans.Wiki();
         [Command("wiki")]
-        public async Task WikiHelp()
+        public async Task WikiHelp(string V = "")
         {
             _Task.HasEmbedPerms(Context, null, true);
             var embed = new EmbedBuilder()
@@ -1222,7 +1226,7 @@ _Task.GetGuild(Context.Guild, out _Guild Guild);
         {
             _Task.GetGuild(Context.Guild, out _Guild Guild);
             _Task.HasEmbedPerms(Context, null, true);
-             HashSet<_Item> Items = new HashSet<_Item>();
+            HashSet<_Item> Items = new HashSet<_Item>();
             if (ID == "")
             {
                 await ReplyAsync("Use `mc/item 46` | `mc/item red wool`");
@@ -1234,7 +1238,7 @@ _Task.GetGuild(Context.Guild, out _Guild Guild);
                 ID = Split.First();
                 Meta = Split.Last();
             }
-            
+
             _Item Item = _Config.MCItems.Find(x => x.ID == ID & x.Meta == Meta);
             if (Item == null)
             {
@@ -1328,7 +1332,7 @@ _Task.GetGuild(Context.Guild, out _Guild Guild);
                         Color = _Utils_Discord.GetRoleColor(Context.Channel as ITextChannel)
                     };
                     await ReplyAsync("", false, embedh.Build());
-                }else if (Name.ToLower() == "entity303" || Name.ToLower() == "entity 303")
+                } else if (Name.ToLower() == "entity303" || Name.ToLower() == "entity 303")
                 {
                     var embedh = new EmbedBuilder()
                     {
@@ -1346,46 +1350,46 @@ _Task.GetGuild(Context.Guild, out _Guild Guild);
                 }
                 _Mob Mob = _Config.MCMobs.Find(x => x.Name.ToLower() == Name.ToLower().Replace(" ", ""));
                 if (Mob == null) _Log.ThrowError(Context, $"`{ _TransWiki.Error_UnknownMob.Get(Guild)}`", "Mob not found");
-               
-                    var embed = new EmbedBuilder()
-                    {
-                        Title = $"[{Mob.ID}] {Mob.Name}",
-                        Description = $"[Wiki]({Mob.WikiLink}) {Mob.Note}",
-                        ThumbnailUrl = Mob.PicUrl,
-                        Color = _Utils_Discord.GetRoleColor(Context.Channel as ITextChannel)
-                    };
-                    if (Mob.Type == _MobType.Secret)
-                    {
-                        embed.WithFooter(new EmbedFooterBuilder() { Text = _TransHidden.FoundSecretCommand.Get(Guild) });
-                    }
-                    string Height = Mob.Height + $" {_TransWiki.blocks.Get(Guild)}";
-                    string Width = Mob.Width + $" {_TransWiki.blocks.Get(Guild)}";
-                    if (Mob.Height == "Rip")
-                    {
-                        Height = _TransMain.Unknown.Get(Guild);
-                    }
-                    if (Mob.Width == "Rip")
-                    {
-                        Width = _TransMain.Unknown.Get(Guild);
-                    }
-                    if (Mob.AttackEasy == "")
-                    {
 
-                        string PlayerText = "";
-                        if (Mob.Name.ToLower() == _TransMain.Player.Get(Guild).ToLower())
-                        {
-                            embed.WithTitle(_TransMain.Player.Get(Guild));
-                            PlayerText = Environment.NewLine + $"**{_TransWiki.Fist_Attack.Get(Guild)}:** 0.5 :heart:";
-                        }
-                        embed.AddField(_TransMain.Stats.Get(Guild), $"**{_TransMain.Health.Get(Guild)}:** {Mob.Health} :heart:" + Environment.NewLine + $"**{_TransMain.Type.Get(Guild)}:** {Mob.Type}" + PlayerText, true);
-                        embed.AddField(_TransMain.Info.Get(Guild), $"**{_TransMain.Height.Get(Guild)}:** {Height}" + Environment.NewLine + $"**{_TransMain.Width.Get(Guild)}:** {Width}" + Environment.NewLine + $"**{_TransMain.Version.Get(Guild)}:** {Mob.Version}", true);
-                    }
-                    else
+                var embed = new EmbedBuilder()
+                {
+                    Title = $"[{Mob.ID}] {Mob.Name}",
+                    Description = $"[Wiki]({Mob.WikiLink}) {Mob.Note}",
+                    ThumbnailUrl = Mob.PicUrl,
+                    Color = _Utils_Discord.GetRoleColor(Context.Channel as ITextChannel)
+                };
+                if (Mob.Type == _MobType.Secret)
+                {
+                    embed.WithFooter(new EmbedFooterBuilder() { Text = _TransHidden.FoundSecretCommand.Get(Guild) });
+                }
+                string Height = Mob.Height + $" {_TransWiki.blocks.Get(Guild)}";
+                string Width = Mob.Width + $" {_TransWiki.blocks.Get(Guild)}";
+                if (Mob.Height == "Rip")
+                {
+                    Height = _TransMain.Unknown.Get(Guild);
+                }
+                if (Mob.Width == "Rip")
+                {
+                    Width = _TransMain.Unknown.Get(Guild);
+                }
+                if (Mob.AttackEasy == "")
+                {
+
+                    string PlayerText = "";
+                    if (Mob.Name.ToLower() == _TransMain.Player.Get(Guild).ToLower())
                     {
-                        embed.AddField(_TransMain.Stats.Get(Guild), $"**{_TransMain.Health.Get(Guild)}:** {Mob.Health} :heart:" + Environment.NewLine + $"**{_TransMain.Attack.Get(Guild)}** :crossed_swords:" + Environment.NewLine + $"**{_TransMain.Easy.Get(Guild)}:** {Mob.AttackEasy}" + Environment.NewLine + $"**{_TransMain.Normal.Get(Guild)}:** {Mob.AttackNormal}" + Environment.NewLine + $"**{_TransMain.Hard.Get(Guild)}:** {Mob.AttackHard}", true);
-                        embed.AddField(_TransMain.Info.Get(Guild), $"**{_TransMain.Height.Get(Guild)}:** {Height}" + Environment.NewLine + $"**{_TransMain.Width.Get(Guild)}:** {Width}" + Environment.NewLine + $"**{_TransMain.Version.Get(Guild)}:** {Mob.Version}" + Environment.NewLine + $"**{_TransMain.Type.Get(Guild)}:** {Mob.Type}", true);
+                        embed.WithTitle(_TransMain.Player.Get(Guild));
+                        PlayerText = Environment.NewLine + $"**{_TransWiki.Fist_Attack.Get(Guild)}:** 0.5 :heart:";
                     }
-                    await ReplyAsync("", false, embed.Build());
+                    embed.AddField(_TransMain.Stats.Get(Guild), $"**{_TransMain.Health.Get(Guild)}:** {Mob.Health} :heart:" + Environment.NewLine + $"**{_TransMain.Type.Get(Guild)}:** {Mob.Type}" + PlayerText, true);
+                    embed.AddField(_TransMain.Info.Get(Guild), $"**{_TransMain.Height.Get(Guild)}:** {Height}" + Environment.NewLine + $"**{_TransMain.Width.Get(Guild)}:** {Width}" + Environment.NewLine + $"**{_TransMain.Version.Get(Guild)}:** {Mob.Version}", true);
+                }
+                else
+                {
+                    embed.AddField(_TransMain.Stats.Get(Guild), $"**{_TransMain.Health.Get(Guild)}:** {Mob.Health} :heart:" + Environment.NewLine + $"**{_TransMain.Attack.Get(Guild)}** :crossed_swords:" + Environment.NewLine + $"**{_TransMain.Easy.Get(Guild)}:** {Mob.AttackEasy}" + Environment.NewLine + $"**{_TransMain.Normal.Get(Guild)}:** {Mob.AttackNormal}" + Environment.NewLine + $"**{_TransMain.Hard.Get(Guild)}:** {Mob.AttackHard}", true);
+                    embed.AddField(_TransMain.Info.Get(Guild), $"**{_TransMain.Height.Get(Guild)}:** {Height}" + Environment.NewLine + $"**{_TransMain.Width.Get(Guild)}:** {Width}" + Environment.NewLine + $"**{_TransMain.Version.Get(Guild)}:** {Mob.Version}" + Environment.NewLine + $"**{_TransMain.Type.Get(Guild)}:** {Mob.Type}", true);
+                }
+                await ReplyAsync("", false, embed.Build());
             }
         }
 
@@ -1437,24 +1441,24 @@ _Task.GetGuild(Context.Guild, out _Guild Guild);
             {
                 _Potion Potion = _Config.MCPotions.Find(x => x.Name.ToLower().Replace(" ", "").Contains(Name.ToLower().Replace(" ", "")));
                 if (Potion == null) _Log.ThrowError(Context, "`Potion not found`", "Potion not found");
-                
-                    var embed = new EmbedBuilder()
-                    {
-                        Title = $"Potion of {Potion.Name}",
-                        Color = _Utils_Discord.GetRoleColor(Context.Channel as ITextChannel),
-                        Description = "```md" + Environment.NewLine + $"Base: {Potion.GetBase()}```" + "```md" + Environment.NewLine + $"Recipe: <{Potion.Base} + {Potion.Ingredient} = {Potion.Name.Replace(" ", "")}>" + Environment.NewLine + $"<Duration {Potion.GetDuration()}> <Note {Potion.Note}```",
-                        ThumbnailUrl = Potion.Image
-                    };
-                    if (Potion.Extended != null)
-                    {
-                        embed.AddField("Extended - Add redstone", "```md" + Environment.NewLine + $"<Duration {Potion.Extended.GetDuration()}>```");
-                    }
-                    if (Potion.Level2 != null)
-                    {
-                        embed.AddField("Level 2 - Add glowstone", "```md" + Environment.NewLine + $"<Duration {Potion.Level2.GetDuration()}> <Note {Potion.Level2.Note}>```");
-                    }
-                    await ReplyAsync("", false, embed.Build());
-                
+
+                var embed = new EmbedBuilder()
+                {
+                    Title = $"Potion of {Potion.Name}",
+                    Color = _Utils_Discord.GetRoleColor(Context.Channel as ITextChannel),
+                    Description = "```md" + Environment.NewLine + $"Base: {Potion.GetBase()}```" + "```md" + Environment.NewLine + $"Recipe: <{Potion.Base} + {Potion.Ingredient} = {Potion.Name.Replace(" ", "")}>" + Environment.NewLine + $"<Duration {Potion.GetDuration()}> <Note {Potion.Note}```",
+                    ThumbnailUrl = Potion.Image
+                };
+                if (Potion.Extended != null)
+                {
+                    embed.AddField("Extended - Add redstone", "```md" + Environment.NewLine + $"<Duration {Potion.Extended.GetDuration()}>```");
+                }
+                if (Potion.Level2 != null)
+                {
+                    embed.AddField("Level 2 - Add glowstone", "```md" + Environment.NewLine + $"<Duration {Potion.Level2.GetDuration()}> <Note {Potion.Level2.Note}>```");
+                }
+                await ReplyAsync("", false, embed.Build());
+
             }
         }
 
@@ -1491,7 +1495,7 @@ _Task.GetGuild(Context.Guild, out _Guild Guild);
                 await ReplyAsync("", false, embed.Build());
             }
         }
-        
+
     }
 
     public class Quiz : InteractiveModuleBase
@@ -1504,25 +1508,41 @@ _Task.GetGuild(Context.Guild, out _Guild Guild);
 
             if (Accept == "start")
             {
-                    Random.Org.Random Rng = new Random.Org.Random();
-                    int Num = Rng.Next(1, _Config.MCQuiz.Count);
-                    _Quiz Quiz = _Config.MCQuiz[Num - 1];
-                    string User = $"<@{Context.User.Id}>";
-                    var qembed = new EmbedBuilder()
+                Random.Org.Random Rng = new Random.Org.Random();
+                int Num = Rng.Next(1, _Config.MCQuiz.Count);
+                _Quiz Quiz = _Config.MCQuiz[Num - 1];
+                string User = $"<@{Context.User.Id}>";
+                var qembed = new EmbedBuilder()
+                {
+                    Title = $"Question - {Context.User.Username}",
+                    Description = Quiz.Question,
+                    Color = new Color(135, 206, 235)
+                };
+                await ReplyAsync("", false, qembed.Build());
+                var response = await WaitForMessage(Context.Message.Author, Context.Channel, new TimeSpan(0, 0, 10));
+                if (response == null)
+                {
+                    var embed = new EmbedBuilder()
                     {
-                        Title = $"Question - {Context.User.Username}",
-                        Description = Quiz.Question,
-                        Color = new Color(135, 206, 235)
+                        Title = "Minecraft Quiz",
+                        Description = $"{User} you ran out of time :(",
+                        Color = new Color(200, 0, 0),
+                        Footer = new EmbedFooterBuilder()
+                        {
+                            Text = "Question: " + Quiz.Question
+                        }
                     };
-                    await ReplyAsync("", false, qembed.Build());
-                    var response = await WaitForMessage(Context.Message.Author, Context.Channel, new TimeSpan(0, 0, 10));
-                    if (response == null)
+                    await ReplyAsync("", false, embed.Build());
+                }
+                else
+                {
+                    if (Quiz.Answer.Contains(response.Content.ToLower()))
                     {
                         var embed = new EmbedBuilder()
                         {
                             Title = "Minecraft Quiz",
-                            Description = $"{User} you ran out of time :(",
-                            Color = new Color(200, 0, 0),
+                            Description = $"<:success:350172481186955267> Correct! {User}" + Environment.NewLine + Quiz.Note,
+                            Color = new Color(0, 200, 0),
                             Footer = new EmbedFooterBuilder()
                             {
                                 Text = "Question: " + Quiz.Question
@@ -1532,36 +1552,20 @@ _Task.GetGuild(Context.Guild, out _Guild Guild);
                     }
                     else
                     {
-                        if (Quiz.Answer.Contains(response.Content.ToLower()))
+                        var embed = new EmbedBuilder()
                         {
-                            var embed = new EmbedBuilder()
+                            Title = "Minecraft Quiz",
+                            Description = $"<:error:350172479936921611> Incorrect {User}",
+                            Color = new Color(200, 0, 0),
+                            Footer = new EmbedFooterBuilder()
                             {
-                                Title = "Minecraft Quiz",
-                                Description = $"<:success:350172481186955267> Correct! {User}" + Environment.NewLine + Quiz.Note,
-                                Color = new Color(0, 200, 0),
-                                Footer = new EmbedFooterBuilder()
-                                {
-                                    Text = "Question: " + Quiz.Question
-                                }
-                            };
-                            await ReplyAsync("", false, embed.Build());
-                        }
-                        else
-                        {
-                            var embed = new EmbedBuilder()
-                            {
-                                Title = "Minecraft Quiz",
-                                Description = $"<:error:350172479936921611> Incorrect {User}",
-                                Color = new Color(200, 0, 0),
-                                Footer = new EmbedFooterBuilder()
-                                {
-                                    Text = "Question: " + Quiz.Question
-                                }
-                            };
-                            await ReplyAsync("", false, embed.Build());
-                        }
-
+                                Text = "Question: " + Quiz.Question
+                            }
+                        };
+                        await ReplyAsync("", false, embed.Build());
                     }
+
+                }
             }
             else
             {
@@ -1577,6 +1581,71 @@ _Task.GetGuild(Context.Guild, out _Guild Guild);
                     Color = new Color(135, 206, 235)
                 };
                 await ReplyAsync("", false, embed.Build());
+            }
+        }
+    }
+    public class Config : ModuleBase
+    {
+        [Group("config"), RequireOwner]
+        public class ConfigGroup : ModuleBase
+        {
+            [Command]
+            public async Task ConfigHelp()
+            {
+                await ReplyAsync("Config > `info` | `delete` | `create` | `reset`");
+            }
+
+            [Command("info")]
+            public async Task ConfigInfo(ulong ID)
+            {
+                _Config.MCGuilds.TryGetValue(ID, out _Guild Guild);
+                if (Guild == null) _Log.ThrowError(Context, "`Could not find guild`", "Guild not found");
+                var embed = new EmbedBuilder()
+                {
+                    Title = $"{Guild.ID} {Guild.Language}",
+                    Description = $"{string.Join(Environment.NewLine, Guild.Servers)}",
+                    Color = _Utils_Discord.GetRoleColor(Context.Channel)
+                };
+                await ReplyAsync("", false, embed.Build());
+            }
+
+            [Command("delete")]
+            public async Task ConfigDelete(ulong ID)
+            {
+                _Config.MCGuilds.TryGetValue(ID, out _Guild Guild);
+                if (Guild == null) _Log.ThrowError(Context, "`Could not find guild`", "Guild not found");
+                _Config.MCGuilds.Remove(ID);
+                File.Delete(_Config.BotPath + $"Guilds/{ID}" + ".json");
+                await ReplyAsync("`Guild config deleted`");
+            }
+
+            [Command("create")]
+            public async Task ConfigCreate(ulong ID)
+            {
+                _Config.MCGuilds.TryGetValue(ID, out _Guild Guild);
+                if (Guild != null) _Log.ThrowError(Context, "`Guild already has a config file`", "Guild already has a config file");
+                await ReplyAsync("`Guild config created`");
+            }
+
+            [Command("reset")]
+            public async Task ConfigReset(ulong ID)
+            {
+                _Config.MCGuilds.TryGetValue(ID, out _Guild Guild);
+                if (Guild == null) _Log.ThrowError(Context, "`Could not find guild`", "Guild not found");
+                _Config.MCGuilds.Remove(ID);
+                File.Delete(_Config.BotPath + $"Guilds/{ID}" + ".json");
+                _Task.NewGuild(ID);
+                await ReplyAsync("`Guild config reset`");
+            }
+
+            [Command("saveall")]
+            public async Task ConfigSaveall()
+            {
+                foreach(var i in _Config.MCGuilds.Values)
+                {
+                    i.Save();
+                }
+                await ReplyAsync("`All guild configs saved`");
             }
         }
     }
