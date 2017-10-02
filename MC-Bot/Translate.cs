@@ -182,20 +182,20 @@ namespace Bot
                     new string[]
                     {
                         "[ mc/bot ]( Bot Einladen/Info/Stats/Links )",
-                        "[ mc/quiz ]( Minecraft quiz :D )",
+                        "[ mc/quiz ]( Minecraft Quiz :D )",
                         "[ mc/colors ]( MC-Farbcodes )",
                         "[ mc/uuid (Spieler) ]( Spieler UUID )",
-                        "[ mc/ping (IP) ]( Ping ein Server )",
-                        "[ mc/list ]( Liste der Community-MC-Server )",
-                        "[ mc/wiki ]( Wiki für Items/Mobs/Enchants/Tränke )",
-                        "[ mc/skin (Spieler) ]( Spielerhaut )",
+                        "[ mc/ping (IP) ]( Ping einen Server )",
+                        "[ mc/list ]( Serverliste der Gilde )",
+                        "[ mc/wiki ]( Wiki für Items/Mobs/Verzauberungen/Tränke )",
+                        "[ mc/skin (Spieler) ]( Spieler-Skin )",
                         "[ mc/names (Spieler) ]( MC-Kontoname Historie )",
                         "[ mc/status ]( Mojang-Status )",
-                        "[ mc/get (Text) ]( Holen Sie sich einen Erfolg )",
-                        "[ mc/minime (Spieler) ]( Vergrößern der Spielerhaut )",
-                        "[ mc/playing ]( Leute spielen Minecraft )",
-                        "[ mc/admin ]( Community-Admin-Befehle )",
-                        "[ mc/invite ]( Holen Sie sich die Bot-Einladung )"
+                        "[ mc/get (Text) ]( Hol dir eine Errungenschaft )",
+                        "[ mc/minime (Spieler) ]( Skin verkleiner )",
+                        "[ mc/playing ]( Menschen, die gerade spielen )",
+                        "[ mc/admin ]( Gildenadmin-Befehle )",
+                        "[ mc/invite ]( Hol dir die Bot-Einladung )"
                     },
 
             };
@@ -247,7 +247,7 @@ namespace Bot
                 SP = "MultiMC le permite administrar y lanzar varias versiones con una instalación fácil de forge / mods",
                 RU = "MultiMC позволяет запускать любые версии игры, также можно легко установить Forge и моды",
                 PO = "MultiMC permite administrar e lançar várias versões com instação fácil de Forge/Mods",
-                GR = "MultiMC ermöglicht es Ihnen, mehrere Versionen mit einfacher Schmiede / Mods-Installation zu verwalten und zu starten"
+                GR = "MultiMC ermöglicht es, mit einfacher Forge- und Mod-Installation, mehrere Versionen zu verwalten und zu starten"
             };
 
             public TString ColorCodes = new TString()
@@ -278,7 +278,7 @@ namespace Bot
                 SP = "Introduzca un IP",
                 RU = "Введите IP",
                 PO = "Insere um IP",
-                GR = "Geben Sie eine IP ein"
+                GR = "Gib eine IP-Adresse ein"
             };
             public TString Error_IPMain = new TString()
             {
@@ -287,7 +287,7 @@ namespace Bot
                 SP = "¿De verdad crees que funcionaría?",
                 RU = "Ты думаешь, что это сработает?",
                 PO = "Achas realmente que isso funcionaria?",
-                GR = "Du denkst wirklich, das würde funktionieren?"
+                GR = "Denkst du wirklich, das würde funktionieren?"
             };
             public TString Error_IPRouter = new TString()
             {
@@ -296,7 +296,7 @@ namespace Bot
                 SP = "Los servidores de Minecraft no funcionan con routers DUH",
                 RU = "Сервера Minecraft не работают на DUH",
                 PO = "Os Servidores de Minecraft não são executados em routers DUH!",
-                GR = "Minecraft-Server laufen nicht auf Routern DUH"
+                GR = "Minecraft-Server laufen nicht auf Routern, DUH!"
             };
             public TString Error_IPZero = new TString()
             {
@@ -314,7 +314,7 @@ namespace Bot
                 SP = "Esto es para servidores de minecraft no google :(",
                 RU = "Это для серверов Minecraft, это не гугл :(",
                 PO = "Isto é para Servidores de Minecraft, não para o Google :(",
-                GR = "Dies ist für Minecraft Server nicht google :("
+                GR = "Dies ist für Minecraft Server, nicht google :("
             };
             public TString Error_IPYoutube = new TString()
             {
@@ -323,7 +323,7 @@ namespace Bot
                 SP = "Esto es para servidores de minecraft no youtube :(",
                 RU = "Это для серверов Minecraft, а не ютуб :(",
                 PO = "Isto é para Servidores de Minecraft, não para o YouTube :(",
-                GR = "Dies ist für Minecraft Server nicht youtube :("
+                GR = "Dies ist für Minecraft Server, nicht youtube :("
             };
             public TString Error_IPMyWeb = new TString()
             {
@@ -332,7 +332,7 @@ namespace Bot
                 SP = "Tratando de hacer ping a mi propio sitio web: D",
                 RU = "Попытаюсь пингануть мой собственный сайт :D",
                 PO = "Tentando descobrir o Ping do meu WebSite :D",
-                GR = "Ich versuche, meine eigene Website zu pingen: D"
+                GR = "Du versuchst meine eigene Website zu pingen :D"
             };
             public TString Error_IPBlocked = new TString()
             {
@@ -341,7 +341,7 @@ namespace Bot
                 SP = "El servidor de Minecraft ha bloqueado el ping",
                 RU = "Сервер заблокировал пинг",
                 PO = "Este Servidor de Minecraft bloqueou o seu Ping",
-                GR = "Minecraft-Server hat das Ping blockiert"
+                GR = "Der Minecraft-Server hat die Ping-Anfrage blockiert"
             };
             public TString Error_EnableQuery = new TString()
             {
@@ -350,7 +350,7 @@ namespace Bot
                 SP = "El servidor de Minecraft no tiene enable-query establecido en server.properties",
                 RU = "Этот сервер не имеет определённой отметки 'enable-query' в 'server.properties'",
                 PO = "Este Servidor de Minecraft tem de ativar o enable-query em server.properties",
-                GR = "Minecraft-Server hat keine Freigabe-Abfrage in server.properties gesetzt"
+                GR = "Der Minecraft-Server erlaubt keine Abfrage von Außen. Er hat enable-query nicht in server.properties aktiviert"
             };
             public TString Error_IPInvalid = new TString()
             {
@@ -359,7 +359,7 @@ namespace Bot
                 SP = "Esto no es un IP válido",
                 RU = "Неверно введён IP",
                 PO = "Este IP é inválido",
-                GR = "Dies ist kein gültiges ip"
+                GR = "Dies ist keine gültige IP-Adresse"
             };
             public TString Error_Cooldown = new TString()
             {
@@ -368,7 +368,7 @@ namespace Bot
                 SP = "Estás en cooldown por 1 minutos!",
                 RU = "Вы на кулдауне на 1 минуту!",
                 PO = "Estás em cooldown por 1 minuto!",
-                GR = "Sie sind auf Abklingzeit für 1 Minute!"
+                GR = "Du bist für 1 Minute auf Abklingzeit!"
             };
             public TString Ping_PleaseWait = new TString()
             {
@@ -377,7 +377,7 @@ namespace Bot
                 SP = "Por favor, espere mientras hago ping",
                 RU = "Подождите, пожалуйста...",
                 PO = "Espera até eu conseguir o Ping",
-                GR = "Bitte warten Sie, während ich ping"
+                GR = "Bitte warte, während ich pinge"
             };
             public TString Ping_ServerLoading = new TString()
             {
@@ -424,7 +424,7 @@ namespace Bot
                 SP = "Los administradores del gremio deben usar",
                 RU = "Только для администраторов",
                 PO = "Os Administradores devem usar",
-                GR = "Gildenadministratoren sollten verwenden"
+                GR = "Als Gildenadmin, benutze"
             };
             public TString Servers = new TString()
             {
@@ -433,7 +433,7 @@ namespace Bot
                 SP = "Servidores",
                 RU = "Сервера",
                 PO = "Servidores",
-                GR = "Servers"
+                GR = "Server"
             };
 
             #region InfoCommand
@@ -444,7 +444,7 @@ namespace Bot
                 SP = "Ventas de la cuenta de Minecraft",
                 RU = "Продажи Minecraft",
                 PO = "Vendas de Contas de Minecraft",
-                GR = "Minecraft Account Sales"
+                GR = "Minecraft Account Verkäufe"
             };
             public TString Info_MCSalesUrl = new TString()
             {
@@ -453,7 +453,7 @@ namespace Bot
                 SP = "https://minecraft.net/es-es/stats/",
                 RU = "https://minecraft.net/ru-ru/stats/",
                 PO = "https://minecraft.net/pt-pt/",
-                GR = "https://minecraft.net/en-us/stats/"
+                GR = "https://minecraft.net/de-de/stats/"
             };
             public TString Info_SalesError = new TString()
             {
@@ -462,7 +462,7 @@ namespace Bot
                 SP = "Estadísticas pueden estar ligeramente fuera debido al almacenamiento en caché",
                 RU = "Статистика может быть немного неверной",
                 PO = "Vendas de Contas de Minecraft",
-                GR = "Stats können aufgrund des Cachings leicht ausgeschaltet werden"
+                GR = "Statistiken können aufgrund des Caching etwas ungenau sein"
             };
             public TString Error_Api = new TString()
             {
@@ -492,7 +492,7 @@ namespace Bot
                 SP = "Robó una piel",
                 RU = "Украден скин",
                 PO = "Roubar uma Skin",
-                GR = "Stola eine Haut"
+                GR = "Einen Skin gestohlen"
             };
             public TString Error_UnknownArg = new TString()
             {
@@ -522,7 +522,7 @@ namespace Bot
                 SP = "El jugador {0} sólo tiene 1 nombre en los registros",
                 RU = "Игрок {0} имеет только 1 имя в записях",
                 PO = "O jogador {0} possui apenas 1 nome nos registros",
-                GR = "Spieler {0} hat nur 1 Namen auf Datensätzen"
+                GR = "Spieler {0} hat nur 1 Namen in den Datensätzen"
             };
             public TString First = new TString()
             {
@@ -561,7 +561,7 @@ namespace Bot
                 SP = "Cuentas de Mojang",
                 RU = "Аккаунты Mojang",
                 PO = "Contas de Mojang",
-                GR = "Mojang-Konten"
+                GR = "Mojang-Accounts"
             };
             public TString Status_MojangAuthServers = new TString()
             {
@@ -570,7 +570,7 @@ namespace Bot
                 SP = "Mojang servidores de autenticación",
                 RU = "Сервера авторизации Mojang",
                 PO = "Servidores de autenticação de Mojang",
-                GR = "Mojang Auth Server"
+                GR = "Mojang Authorisierungs-Server"
             };
             public TString Status_MojangAuthService = new TString()
             {
@@ -579,7 +579,7 @@ namespace Bot
                 SP = "Servicio Mojang auth",
                 RU = "Сервис авторизации Mojang",
                 PO = "Serviço de autenticação de Mojang",
-                GR = "Mojang auth Service"
+                GR = "Mojang Authorisierungs-Service"
             };
             public TString Status_MojangSessions = new TString()
             {
@@ -653,7 +653,7 @@ namespace Bot
                 SP = "El texto no puede tener más de 22 letras / números",
                 RU = "Текст не может содержать более 22 символов",
                 PO = "O texto não pode ter mais que 22 caracteres",
-                GR = "Text kann nicht mehr als 22 Buchstaben/Zahlen sein"
+                GR = "Text kann nicht mehr als 22 Buchstaben/Zahlen enthalten"
             };
             public TString OnlineSkinEditor = new TString()
             {
@@ -662,7 +662,7 @@ namespace Bot
                 SP = "Online Skin Editor",
                 RU = "Онлайн редактор скинов",
                 PO = "Editor de pele on-line",
-                GR = "Online-Skin-Editor"
+                GR = "Online Skin-Editor"
             };
 
             #region BotCommand
@@ -673,7 +673,7 @@ namespace Bot
                 SP = "Si tiene algún problema, sugerencias o traducciones de idiomas, póngase en contacto conmigo",
                 RU = "Если вы нашли неполадки или у вас есть предложения, обращайтесь ко мне",
                 PO = "Se tiveres algum problema, sugestão ou tradução, contacta-me",
-                GR = "Wenn Sie irgendwelche Fragen, Vorschläge oder Sprachübersetzungen haben, kontaktieren Sie mich bitte"
+                GR = "Wenn du Fragen oder Vorschläge haben solltest oder du mit der Übersetzung helfen möchtest, kontaktiere mich bitte"
             };
             public TString Bot_Footer = new TString()
             {
@@ -682,7 +682,7 @@ namespace Bot
                 SP = "Bot comandos de propietario no cuentan para el comando de contar por encima también algunos de ellos son secretos que tiene que encontrar",
                 RU = "Команды владельца бота не отображены сверху, поэтому вы должны найти их сами",
                 PO = "Os comandos do proprietário do botão não contam para a contagem de comandos acima, também alguns deles são secretos que você precisa encontrar",
-                GR = "Bot Besitzer Befehle zählen nicht auf die Befehlszählung oben auch einige von ihnen sind geheimen, die Sie zu finden haben"
+                GR = "Befehle für Bot-Besitzer sind in der oben erwähnten Anzahl an Kommandos nicht enthalten. Ein paar der Kommandos sind geheim, du musst sie nur finden"
             };
             public TString Bot_Owner = new TString()
             {
@@ -718,7 +718,7 @@ namespace Bot
                 SP = "Estadísticas",
                 RU = "Статистика",
                 PO = "Status",
-                GR = "Stats"
+                GR = "Statistiken"
             };
             public TString Guilds = new TString()
             {
@@ -727,7 +727,7 @@ namespace Bot
                 SP = "Gremios",
                 RU = "Сервера",
                 PO = "Servidores",
-                GR = "Gilden"
+                GR = "Communities"
             };
 
             public TString Uptime = new TString()
@@ -757,7 +757,7 @@ namespace Bot
                 SP = "Bot List Guilds",
                 RU = "Список серверов",
                 PO = "Lista de BOTs",
-                GR = "Bot-Liste Gilden"
+                GR = "Liste von Bot-Communities"
             };
             #endregion
 
@@ -813,7 +813,7 @@ namespace Bot
                 SP = "Tipo",
                 RU = "Тип",
                 PO = "Tipo",
-                GR = "Art"
+                GR = "Typ"
             };
             public TString Version = new TString()
             {
@@ -858,7 +858,7 @@ namespace Bot
                 SP = "Difícil",
                 RU = "Жесткий",
                 PO = "Díficil",
-                GR = "Hart"
+                GR = "Schwer"
             };
         }
        public class Wiki
@@ -879,7 +879,7 @@ namespace Bot
                 SP = "No se puede encontrar el nombre de la mafia",
                 RU = "Не удалось найти имя моба",
                 PO = "Não foi possível encontrar o nome do mob",
-                GR = "Ich kann keinen Namen finden"
+                GR = "Mob mit diesem Namen konnte nicht gefunden werden"
             };
             public TString blocks = new TString()
             {
@@ -909,7 +909,7 @@ namespace Bot
                 SP = "Papel pintado",
                 RU = "Фон",
                 PO = "Wallpaper",
-                GR = "Tapete"
+                GR = "Hintergrundbilder"
             };
             public TString ForgecraftWiki = new TString()
             {
@@ -945,7 +945,7 @@ namespace Bot
                 SP = "Minecraft clásico fue la segunda fase de desarrollo en 2009 que permitió a los jugadores jugar en el navegador usando java en el sitio web minecraft.net que fue utilizado principalmente para construir cosas",
                 RU = "Minecraft Classic был второй фазой разработки игры в 2009, которая позволила играть в браузере, используя Java, на сайте minecraft.net",
                 PO = "O Minecraft classic foi a segunda fase do desenvolvimento em 2009, que permitiu que os jogadores jogassem no navegador usando o java no site minecraft.net, que foi usado principalmente para construir coisas",
-                GR = "Minecraft-Klassiker war die zweite Phase der Entwicklung im Jahr 2009, die es Spielern ermöglicht, im Browser mit Java auf der Minecraft.net-Website zu spielen, die primär verwendet wurde, um Dinge zu bauen"
+                GR = "Minecraft Classic war die zweite Phase der Entwicklung im Jahr 2009, die es Spielern ermöglichte, im Browser mit Java auf Minecraft.net zu spielen. Sie wurde primär verwendet, um Dinge zu bauen"
             };
             public TString Forgecraft = new TString()
             {
@@ -954,7 +954,7 @@ namespace Bot
                 SP = "Forgecraft es el conjunto de servidores privados de listas blancas para que los desarrolladores de mod puedan recopilar y probar sus mods en un entorno privado. Muchos YouTubers y live-streamers también se reúnen en el servidor para interactuar con los desarrolladores de mod, ayudar a jugar a probar los mods y crear videos para que el público en general sepa lo que están haciendo los desarrolladores de mod.",
                 RU = "Forgecraft - это набор приватных серверов для создателей модов, предназначенный для проверки модов. Ютуберы и стримеры также могут попасть на такие сервера и помочь разработчикам модов в тестировании, и показать другим игрокам, что создатели модов делают.",
                 PO = "Forgecraft é o conjunto de servidores privados com whitelist para desenvolvedores de modificações para coletar e testar seus mods beta em um ambiente privado. Muitos YouTubers e live-streamers também se reúnem no servidor para interagir com os desenvolvedores de mod, ajudar a jogar-testar os mods e criar vídeos para que o público em geral saiba o que os desenvolvedores de modelos estão fazendo.",
-                GR = "Forgecraft ist die Menge der privaten Whitelist-Server für Mod-Entwickler zu sammeln und beta-Test ihre Mods in einer privaten Umgebung. Viele YouTubers und Live-Streamer sammeln auch auf dem Server, um mit den Mod-Entwicklern zu interagieren, zu helfen, die Mods zu testen und Videos zu erstellen, um die allgemeine Öffentlichkeit zu informieren, was die Mod-Entwickler tun."
+                GR = "Forgecraft ist eine Ansammlung von privaten Whitelist-Servern. Sie dient als Sammelstelle für Mod-Entwickler und zum Testen von Mods in einer privaten Umgebung. Viele YouTuber und Livestreamer treffen sich auch auf dem Server, um mit den Mod-Entwicklern zu interagieren, zu helfen, die Mods zu testen und Videos zu erstellen, um die Öffentlichkeit zu informieren, was die Mod-Entwickler tun."
             };
             public TString ForgecraftWallpaper = new TString()
             {
@@ -972,7 +972,7 @@ namespace Bot
                 SP = "RIP Bukkit te faltará junto con otras soluciones de servidor ...",
                 RU = "RIP Bukkit, нам тебя будет не хватать...",
                 PO = "RIP Bukkit vais perder com outras soluções para os Servidores...",
-                GR = "RIP Bukkit werden Sie mit anderen Serverlösungen verpasst ..."
+                GR = "RIP Bukkit. Wir werden euch und andere Serverlösungen vermissen..."
             };
             public TString Direwolf20 = new TString()
             {
@@ -981,7 +981,7 @@ namespace Bot
                 SP = "Direwolf20 es un popular youtuber conocido por su permite juegos y tutoriales de mod en minecraft modded. También juega en un servidor privado llamado Forgecraft con un montón de desarrolladores de mod y otros youtubers con sus amigos Soaryn y Pahimar",
                 RU = "Direwolf20 - это популярный ютубер, который известен за его летс-плеи и туториалы по модам. Он также играет на приватном сервере Forgecraft, с несколькими разработчиками модов, с его друзьями Soaryn и Pahimar",
                 PO = "Direwolf20 é um popular YouTuber conhecido por seus jogadinhos e tutoriais mod em Minecraft modificado. Ele também joga em um servidor privado chamado Forgecraft com um monte de desenvolvedores de mod e outros youtubers com seus amigos Soaryn e Pahimar",
-                GR = "Direwolf20 ist ein populärer Youtuber, der für seine Letspiele und Mod Tutorials auf modded Minecraft bekannt ist. Er spielt auch auf einem privaten Server namens Forgecraft mit einem Haufen Mod-Entwickler und anderen Youtubers mit seinen Freunden Soaryn und Pahimar"
+                GR = "Direwolf20 ist ein bekannter Youtuber, der für seine Let's plays und Mod-Tutorials auf modded Minecraft bekannt ist. Er spielt auch auf einem privaten Server namens Forgecraft mit einem Haufen Mod-Entwickler und anderen Youtubern, wie seinen Freunden Soaryn und Pahimar"
             };
             public TString Herobrine = new TString()
             {
@@ -990,7 +990,7 @@ namespace Bot
                 SP = "Siempre observándote...",
                 RU = "Всегда следим за тобой...",
                 PO = "Sempre observando-te...",
-                GR = "Immer beobachte dich..."
+                GR = "Er hat dich im Auge..."
             };
             public TString Entity303 = new TString()
             {
@@ -999,7 +999,7 @@ namespace Bot
                 SP = "Un minecraft espeluznante pasta de un ex empleado de Mojang que fue despedido por Notch y ahora quieren venganza",
                 RU = "Крипипаста майнкрафта, которая была замечена Нотчем, но хочет мести",
                 PO = "Um Minecraft macarrão assustador de um ex-funcionário de Mojang que foi demitido por Notch e agora quer vingança",
-                GR = "Ein minecraft gruselige Nudeln eines ehemaligen Mojang-Angestellten, der von Notch gefeuert wurde und nun Rache will"
+                GR = "Eine Minecraft Schauergeschichte eines ehemaligen Mojang-Angestellten, der von Notch gefeuert wurde und nun Rache will"
             };
             public TString Israphel = new TString()
             {
@@ -1008,7 +1008,7 @@ namespace Bot
                 SP = "La mejor serie de minecraft de youtube que nunca morirá en nuestros corazones ... 2010 - 2012 RIP Yogscast",
                 RU = "Лучшие серии майнкрафта, которые никогда не умрут в наших сердцах... 2010 - 2012 RIP Yogscast",
                 PO = "O melhor YouTuber de séries de Minecraft que nunca morrerá nos nossos corações... 2010 - 2012 RIP Yogscast",
-                GR = "Die besten Youtube Minecraft Serie, die niemals in unseren Herzen sterben wird ... 2010 - 2012 RIP Yogscast"
+                GR = "Die beste Youtube Minecraft Serie, die in unserem Herzen niemals sterben wird ... 2010 - 2012 RIP Yogscast"
             };
             public TString Notch = new TString()
             {
@@ -1017,7 +1017,7 @@ namespace Bot
                 SP = "Minecraft fue creado por Notch aka Markus Persson",
                 RU = "Minecraft был создан Нотчем aka Маркусом Перссоном",
                 PO = "O Minecraft foi criado pelo Notch aka Markus Persson",
-                GR = "Minecraft wurde von Notch aka Markus Persson erstellt"
+                GR = "Minecraft wurde von Notch aka Markus Persson kreiert"
             };
         }
 
@@ -1066,12 +1066,12 @@ namespace Bot
                         "[ mc/delserver ]( Remove um Servidor de Minecraft da lista )",
                     },
 
-                    // English
+                    // German
                     new string[]
                     {
-                        "[ mc/lang ]( Stellen Sie die Gemeinschaftssprache eine )",
-                        "[ mc/addserver ]( Füge dieser Gildenliste einen MC-Server hinzu )",
-                        "[ mc/delserver ]( Entfernen Sie einen MC-Server aus dieser Gildenliste )",
+                        "[ mc/lang ]( Wähle die Sprache der Gilde)",
+                        "[ mc/addserver ]( Füge der Serverliste der Gilde einen MC-Server hinzu )",
+                        "[ mc/delserver ]( Entferne einen MC-Server aus der Serverliste der Gilde )",
                     }
                 };
             public TString LanguageTranslate = new TString()
@@ -1081,7 +1081,7 @@ namespace Bot
                 SP = "¿Quiere traducir un idioma? Contacto",
                 RU = "Хотите перевести бота на другой язык? Соединитесь с нами",
                 PO = "Pretendes uma tradução? Contacta",
-                GR = "Wollen Sie eine Sprache übersetzen? Kontakt"
+                GR = "Du willst mit der Übersetzung helfen? Kontaktiere"
             };
             public TString Error_NoData = new TString()
             {
@@ -1090,7 +1090,7 @@ namespace Bot
                 SP = "No se pudieron encontrar los datos del clan xXBuilderBXx#9113",
                 RU = "Не найден контакт с xXBuilderBXx#9113",
                 PO = "Não foi possível encontrar o contacto para xXBuilderBXx#9113",
-                GR = "Gildendaten konnte nicht gefunden werden Kontakt xXBuilderBXx # 9113"
+                GR = "Gildendaten konnten nicht gefunden werden. Kontaktiere xXBuilderBXx#9113"
             };
             public TString AdminCommands = new TString()
             {
@@ -1099,7 +1099,7 @@ namespace Bot
                 SP = "Comandos de Guild Admin",
                 RU = "Список админских команд",
                 PO = "Comandos Administrativos",
-                GR = "Gilden-Admin-Befehle"
+                GR = "Befehle für Gildenadmins"
             };
             public TString AdminOnly = new TString()
             {
@@ -1108,7 +1108,7 @@ namespace Bot
                 SP = "No eres un administrador del gremio",
                 RU = "Вы не администратор",
                 PO = "Não és um admin da Comunidade",
-                GR = "Du bist keine Gilde admin"
+                GR = "Du bist kein Gildenadmin"
             };
             public TString UseList = new TString()
             {
@@ -1117,7 +1117,7 @@ namespace Bot
                 SP = "Utilice mc/list para obtener una lista de estos servidores de los minecraft de los gremios",
                 RU = "Используйте mc/list для списка серверов в майнкрафте для данной гильдии",
                 PO = "Usa mc/list para veres a lista de Servidores de Minecraft",
-                GR = "Verwenden Sie mc / list für eine Liste dieser Gilden Minecraft Server"
+                GR = "Verwende mc/list für eine Liste der Gilden-Minecraft-Server"
             };
             public TString AddServer = new TString()
             {
@@ -1126,7 +1126,7 @@ namespace Bot
                 SP = "Introduzca una etiqueta, ip y nombre",
                 RU = "Введите тэг, IP и название",
                 PO = "Coloca uma tag, ip e nome",
-                GR = "Geben Sie ein Tag, ip und name ein"
+                GR = "Gib einen Tag, eine IP-Adresse und einen Namen ein"
             };
             public TString AddServer_Already = new TString()
             {
@@ -1144,7 +1144,7 @@ namespace Bot
                 SP = "Añadido servidor {0} a la lista de los gremios",
                 RU = "Добавлен сервер {0} в список серверов",
                 PO = "Servidor adicionado {0} á lista de Servidores",
-                GR = "Server hinzugefügt {0} zur Gildenliste"
+                GR = "Server {0} zur Gildenliste hinzugefügt"
             };
             
             public TString DelServer_Enter = new TString()
@@ -1154,7 +1154,7 @@ namespace Bot
                 SP = "Eliminar un servidor con",
                 RU = "Удалить сервер с",
                 PO = "Eliminar um Servidor com",
-                GR = "Löschen Sie einen Server mit"
+                GR = "Lösche einen Server mit"
             };
             public TString DelServer_None = new TString()
             {
@@ -1172,7 +1172,7 @@ namespace Bot
                 SP = "Servidor eliminado {0} de la lista de gremios",
                 RU = "Удалён сервер {0} из списка серверов данной гильдии",
                 PO = "Servidor removido {0} da lista de Servidores",
-                GR = "Entfernter Server {0} aus der Gildenliste"
+                GR = "Server {0} aus der Gildenliste entfernt"
             };
             public TString ChangeLang = new TString()
             {
