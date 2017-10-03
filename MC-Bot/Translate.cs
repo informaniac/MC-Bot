@@ -86,15 +86,16 @@ namespace Bot
                         "[ mc/colors ]( MC color codes )",
                         "[ mc/uuid (Player) ]( Player UUID )",
                         "[ mc/ping (IP) ]( Ping a server )",
-                        "[ mc/list ]( List guild MC servers )",
+                        "[ mc/list ]( List community servers )",
                         "[ mc/wiki ]( Wiki for Items/Mobs/Enchants/Potions )",
+                        "[ mc/version ]( Minecraft version info )",
                         "[ mc/skin (Player) ]( Player skin )",
                         "[ mc/names (Player) ]( MC account name history )",
                         "[ mc/status ]( Mojang status )",
                         "[ mc/get (Text) ]( Get an achievement )",
                         "[ mc/minime (Player) ]( Minify player skin )",
                         "[ mc/playing ]( People playing Minecraft )",
-                        "[ mc/admin ]( Guild admin commands )",
+                        "[ mc/admin ]( Community admin commands )",
                         "[ mc/invite ]( Get the bot invite )"
                     },
 
@@ -106,15 +107,16 @@ namespace Bot
                         "[ mc/colors ]( Codes de couleur MC )",
                         "[ mc/uuid (Joueur) ]( Joueur UUID )",
                         "[ mc/ping (IP) ]( Faire un ping sur un serveur )",
-                        "[ mc/list ]( Liste des serveurs MC de la guilde )",
+                        "[ mc/list ]( Liste des serveurs communautaires )",
                         "[ mc/wiki ]( Wiki for Items/Mobs/Enchants/Potions )",
+                        "[ mc/version ]( Minecraft version info )",
                         "[ mc/skin (Joueur) ]( Skin du joueur )",
                         "[ mc/names (Joueur) ]( Historique des nom de compte MC )",
                         "[ mc/status ]( Status des serveur de Mojange )",
                         "[ mc/get (Texte) ]( Obtenir une réussite )",
                         "[ mc/minime (Joueur) ]( Minimiser la skin du joueur )",
                         "[ mc/playing ]( Les gens qui jouent à Minecraft )",
-                        "[ mc/admin ]( Commandes d'administration de la guilde )",
+                        "[ mc/admin ]( Commandes d'administration de la communauté )",
                         "[ mc/invite ]( Obtenir l'invitation de bot )"
                     },
 
@@ -126,15 +128,16 @@ namespace Bot
                         "[ mc/colors ]( MC color codes )",
                         "[ mc/uuid (Jugador) ]( Jugador UUID )",
                         "[ mc/ping (IP) ]( Hacer ping a un servidor )",
-                        "[ mc/list ]( Lista de servidores de MC del clan )",
+                        "[ mc/list ]( Listar servidores comunitarios )",
                         "[ mc/wiki ]( Wiki de Artículos/Mobs/Enchants/Pociones )",
+                        "[ mc/version ]( Minecraft version info )",
                         "[ mc/skin (Jugador) ]( Piel del jugador )",
                         "[ mc/names (Jugador) ]( Historia del nombre de cuenta de MC )",
                         "[ mc/status ]( Estado de Mojang )",
                         "[ mc/get (Texto) ]( Obtener un logro )",
                         "[ mc/minime (Jugador) ]( Minify la piel del reproductor )",
                         "[ mc/playing ]( Les gens qui jouent à Minecraft )",
-                        "[ mc/admin ]( Guild comandos de administración )",
+                        "[ mc/admin ]( Comandos de administración de la comunidadn )",
                         "[ mc/invite ]( Obtener la invitación bot )"
                     },
 
@@ -146,15 +149,16 @@ namespace Bot
                         "[ mc/colors ]( Коды цветов )",
                         "[ mc/uuid (игрок) ]( UUID игрока )",
                         "[ mc/ping (IP) ]( Пинг сервера )",
-                        "[ mc/list ]( Список серверов )",
+                        "[ mc/list ]( Список серверов сообщества )",
                         "[ mc/wiki ]( Вики: информация о мобах/предметах/зачарованиях и т.д. )",
+                        "[ mc/version ]( Minecraft version info )",
                         "[ mc/skin (игрок) ]( Скин игрока )",
                         "[ mc/names (игрок) ]( История имён аккаунта )",
                         "[ mc/status ]( Статус Mojang )",
                         "[ mc/get (текст) ]( Генератор достижений )",
                         "[ mc/minime (игрок) ]( Минимизировать скин игрока )",
                         "[ mc/playing ]( Сколько людей играют в Minecraft на данный момент )",
-                        "[ mc/admin ]( Команды администраторов сервера )",
+                        "[ mc/admin ]( Команды администратора сообщества )",
                         "[ mc/invite ]( Ссылка на добавление бота на свой сервер )"
                     },
 
@@ -166,15 +170,16 @@ namespace Bot
                         "[ mc/colors ]( Códigos das Cores MC )",
                         "[ mc/uuid (Jogador) ]( UUID do Jogador )",
                         "[ mc/ping (IP) ]( Ping do Servidor )",
-                        "[ mc/list ]( Lista de Servidores )",
+                        "[ mc/list ]( Lista de servidores da comunidade )",
                         "[ mc/wiki ]( Wiki de Items/Mobs/Enchants/Potions )",
+                        "[ mc/version ]( Minecraft version info )",
                         "[ mc/skin (Jogador) ]( Skin do Jogador )",
                         "[ mc/names (Jogador) ]( Histórico de Nomes MC )",
                         "[ mc/status ]( Mojang Status )",
                         "[ mc/get (Texto) ]( Obter uma Conquista )",
                         "[ mc/minime (Jogador) ]( MiniEu de uma Skin )",
                         "[ mc/playing ]( Pessoas a Jogar Minecraft )",
-                        "[ mc/admin ]( Comandos Administrativos )",
+                        "[ mc/admin ]( Comandos de administração da comunidade )",
                         "[ mc/invite ]( Convite do BOT )"
                     },
 
@@ -186,8 +191,9 @@ namespace Bot
                         "[ mc/colors ]( MC-Farbcodes )",
                         "[ mc/uuid (Spieler) ]( Spieler UUID )",
                         "[ mc/ping (IP) ]( Ping ein Server )",
-                        "[ mc/list ]( Liste der Community-MC-Server )",
+                        "[ mc/list ]( Liste der Community-Server )",
                         "[ mc/wiki ]( Wiki für Items/Mobs/Enchants/Tränke )",
+                        "[ mc/version ]( Minecraft version info )",
                         "[ mc/skin (Spieler) ]( Spielerhaut )",
                         "[ mc/names (Spieler) ]( MC-Kontoname Historie )",
                         "[ mc/status ]( Mojang-Status )",
@@ -419,12 +425,12 @@ namespace Bot
             };
             public TString List_GuildAdmin = new TString()
             {
-                EN = "Guild administrators should use",
-                FR = "Les administrateurs de guilde devraient utiliser",
-                SP = "Los administradores del gremio deben usar",
-                RU = "Только для администраторов",
-                PO = "Os Administradores devem usar",
-                GR = "Gildenadministratoren sollten verwenden"
+                EN = "Community admin should use",
+                FR = "L'administrateur communautaire devrait utiliser",
+                SP = "El administrador de la comunidad debería usar",
+                RU = "Администратор сообщества должен использовать",
+                PO = "O administrador da comunidade deve usar",
+                GR = "Community-Admin sollte verwenden"
             };
             public TString Servers = new TString()
             {
@@ -621,12 +627,12 @@ namespace Bot
 
             public TString PeoplePlayingMinecraft = new TString()
             {
-                EN = "People playing Minecraft",
-                FR = "Les gens qui jouent à Minecraft",
-                SP = "Personas jugando Minecraft",
-                RU = "Игроки в Minecraft",
-                PO = "Pessoas a Jogar Minecraft",
-                GR = "Leute spielen Minecraft"
+                EN = "People playing Minecraft [Discord]",
+                FR = "Les gens qui jouent à Minecraft [Discord]",
+                SP = "Personas jugando Minecraft [Discord]",
+                RU = "Игроки в Minecraft [Discord]",
+                PO = "Pessoas a Jogar Minecraft [Discord]",
+                GR = "Leute spielen Minecraft [Discord]"
             };
             public TString Text = new TString()
             {
@@ -1031,6 +1037,8 @@ namespace Bot
                         "[ mc/lang ]( Set the community language )",
                         "[ mc/addserver ]( Add a MC server to this guild list )",
                         "[ mc/delserver ]( Remove a MC server from this guild list )",
+                        "[ mc/setprefix ]( Set Custom Prefix )",
+                        "[ mc/resetprefix ]( Remove Custom Prefix )"
                     },
 
                     // French
@@ -1039,6 +1047,8 @@ namespace Bot
                         "[ mc/lang ]( Définir la langue de la communauté )",
                         "[ mc/addserver ]( Ajouter un serveur MC à cette liste de guilde )",
                         "[ mc/delserver ]( Supprimez un serveur MC de cette liste de guilde )",
+                        "[ mc/setprefix ]( Set Custom Prefix )",
+                        "[ mc/resetprefix ]( Remove Custom Prefix )"
 
                     },
 
@@ -1048,6 +1058,8 @@ namespace Bot
                         "[ mc/lang ]( Définir la langue de la communauté )",
                         "[ mc/addserver ]( Ajouter un serveur MC à cette liste de guilde )",
                         "[ mc/delserver ]( Supprimez un serveur MC de cette liste de guilde )",
+                        "[ mc/setprefix ]( Set Custom Prefix )",
+                        "[ mc/resetprefix ]( Remove Custom Prefix )"
                     },
 
                     // Russian
@@ -1055,7 +1067,9 @@ namespace Bot
                     {
                         "[ mc/lang ]( Установить язык сервера )",
                         "[ mc/addserver ]( Добавить MC сервер в список серверов )",
-                        "[ mc/delserver ]( Удалить MC сервер из списка)"
+                        "[ mc/delserver ]( Удалить MC сервер из списка)",
+                        "[ mc/setprefix ]( Set Custom Prefix )",
+                        "[ mc/resetprefix ]( Remove Custom Prefix )"
                     },
 
                     // Portugese
@@ -1064,14 +1078,18 @@ namespace Bot
                         "[ mc/lang ]( Muda a linguagem do BOT )",
                         "[ mc/addserver ]( Adicionar um Servidor de Minecraft á lista )",
                         "[ mc/delserver ]( Remove um Servidor de Minecraft da lista )",
+                        "[ mc/setprefix ]( Set Custom Prefix )",
+                        "[ mc/resetprefix ]( Remove Custom Prefix )"
                     },
 
-                    // English
+                    // German
                     new string[]
                     {
                         "[ mc/lang ]( Stellen Sie die Gemeinschaftssprache eine )",
                         "[ mc/addserver ]( Füge dieser Gildenliste einen MC-Server hinzu )",
                         "[ mc/delserver ]( Entfernen Sie einen MC-Server aus dieser Gildenliste )",
+                        "[ mc/setprefix ]( Set Custom Prefix )",
+                        "[ mc/resetprefix ]( Remove Custom Prefix )"
                     }
                 };
             public TString LanguageTranslate = new TString()

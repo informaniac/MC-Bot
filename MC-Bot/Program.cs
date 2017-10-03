@@ -879,14 +879,26 @@ namespace Bot.Services
             if (message == null) return;
             if (message.Author.IsBot) return;
             int argPos = 0;
+
+            string Prefix = _Bot.Prefix;
+            if (!message.Channel.Name.StartsWith("@"))
+            {
+                _Config.MCGuilds.TryGetValue((message.Channel as ITextChannel).GuildId, out _Guild Guild);
+                if (Guild.Prefix != "")
+                {
+                    Prefix = Guild.Prefix;
+                }
+            }
+
             if (!_Bot.DevMode && message.Content == "bbtest" && message.Author.Id == 190590364871032834) await message.Channel.SendMessageAsync("Test");
-            if (!(message.HasStringPrefix(_Bot.Prefix, ref argPos) || !_Bot.DevMode && message.HasMentionPrefix(_Bot._Client.CurrentUser, ref argPos))) return;
+            if (!(message.HasStringPrefix(_Bot.Prefix, ref argPos) || !_Bot.DevMode && message.HasMentionPrefix(_Bot._Client.CurrentUser, ref argPos) || !_Bot.DevMode && message.HasStringPrefix(Prefix, ref argPos))) return;
+            
             CommandContext Context = new CommandContext(_Client, message);
             IResult result = await _Commands.ExecuteAsync(Context, argPos, _Services);
             if (result.IsSuccess)
             {
                 _Log.Command(Context);
-            }
+}
             else
             {
                 if (result.ErrorReason.StartsWith("Custom - "))

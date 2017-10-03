@@ -82,15 +82,21 @@ namespace Bot
         public static string Library = ".net V2-00828";
         public static bool DevMode = true;
         public static Class Tokens = new Class();
-        public static _Trans.Main _TransMain = new _Trans.Main();
+        
         public static Dictionary<ulong, _Guild> MCGuilds = new Dictionary<ulong, _Guild>();
         public static List<_Item> MCItems = new List<_Item>();
         public static List<_Mob> MCMobs = new List<_Mob>();
         public static List<_Quiz> MCQuiz = new List<_Quiz>();
         public static List<_Potion> MCPotions = new List<_Potion>();
         public static List<_Enchant> MCEnchantments = new List<_Enchant>();
+        public static Dictionary<string, _Version> MC_Versions = new Dictionary<string, _Version>();
         public static Dictionary<ulong, Cooldown> PingCooldown = new Dictionary<ulong, Cooldown>();
         public static int Count = 0;
+
+        public static _Trans.Main _TransMain = new _Trans.Main();
+        public static _Trans.Hidden _TransHidden = new _Trans.Hidden();
+        public static _Trans.Wiki _TransWiki = new _Trans.Wiki();
+        public static _Trans.Admin _TransAdmin = new _Trans.Admin();
         public class Class
         {
             public string Discord = "";
@@ -104,6 +110,7 @@ namespace Bot
             AddPotions();
             AddEnchants();
             AddItems();
+            AddVersions();
             return new ServiceCollection()
                 .AddSingleton(Client)
                 .AddSingleton<_Bot>(ThisBot)
@@ -113,7 +120,7 @@ namespace Bot
                 .BuildServiceProvider();
             
         }
-        private static void AddItems()
+        internal static void AddItems()
         {
             using (StreamReader reader = new StreamReader(_Config.BotPath + "Items.json"))
             {
@@ -154,7 +161,7 @@ namespace Bot
                 }
             }
         }
-        private static void AddEnchants()
+        internal static void AddEnchants()
         {
             MCEnchantments.Add(new _Enchant() { Name = "Protection", ID = 0, Type = _EnchantType.Armor, Version = "0", Note = "Reduces all damage except for void and hunger damage.", MaxLevel = 4});
             MCEnchantments.Add(new _Enchant() { Name = "Fire Protection", ID = 1, Type = _EnchantType.Armor, Version = "0", Note = "Makes you immune to fire damage.", MaxLevel = 4 });
@@ -189,7 +196,7 @@ namespace Bot
             MCEnchantments.Add(new _Enchant() { Name = "Unbreaking", ID = 34, Type = _EnchantType.All, Version = "0", Note = "Increases durability of items.", MaxLevel = 3 });
             MCEnchantments.Add(new _Enchant() { Name = "Mending", ID = 70, Type = _EnchantType.All, Version = "0", Note = "Repairs durability of held item with experience. Rate is 2 durability per XP.", MaxLevel = 1 });
         }
-        private static void AddPotions()
+        internal static void AddPotions()
         {
             MCPotions.Add(new _Potion() { Name = "Regeneration", Image = "https://vignette2.wikia.nocookie.net/minecraft/images/f/f0/Potion-of-regeneration.png", Base = _PotionBase.Base1, Ingredient = "Ghast Tear", Duration = "0:45", Note = "Restores 9 heart of health over time > half a heart every 2.5 seconds", Extended = new _Potion() { Duration = "1:30", Note = "" }, Level2 = new _Potion() { Duration = "0:22", Note = "Restores 9 heart of health over time > half a heart every 1.25 seconds" } });
             MCPotions.Add(new _Potion() { Name = "Swiftness", Image = "https://vignette2.wikia.nocookie.net/minecraft/images/4/49/Potion-of-swiftness.png", Base = _PotionBase.Base1, Ingredient = "Sugar", Duration = "3:00", Note = "Increases speed by 20%", Extended = new _Potion() { Duration = "8:00", Note = "" }, Level2 = new _Potion() { Duration = "1:30", Note = "Increases speed by 40%" } });
@@ -205,7 +212,7 @@ namespace Bot
             MCPotions.Add(new _Potion() { Name = "Slowness", Image = "https://vignette1.wikia.nocookie.net/minecraft/images/5/55/Potion-of-slowness.png", Base = _PotionBase.Base2, Ingredient = "Sugar + Fermented Spider Eye", Duration = "1:30", Note = "Slows players/mobs by 15%", Extended = new _Potion() { Duration = "4:00", Note = "" } });
             MCPotions.Add(new _Potion() { Name = "Harming", Image = "https://vignette1.wikia.nocookie.net/minecraft/images/9/92/Potion-of-harming.png", Base = _PotionBase.Base1, Ingredient = "Spider Eye + Fermented Spider Eye", Duration = "Instant", Note = "Deals 3 hearts of damage", Level2 = new _Potion() { Duration = "Instant", Note = "Deals 6 hearts of damage to player" } });
         }
-        private static void AddMobs()
+        internal static void AddMobs()
         {
             MCMobs.Add(new _Mob() { Name = "Player", EmojiID = "352238802900615178", ID = "0", Health = "10", Height = "1.8", Width = "0.6", Type = _MobType.Passive, Version = "0", PicUrl = "https://minecraft.gamepedia.com/media/minecraft.gamepedia.com/thumb/f/f3/Steve.png/166px-Steve.png", Note = "Main character in the game called Steve" + Environment.NewLine + "or in newer versions Alex", AttackEasy = "", WikiLink = "https://minecraft.gamepedia.com/The_Player" });
             MCMobs.Add(new _Mob() { Name = "Bat", EmojiID = "350864494991245313", ID = "65", Health = "3", Height = "0.9", Width = "0.5", Type = _MobType.Passive, Version = "1.4.2", AttackEasy = "", AttackNormal = "", AttackHard = "", PicUrl = "https://minecraft.gamepedia.com/media/minecraft.gamepedia.com/0/09/Bat.gif", Note = "Bats are useless in the game", WikiLink = "https://minecraft.gamepedia.com/Bat" });
@@ -263,7 +270,7 @@ namespace Bot
             MCMobs.Add(new _Mob() { Name = "KillerRabbit", EmojiID = "", ID = "104", Health = "1.5", Height = "0.5", Width = "0.4", Type = _MobType.Secret, Version = "1.8", AttackEasy = "2.5", AttackNormal = "4", AttackHard = "6", PicUrl = "https://minecraft.gamepedia.com/media/minecraft.gamepedia.com/thumb/e/e6/White_Rabbit.png/150px-White_Rabbit.png", Note = "Mystery killer rabbits", WikiLink = "https://minecraft.gamepedia.com/Rabbit#The_Killer_Bunny" });
             MCMobs.Add(new _Mob() { Name = "Illusioner", EmojiID = "", ID = "37", Health = "16", Height = "2", Width = "0.6", Type = _MobType.Secret, Version = "1.12", AttackEasy = "0.5-2", AttackNormal = "0.5-2", AttackHard = "0.5-2.5", PicUrl = "https://minecraft.gamepedia.com/media/minecraft.gamepedia.com/thumb/f/f8/Illusioner_attacking.png/295px-Illusioner_attacking.png", Note = "Coming soon to 1.12", WikiLink = "https://minecraft.gamepedia.com/Illusioner" });
         }
-        private static void AddQuiz()
+        internal static void AddQuiz()
         {
             MCQuiz.Add(new _Quiz() { Question = "How many villager professions/careers are there not including the default villager", Answer = "6 six", Note = "The 6 professions are Farmer, Librarian, Priest, Blacksmith, Butcher and Nitwit"});
             MCQuiz.Add(new _Quiz() { Question = "What item can iron golems spawn with", Answer = "poppy, poppies", Note = "Iron golems can spawn with a poppy in their hand and offer them to villagers" });
@@ -284,6 +291,22 @@ namespace Bot
             MCQuiz.Add(new _Quiz() { Question = "What biome does hardened clay generate in", Answer = "mesa", Note = "The mesa is a landscape of red sand and hardened clay hills" });
             MCQuiz.Add(new _Quiz() { Question = "How many tree types are there", Answer = "4 four", Note = "There are four tree types in the game oak, birch, spruce and jungle" });
             MCQuiz.Add(new _Quiz() { Question = "What biome can hostile mobs not spawn in", Answer = "mushroom", Note = "Hostile mobs cannot spawn in the mushroom biome or in the caves either" });
+        }
+        internal static void AddVersions()
+        {
+            MC_Versions.Add("1.12", new _Version { AllVersions = "[1.12](https://minecraft.gamepedia.com/1.12) | [1.12.1](https://minecraft.gamepedia.com/1.12.1) | [1.12.2](https://minecraft.gamepedia.com/1.12.2)", Name = "World of color update", Released = "June 7 | 2017" });
+            MC_Versions.Add("1.11", new _Version { AllVersions = "[1.11](https://minecraft.gamepedia.com/1.11) | [1.11.1](https://minecraft.gamepedia.com/1.11.1) | [1.11.2](https://minecraft.gamepedia.com/1.11.2)", Name = "Exploration update", Released = "November 14 | 2016" });
+            MC_Versions.Add("1.10", new _Version { AllVersions = "[1.10](https://minecraft.gamepedia.com/1.10) | [1.10.1](https://minecraft.gamepedia.com/1.10.1) | [1.10.2](https://minecraft.gamepedia.com/1.10.2)", Name = "Frostburn update", Released = "June 8 | 2016" });
+            MC_Versions.Add("1.9", new _Version { AllVersions = "[1.9](https://minecraft.gamepedia.com/1.9) | [1.9.1](https://minecraft.gamepedia.com/1.9.1) | [1.9.2](https://minecraft.gamepedia.com/1.9.2) | [1.9.3](https://minecraft.gamepedia.com/1.9.3) | [1.9.4](https://minecraft.gamepedia.com/1.9.4)", Name = "Combat update", Released = "Febuary 29 | 2016" });
+            MC_Versions.Add("1.8", new _Version { AllVersions = "[1.8](https://minecraft.gamepedia.com/1.8) | [1.8.1](https://minecraft.gamepedia.com/1.8.1) | [1.8.2](https://minecraft.gamepedia.com/1.8.2) | [1.8.3](https://minecraft.gamepedia.com/1.8.3) | [1.8.4](https://minecraft.gamepedia.com/1.8.4) | [1.8.5](https://minecraft.gamepedia.com/1.8.5) | [1.8.6](https://minecraft.gamepedia.com/1.8.6) | [1.8.7](https://minecraft.gamepedia.com/1.8.7) | [1.8.8](https://minecraft.gamepedia.com/1.8.8) | [1.8.9](https://minecraft.gamepedia.com/1.8.9)", Name = "Bountiful update", Released = "September 2 | 2014" });
+            MC_Versions.Add("1.7", new _Version { AllVersions = "[1.7.2](https://minecraft.gamepedia.com/1.7.2) | [1.7.4](https://minecraft.gamepedia.com/1.7.4) | [1.7.5](https://minecraft.gamepedia.com/1.7.5) | [1.7.6](https://minecraft.gamepedia.com/1.7.6) | [1.7.7](https://minecraft.gamepedia.com/1.7.7) | [1.7.8](https://minecraft.gamepedia.com/1.7.8) | [1.7.9](https://minecraft.gamepedia.com/1.7.9) | [1.7.10](https://minecraft.gamepedia.com/1.7.10)", Name = "The update that changed the world", Released = "October 25 | 2013" });
+            MC_Versions.Add("1.6", new _Version { AllVersions = "[1.6.1](https://minecraft.gamepedia.com/1.6.1) | [1.6.2](https://minecraft.gamepedia.com/1.6.2) | [1.6.4](https://minecraft.gamepedia.com/1.6.4)", Name = "Horse update", Released = "July 1 | 2013" });
+            MC_Versions.Add("1.5", new _Version { AllVersions = "[1.5](https://minecraft.gamepedia.com/1.5) | [1.5.1](https://minecraft.gamepedia.com/1.5.1) | [1.5.2](https://minecraft.gamepedia.com/1.5.2)", Name = "Redstone update", Released = "March 13 | 2013" });
+            MC_Versions.Add("1.4", new _Version { AllVersions = "[1.4.2](https://minecraft.gamepedia.com/1.4.2) | [1.4.4](https://minecraft.gamepedia.com/1.4.4) | [1.4.5](https://minecraft.gamepedia.com/1.4.5) | [1.4.6](https://minecraft.gamepedia.com/1.4.6) | [1.4.7](https://minecraft.gamepedia.com/1.4.7)", Name = "Pretty scary update", Released = "October 25 | 2012" });
+            MC_Versions.Add("1.3", new _Version { AllVersions = "[1.3.1](https://minecraft.gamepedia.com/1.3.1) | [1.3.2](https://minecraft.gamepedia.com/1.3.2)", Name = "No Name", Released = "August 1 | 2012" });
+            MC_Versions.Add("1.2", new _Version { AllVersions = "[1.2.1](https://minecraft.gamepedia.com/1.2.1) | [1.2.2](https://minecraft.gamepedia.com/1.2.2) | [1.2.3](https://minecraft.gamepedia.com/1.2.3) | [1.2.4](https://minecraft.gamepedia.com/1.2.4) | [1.2.5](https://minecraft.gamepedia.com/1.2.5)", Name = "No Name", Released = "March 1 | 2012" });
+            MC_Versions.Add("1.1", new _Version { AllVersions = "[1.1](https://minecraft.gamepedia.com/1.1)", Name = "No Name", Released = "January 12 | 2012" });
+            MC_Versions.Add("1.0", new _Version { AllVersions = "[1.0.0](https://minecraft.gamepedia.com/1.0.0)", Name = "No Name", Released = "November 18 | 2011" });
         }
     }
 }

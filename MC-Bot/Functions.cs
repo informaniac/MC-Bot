@@ -387,7 +387,10 @@ namespace Bot.Classes
     {
         English = 0, French = 1, Spanish = 2, Russian = 3, Portuguese = 4, German = 5
     }
-    
+    public class _First
+    {
+        public bool Set = false;
+    }
     public class _Ping
     {
         public enum _Status
@@ -488,6 +491,7 @@ namespace Bot.Classes
         public ulong ID;
         public List<_Server> Servers = new List<_Server>();
         public _Language Language = _Language.English;
+        public string Prefix = "";
         public void Save()
         {
             using (StreamWriter file = File.CreateText(_Config.BotPath + $"Guilds/{ID}" + ".json"))
@@ -497,5 +501,31 @@ namespace Bot.Classes
 
             }
         }
+        public string GetPrefix(ICommandContext Context)
+        {
+            if (Context.Guild == null)
+            {
+                return "mc/";
+            }
+            if (Context.Message.Content.StartsWith("mc/"))
+            {
+                return "mc/";
+            }
+            else
+            {
+                return Prefix;
+            }
+        }
+    }
+    public class _Biome
+    {
+
+
+    }
+    public class _Version
+    {
+        public string Name = "";
+        public string AllVersions = "";
+        public string Released = "";
     }
 }
