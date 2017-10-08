@@ -385,7 +385,7 @@ namespace Bot.Classes
     }
     public enum _Language
     {
-        English = 0, French = 1, Spanish = 2, Russian = 3, Portuguese = 4, German = 5
+        English = 0, French = 1, Spanish = 2, Russian = 3, Portuguese = 4, German = 5, Dutch = 6, Italian = 7
     }
     public class _First
     {

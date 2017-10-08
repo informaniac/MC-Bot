@@ -1211,14 +1211,14 @@ namespace Bot.Commands
                 var embed = new EmbedBuilder()
                 {
                     Title = _Config._TransAdmin.ChangeLang.Get(Guild),
-                    Description = "```md" + Environment.NewLine + "<0 English> mc/lang 0" + Environment.NewLine + "<1 Français> mc/lang 1" + Environment.NewLine + "<2 Español> mc/lang 2" + Environment.NewLine + "<3 Pусский> mc/lang 3" + Environment.NewLine + "<4 Português> mc/lang 4" + Environment.NewLine + "<5 Deutsche> mc/lang 5```",
+                    Description = "```md" + Environment.NewLine + "<　　　mc/lang 0　　　= English >" + Environment.NewLine + "<　　　mc/lang 1　　　= Français >" + Environment.NewLine + "<　　　mc/lang 2　　　= Español >" + Environment.NewLine + "<　　　mc/lang 3　　　= Pусский >" + Environment.NewLine + "<　　　mc/lang 4　　　= Português >" + Environment.NewLine + "<　　　mc/lang 5　　　= German >" + Environment.NewLine + "<　　　mc/lang 6　　　= Dutch >" + Environment.NewLine + "<　　　mc/lang 7　　　= Italian >```",
                     Color = _Utils_Discord.GetRoleColor(Context.Channel as ITextChannel),
                     Footer = new EmbedFooterBuilder()
                     {
                         Text = $"{_Config._TransAdmin.LanguageTranslate.Get(Guild)} xXBuilderBXx#9113"
                     }
                 };
-                embed.AddField("Translation Help", "Pусский | Mineblaze#6804 - <@240841342723424256>" + Environment.NewLine + "Português | yBaang_#3224 <@319171978881925121>");
+                embed.AddField("Translation Help", "Pусский | Mineblaze#6804 - <@240841342723424256>" + Environment.NewLine + "Português | yBaang_#3224 - <@319171978881925121>" + Environment.NewLine + "Dutch | Zak_Patat#9077 - <@186543143225786370>" + Environment.NewLine + "Italian | jumper222#9027 - <@203208900336418816>");
                 await ReplyAsync("", false, embed.Build());
             }
             else
@@ -1253,7 +1253,17 @@ namespace Bot.Commands
                     case 5:
                         Guild.Language = _Language.German;
                         Guild.Save();
-                        await ReplyAsync("`Gemeinschaftssprache auf Deutsch`");
+                        await ReplyAsync("`Gemeinschaftssprache auf Deutsch eingestellt`");
+                        break;
+                    case 6:
+                        Guild.Language = _Language.Dutch;
+                        Guild.Save();
+                        await ReplyAsync("`Gemeenschapstaal ingesteld op Nederlands`");
+                        break;
+                    case 7:
+                        Guild.Language = _Language.Italian;
+                        Guild.Save();
+                        await ReplyAsync("`La lingua comunitaria è impostata su olandese`");
                         break;
                 }
             }
