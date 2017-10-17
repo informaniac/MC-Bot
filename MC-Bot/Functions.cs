@@ -72,33 +72,6 @@ namespace Bot.Functions
                 }
             }
         }
-
-        public static bool HasEmbedPerms(ICommandContext Context, _Guild Guild = null, bool Error = false)
-        {
-            if (Context.Guild == null)
-            {
-                return true;
-            }
-            _Bot.GuildCache.TryGetValue(Context.Guild.Id, out _CacheItem CI);
-            if (CI.Bot == null)
-            {
-                CI.Bot = Context.Guild.GetCurrentUserAsync().GetAwaiter().GetResult();
-            }
-            if (CI.Bot.GuildPermissions.EmbedLinks || CI.Bot.GetPermissions(Context.Channel as IGuildChannel).EmbedLinks)
-            {
-                return true;
-            }
-            if (Error)
-            {
-                string ErrorText = _Config._TransMain.Error_NoEmbedPerms.EN;
-                if (Guild != null)
-                {
-                    ErrorText = _Config._TransMain.Error_NoEmbedPerms.Get(Guild);
-                }
-                _Log.ThrowError(Context, "```python" + Environment.NewLine + $"{ErrorText}```", "No Embed Links Pemr");
-            }
-            return false;
-        }
         
     }
 }
@@ -417,7 +390,7 @@ namespace Bot.Classes
             Port = _Port;
             
            
-            dynamic Data = Utils._Utils_Http.GetJsonObject("https://use.gameapis.net/mc/query/info/" + IP + ":" + Port);
+            dynamic Data = _Utils.Http.JsonObject("https://use.gameapis.net/mc/query/info/" + IP + ":" + Port);
             if (Data.status == false)
             {
                 _Log.Custom(Data.error);
@@ -437,7 +410,7 @@ namespace Bot.Classes
             IP = _IP;
             Port = _Port;
            
-            dynamic Data = Utils._Utils_Http.GetJsonObject("https://use.gameapis.net/mc/query/extensive/" + IP + ":" + Port);
+            dynamic Data = _Utils.Http.JsonObject("https://use.gameapis.net/mc/query/extensive/" + IP + ":" + Port);
             if (Data.status == false)
             {
                 if (Data.error == "Failed to parse server's response")
@@ -469,7 +442,7 @@ namespace Bot.Classes
             IP = _IP;
             Port = _Port;
            
-            dynamic Data = Utils._Utils_Http.GetJsonObject("https://use.gameapis.net/mc/extensive/info/" + IP + ":" + Port);
+            dynamic Data = _Utils.Http.JsonObject("https://use.gameapis.net/mc/extensive/info/" + IP + ":" + Port);
             if (Data.status == false)
             {
                 if (Data.error == "Failed to parse server's response")

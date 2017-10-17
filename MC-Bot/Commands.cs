@@ -54,7 +54,6 @@ namespace Bot.Commands
         public async Task Help(string Action = "")
         {
                 _Task.GetGuild(Context.Guild, out _Guild Guild);
-                _Task.HasEmbedPerms(Context, Guild, true);
             if (NewsText == "" && File.Exists(_Config.BotPath + "News.txt"))
             {
                 using (StreamReader reader = new StreamReader(_Config.BotPath + "News.txt"))
@@ -124,7 +123,6 @@ namespace Bot.Commands
         public async Task Colors()
         {
             _Task.GetGuild(Context.Guild, out _Guild Guild);
-            _Task.HasEmbedPerms(Context, Guild, true);
             var embed = new EmbedBuilder()
             {
                 Title = _Config._TransMain.ColorCodes.Get(Guild),
@@ -137,7 +135,6 @@ namespace Bot.Commands
         public async Task Uuid(string Player)
         {
             _Task.GetGuild(Context.Guild, out _Guild Guild);
-            _Task.HasEmbedPerms(Context, Guild, true);
             UuidAtTimeResponse uuid = new UuidAtTime(Player, DateTime.Now).PerformRequest().Result;
             if (!uuid.IsSuccess)
             {
@@ -165,7 +162,6 @@ namespace Bot.Commands
         public async Task Ping(string IP = "", ushort Port = 25565)
         {
             _Task.GetGuild(Context.Guild, out _Guild Guild);
-            _Task.HasEmbedPerms(Context, Guild, true);
             if (IP == "" || IP.StartsWith("("))
             {
                 await ReplyAsync($"{_Config._TransMain.Error_EnterIP.Get(Guild)} | `mc/ping my.server.net` | `mc/ping other.server.net:25566` | `mc/ping this.server.net 25567`");
@@ -329,7 +325,6 @@ namespace Bot.Commands
         public async Task PingFull(string IP = "", ushort Port = 25565)
         {
             _Task.GetGuild(Context.Guild, out _Guild Guild);
-            _Task.HasEmbedPerms(Context, Guild, true);
 
             if (IP == "" || IP.StartsWith("("))
             {
@@ -506,7 +501,6 @@ namespace Bot.Commands
         public async Task List()
         {
             _Task.GetGuild(Context.Guild, out _Guild Guild);
-            _Task.HasEmbedPerms(Context, Guild, true);
 
             if (Guild.Servers.Count == 0) _Log.ThrowError(Context, $"{_Config._TransMain.List_NoServers.Get(Guild)} :(" + Environment.NewLine + $"{_Config._TransMain.List_GuildAdmin.Get(Guild)} `mc/admin`", "No Servers On List");
             HashSet<string> Servers = new HashSet<string>();
@@ -537,7 +531,7 @@ namespace Bot.Commands
         public async Task Info()
         {
             _Task.GetGuild(Context.Guild, out _Guild Guild);
-            _Task.HasEmbedPerms(Context, Guild, true);
+            
 
             StatisticsResponse stats = await new Statistics(Item.MinecraftAccountsSold).PerformRequest();
             if (!stats.IsSuccess) _Log.ThrowError(Context, $"`{_Config._TransMain.Error_Api.Get(Guild)}`", stats.Error.ErrorMessage);
@@ -584,7 +578,7 @@ namespace Bot.Commands
         public async Task SkinArg(string Arg = "", string Player = "")
         {
             _Task.GetGuild(Context.Guild, out _Guild Guild);
-            _Task.HasEmbedPerms(Context, Guild, true);
+            
 
             if (Arg == "")
             {
@@ -641,7 +635,7 @@ namespace Bot.Commands
         public async Task Names(string Player = "")
         {
             _Task.GetGuild(Context.Guild, out _Guild Guild);
-            _Task.HasEmbedPerms(Context, Guild, true);
+            
 
             if (Player == "")
             {
@@ -692,7 +686,7 @@ namespace Bot.Commands
         public async Task Status()
         {
             _Task.GetGuild(Context.Guild, out _Guild Guild);
-            _Task.HasEmbedPerms(Context, Guild, true);
+            
 
             ApiStatusResponse status = new ApiStatus().PerformRequest().Result;
             if (!status.IsSuccess) _Log.ThrowError(Context, $"`{_Config._TransMain.Error_Api.Get(Guild)}`", status.Error.ErrorMessage);
@@ -718,7 +712,7 @@ namespace Bot.Commands
         public async Task Playing()
         {
             _Task.GetGuild(Context.Guild, out _Guild Guild);
-            _Task.HasEmbedPerms(Context, Guild, true);
+            
 
             int CountOther = 0;
             int Count1710 = 0;
@@ -779,7 +773,7 @@ namespace Bot.Commands
         public async Task Get([Remainder]string Text = "")
         {
             _Task.GetGuild(Context.Guild, out _Guild Guild);
-            _Task.HasEmbedPerms(Context, Guild, true);
+            
 
             if (Text == "")
             {
@@ -812,7 +806,7 @@ namespace Bot.Commands
         public async Task Minime(string Player = "")
         {
             _Task.GetGuild(Context.Guild, out _Guild Guild);
-            _Task.HasEmbedPerms(Context, Guild, true);
+            
 
             if (Player == "")
             {
@@ -844,7 +838,7 @@ namespace Bot.Commands
         public async Task Bot()
         {
             _Task.GetGuild(Context.Guild, out _Guild Guild);
-            _Task.HasEmbedPerms(Context, Guild, true);
+            
             int FrenchCount = _Config.MCGuilds.Values.Where(x => x.Language == _Language.French).Count();
             int SpanishCount = _Config.MCGuilds.Values.Where(x => x.Language == _Language.Spanish).Count();
             int RussianCount = _Config.MCGuilds.Values.Where(x => x.Language == _Language.Russian).Count();
@@ -891,7 +885,7 @@ namespace Bot.Commands
         public async Task Classic()
         {
             _Task.GetGuild(Context.Guild, out _Guild Guild);
-            _Task.HasEmbedPerms(Context, Guild, true);
+            
             var embed = new EmbedBuilder()
             {
                 Title = "Minecraft Classic",
@@ -909,7 +903,7 @@ namespace Bot.Commands
         public async Task Dab()
         {
             _Task.GetGuild(Context.Guild, out _Guild Guild);
-            _Task.HasEmbedPerms(Context, Guild, true);
+            
             var embed = new EmbedBuilder()
             {
                 ImageUrl = "https://media-curse.cursecdn.com/attachments/thumbnails/236/440/190/130/dd63904725da76213d1878fb1cc6daaf.jpeg",
@@ -931,7 +925,7 @@ namespace Bot.Commands
         public async Task Fidget()
         {
             _Task.GetGuild(Context.Guild, out _Guild Guild);
-            _Task.HasEmbedPerms(Context, Guild, true);
+            
             var embed = new EmbedBuilder()
             {
                 ImageUrl = "http://www.mc-mod.net/wp-content/uploads/2017/05/Fidget-Spinner-Mod-1.gif",
@@ -948,7 +942,7 @@ namespace Bot.Commands
         public async Task Forge()
         {
             _Task.GetGuild(Context.Guild, out _Guild Guild);
-            _Task.HasEmbedPerms(Context, Guild, true);
+            
             var embed = new EmbedBuilder()
             {
                 Description = _Config._TransHidden.Forgecraft.Get(Guild) + Environment.NewLine +
@@ -966,7 +960,7 @@ namespace Bot.Commands
         public async Task ForgecraftWallpaper()
         {
             _Task.GetGuild(Context.Guild, out _Guild Guild);
-            _Task.HasEmbedPerms(Context, Guild, true);
+            
             var embed = new EmbedBuilder()
             {
                 Author = new EmbedAuthorBuilder()
@@ -988,7 +982,7 @@ namespace Bot.Commands
         public async Task Bukkit()
         {
             _Task.GetGuild(Context.Guild, out _Guild Guild);
-            _Task.HasEmbedPerms(Context, Guild, true);
+            
             var embed = new EmbedBuilder()
             {
                 Color = _Utils.Discord.GetRoleColor(Context.Channel as ITextChannel),
@@ -1005,7 +999,7 @@ namespace Bot.Commands
         public async Task DW()
         {
             _Task.GetGuild(Context.Guild, out _Guild Guild);
-            _Task.HasEmbedPerms(Context, Guild, true);
+            
             var embed = new EmbedBuilder()
             {
                 Color = _Utils.Discord.GetRoleColor(Context.Channel as ITextChannel),
@@ -1022,7 +1016,7 @@ namespace Bot.Commands
         public async Task Herobrine()
         {
             _Task.GetGuild(Context.Guild, out _Guild Guild);
-            _Task.HasEmbedPerms(Context, Guild, true);
+            
             var embedh = new EmbedBuilder()
             {
                 Title = "Herobrine",
@@ -1041,7 +1035,7 @@ namespace Bot.Commands
         public async Task Entity303()
         {
             _Task.GetGuild(Context.Guild, out _Guild Guild);
-            _Task.HasEmbedPerms(Context, Guild, true);
+            
             var embedh = new EmbedBuilder()
             {
                 Title = "Entity 303",
@@ -1060,7 +1054,7 @@ namespace Bot.Commands
         public async Task IS()
         {
             _Task.GetGuild(Context.Guild, out _Guild Guild);
-            _Task.HasEmbedPerms(Context, Guild, true);
+            
             var embed = new EmbedBuilder()
             {
                 Color = _Utils.Discord.GetRoleColor(Context.Channel as ITextChannel),
@@ -1077,7 +1071,7 @@ namespace Bot.Commands
         public async Task Notch()
         {
             _Task.GetGuild(Context.Guild, out _Guild Guild);
-            _Task.HasEmbedPerms(Context, Guild, true);
+            
             var embed = new EmbedBuilder()
             {
                 Description = $"{_Config._TransHidden.Notch.Get(Guild)} [Wiki](https://en.wikipedia.org/wiki/Markus_Persson)",
@@ -1097,7 +1091,7 @@ namespace Bot.Commands
         public async Task Admin()
         {
             _Task.GetGuild(Context.Guild, out _Guild Guild);
-            _Task.HasEmbedPerms(Context, Guild, true);
+            
 
             IGuildUser GUU = await Context.Guild.GetUserAsync(Context.User.Id);
 
@@ -1133,7 +1127,7 @@ namespace Bot.Commands
         public async Task Addserver(string Tag = "", string IP = "", [Remainder]string Name = "")
         {
             _Task.GetGuild(Context.Guild, out _Guild Guild);
-            _Task.HasEmbedPerms(Context, Guild, true);
+            
 
             IGuildUser GUU = await Context.Guild.GetUserAsync(Context.User.Id);
             if (Context.User.Id != 190590364871032834 && !GUU.GuildPermissions.Administrator) _Log.ThrowError(Context, $"<:error:350172479936921611> {_Config._TransAdmin.AdminOnly.Get(Guild)}", "Not a guild administrator");
@@ -1175,7 +1169,7 @@ namespace Bot.Commands
         public async Task Delserver(string Tag = "")
         {
             _Task.GetGuild(Context.Guild, out _Guild Guild);
-            _Task.HasEmbedPerms(Context, Guild, true);
+            
 
             IGuildUser GUU = await Context.Guild.GetUserAsync(Context.User.Id);
             if (Context.User.Id != 190590364871032834 && !GUU.GuildPermissions.Administrator) _Log.ThrowError(Context, $"<:error:350172479936921611> {_Config._TransAdmin.AdminOnly.Get(Guild)}", "Not a guild administrator");
@@ -1201,7 +1195,7 @@ namespace Bot.Commands
         public async Task Language(int ID = -1)
         {
             _Task.GetGuild(Context.Guild, out _Guild Guild);
-            _Task.HasEmbedPerms(Context, Guild, true);
+            
 
             IGuildUser GUU = await Context.Guild.GetUserAsync(Context.User.Id);
             if (Context.User.Id != 190590364871032834 && !GUU.GuildPermissions.Administrator) _Log.ThrowError(Context, $"<:error:350172479936921611> {_Config._TransAdmin.AdminOnly.Get(Guild)}", "Not a guild administrator");
@@ -1272,7 +1266,7 @@ namespace Bot.Commands
         public async Task Prefix(string Prefix = "")
         {
             _Task.GetGuild(Context.Guild, out _Guild Guild);
-            _Task.HasEmbedPerms(Context, Guild, true);
+            
 
             IGuildUser GUU = await Context.Guild.GetUserAsync(Context.User.Id);
             if (Context.User.Id != 190590364871032834 && !GUU.GuildPermissions.Administrator) _Log.ThrowError(Context, $"<:error:350172479936921611> {_Config._TransAdmin.AdminOnly.Get(Guild)}", "Not a guild administrator");
@@ -1304,7 +1298,7 @@ namespace Bot.Commands
         public async Task ResetPrefix()
         {
             _Task.GetGuild(Context.Guild, out _Guild Guild);
-            _Task.HasEmbedPerms(Context, Guild, true);
+            
 
             IGuildUser GUU = await Context.Guild.GetUserAsync(Context.User.Id);
             if (Context.User.Id != 190590364871032834 && !GUU.GuildPermissions.Administrator) _Log.ThrowError(Context, $"<:error:350172479936921611> {_Config._TransAdmin.AdminOnly.Get(Guild)}", "Not a guild administrator");
@@ -1319,7 +1313,6 @@ namespace Bot.Commands
         [Command("wiki")]
         public async Task WikiHelp(string V = "")
         {
-            _Task.HasEmbedPerms(Context, null, true);
             var embed = new EmbedBuilder()
             {
                 Title = "Wiki Commands",
@@ -1333,7 +1326,6 @@ namespace Bot.Commands
         public async Task Items(string ID = "", string Meta = "0")
         {
             _Task.GetGuild(Context.Guild, out _Guild Guild);
-            _Task.HasEmbedPerms(Context, null, true);
             HashSet<_Item> Items = new HashSet<_Item>();
             if (ID == "")
             {
@@ -1377,7 +1369,6 @@ namespace Bot.Commands
         public async Task Mob([Remainder]string Name = "")
         {
             _Task.GetGuild(Context.Guild, out _Guild Guild);
-            _Task.HasEmbedPerms(Context, null, true);
             if (Name == "")
             {
                 List<string> Passive = new List<string>();
@@ -1504,7 +1495,6 @@ namespace Bot.Commands
         [Command("potion"), Alias("potions")]
         public async Task Potion([Remainder]string Name = "")
         {
-            _Task.HasEmbedPerms(Context, null, true);
             if (Name == "")
             {
                 var embed = new EmbedBuilder()
@@ -1573,7 +1563,6 @@ namespace Bot.Commands
         [Command("enchant"), Alias("enchants")]
         public async Task Enchant([Remainder]string Name = "")
         {
-            _Task.HasEmbedPerms(Context, null, true);
             if (Name == "")
             {
                 var embed = new EmbedBuilder()
@@ -1611,7 +1600,6 @@ namespace Bot.Commands
         [Command("quiz")]
         public async Task QuizCom(string Accept = "")
         {
-            _Task.HasEmbedPerms(Context, null, true);
 
             if (Accept == "start")
             {
