@@ -72,33 +72,6 @@ namespace Bot.Functions
                 }
             }
         }
-
-        public static bool HasEmbedPerms(ICommandContext Context, _Guild Guild = null, bool Error = false)
-        {
-            if (Context.Guild == null)
-            {
-                return true;
-            }
-            _Bot.GuildCache.TryGetValue(Context.Guild.Id, out _CacheItem CI);
-            if (CI.Bot == null)
-            {
-                CI.Bot = Context.Guild.GetCurrentUserAsync().GetAwaiter().GetResult();
-            }
-            if (CI.Bot.GuildPermissions.EmbedLinks || CI.Bot.GetPermissions(Context.Channel as IGuildChannel).EmbedLinks)
-            {
-                return true;
-            }
-            if (Error)
-            {
-                string ErrorText = _Config._TransMain.Error_NoEmbedPerms.EN;
-                if (Guild != null)
-                {
-                    ErrorText = _Config._TransMain.Error_NoEmbedPerms.Get(Guild);
-                }
-                _Log.ThrowError(Context, "```python" + Environment.NewLine + $"{ErrorText}```", "No Embed Links Pemr");
-            }
-            return false;
-        }
         
     }
 }
@@ -385,9 +358,12 @@ namespace Bot.Classes
     }
     public enum _Language
     {
-        English = 0, French = 1, Spanish = 2, Russian = 3, Portuguese = 4, German = 5
+        English = 0, French = 1, Spanish = 2, Russian = 3, Portuguese = 4, German = 5, Dutch = 6, Italian = 7
     }
-    
+    public class _First
+    {
+        public bool Set = false;
+    }
     public class _Ping
     {
         public enum _Status
@@ -414,7 +390,7 @@ namespace Bot.Classes
             Port = _Port;
             
            
-            dynamic Data = Utils._Utils_Http.GetJsonObject("https://use.gameapis.net/mc/query/info/" + IP + ":" + Port);
+            dynamic Data = _Utils.Http.JsonObject("https://use.gameapis.net/mc/query/info/" + IP + ":" + Port);
             if (Data.status == false)
             {
                 _Log.Custom(Data.error);
@@ -434,7 +410,7 @@ namespace Bot.Classes
             IP = _IP;
             Port = _Port;
            
-            dynamic Data = Utils._Utils_Http.GetJsonObject("https://use.gameapis.net/mc/query/extensive/" + IP + ":" + Port);
+            dynamic Data = _Utils.Http.JsonObject("https://use.gameapis.net/mc/query/extensive/" + IP + ":" + Port);
             if (Data.status == false)
             {
                 if (Data.error == "Failed to parse server's response")
@@ -466,7 +442,7 @@ namespace Bot.Classes
             IP = _IP;
             Port = _Port;
            
-            dynamic Data = Utils._Utils_Http.GetJsonObject("https://use.gameapis.net/mc/extensive/info/" + IP + ":" + Port);
+            dynamic Data = _Utils.Http.JsonObject("https://use.gameapis.net/mc/extensive/info/" + IP + ":" + Port);
             if (Data.status == false)
             {
                 if (Data.error == "Failed to parse server's response")
@@ -488,6 +464,7 @@ namespace Bot.Classes
         public ulong ID;
         public List<_Server> Servers = new List<_Server>();
         public _Language Language = _Language.English;
+        public string Prefix = "";
         public void Save()
         {
             using (StreamWriter file = File.CreateText(_Config.BotPath + $"Guilds/{ID}" + ".json"))
@@ -497,5 +474,31 @@ namespace Bot.Classes
 
             }
         }
+        public string GetPrefix(ICommandContext Context)
+        {
+            if (Context.Guild == null)
+            {
+                return "mc/";
+            }
+            if (Context.Message.Content.StartsWith("mc/"))
+            {
+                return "mc/";
+            }
+            else
+            {
+                return Prefix;
+            }
+        }
+    }
+    public class _Biome
+    {
+
+
+    }
+    public class _Version
+    {
+        public string Name = "";
+        public string AllVersions = "";
+        public string Released = "";
     }
 }
